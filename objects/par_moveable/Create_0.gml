@@ -46,7 +46,12 @@ movex = function(_x, _oncollide = _oncollide_h)
         {
             if(place_meeting(x + s, y, par_solid))
             {
-                if(!place_meeting(x + s, y - 1, par_solid))
+                if(instance_place(x + s, y, par_solid).ghost)
+                {
+                    x += s
+                    continue
+                }
+                else if(!place_meeting(x + s, y - 1, par_solid))
                 {
                     y -= 1
                     x += s
@@ -83,7 +88,12 @@ movey = function(_y, _oncollide = _oncollide_v)
         {
             if(place_meeting(x, y + s, par_solid))
             {
-                if(!place_meeting(x + 1, y + s, par_solid))
+                if(instance_place(x, y + s, par_solid).ghost)
+                {
+                    y += s
+                    continue
+                }
+                else if(!place_meeting(x + 1, y + s, par_solid))
                 {
                     x += 1
                     y += s

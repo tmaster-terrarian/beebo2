@@ -2,11 +2,11 @@ redoing game from the ground up
 
 player
     [x] physics
-    [] better states and fix state switching clunkiness
+    [x] better states and fix state switching clunkiness
     [] stat management
     [] merge gun with player code
     [] death screen
-    [] ledge climb
+    [x] ledge climb
     [] more interesting, possibly tighter movement
 
 camera
@@ -77,4 +77,3 @@ art assets
 hud
     [] health bar with difference visualization
     [] inventory
-    [] 

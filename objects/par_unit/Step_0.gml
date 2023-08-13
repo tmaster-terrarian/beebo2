@@ -1,5 +1,3 @@
-if(object_index == obj_player) return;
-
 if(hp <= 0) && !ded
 {
     ded = 1

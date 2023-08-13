@@ -1,0 +1,72 @@
+{
+    "en":
+    {
+        "ui_warning": "WARNING",
+
+        "options_screen_size": "Screen Size",
+        "options_sound_volume": "Sound Volume",
+        "options_music_volume": "Music Volume",
+        "options_dont": "dont.",
+        "options_do_not": "do not",
+        "options_timer": "Show Timer",
+        "options_discord_rpc": "Rich Presence",
+        "options_vfx_culling_bias": "VFX Culling Bias",
+        "options_language": "Language",
+        "options_delete_save": "Delete Savedata",
+        "options_back": "Back",
+
+        "item_unknown_name": "Undefined",
+        "item_unknown_shortdesc": "undefined",
+        "item_beeswax_name": "Beeswax",
+        "item_beeswax_shortdesc": "[kw_number]+10%[/c] [kw_projectile]bullet accuracy[/c].",
+        "item_eviction_notice_name": "Eviction Notice",
+        "item_eviction_notice_shortdesc": "Throw [kw_damage]razor-sharp[/c] [kw_projectile]legal papers[/c] [kw_proctype]on hit[/c] when above [kw_number]90%[/c] [kw_health]health[/c].",
+        "item_serrated_stinger_name": "Serrated Stinger",
+        "item_serrated_stinger_shortdesc": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c].",
+        "item_amorphous_plush_name": "Amorphous Plush",
+        "item_amorphous_plush_shortdesc": "A protective feline follows you.",
+        "item_emergency_field_kit_name": "Emergency Field Kit",
+        "item_emergency_field_kit_shortdesc": "Gain an [kw_health]extra life[/c].",
+        "item_emergency_field_kit_consumed_name": "Emergency Field Kit (Consumed)",
+        "item_emergency_field_kit_consumed_shortdesc": "A used item with no power.",
+        "item_bloody_dagger_name": "Bloody Dagger",
+        "item_bloody_dagger_shortdesc": "Attacks from behind deal [kw_damage]bonus damage[/c] [kw_proctype]on hit[/c].",
+        "item_lucky_clover_name": "Lucky Clover",
+        "item_lucky_clover_shortdesc": "[kw_number]+10%[/c] chance for [kw_proctype]attacks[/c] to [kw_damage]critically hit[/c].",
+
+        "modifier_unknown_name": "Unknown",
+        "modifier_unknown_shortdesc": "unknown",
+        "modifier_reckless_name": "Reckless",
+        "modifier_reckless_shortdesc": "Deal [kw_damage]double damage[/c]...\n[kw_downside]but halve your health[/c].",
+        "modifier_evolution_name": "Evolution",
+        "modifier_evolution_shortdesc": "[kw_downside]Everything[/c] gets [kw_number]3 stacks[/c] of a [kw_downside]random item[/c]."
+    },
+    "es":
+    {
+        "options_screen_size": "Screen Size",
+        "options_sound_volume": "Sound Volume",
+        "options_music_volume": "Music Volume",
+        "options_dont": "dont.",
+        "options_do_not": "do not",
+        "options_timer": "Show Timer",
+        "options_discord_rpc": "Rich Presence",
+        "options_vfx_culling_bias": "VFX Culling Bias",
+        "options_language": "Language",
+        "options_delete_save": "Delete Savedata",
+        "options_back": "Back",
+
+        "item_unknown_name": "Indefinido",
+        "item_unknown_shortdesc": "indefinido",
+        "item_beeswax_name": "Cera de Abejas",
+        "item_beeswax_shortdesc": "[kw_number]+10%[/c] [kw_projectile]precision de bala[/c].",
+        "item_eviction_notice_name": "Aviso de Desalojo",
+        "item_eviction_notice_shortdesc": "Tira [kw_projectile]documentos legales[/c] [kw_damage]afilados[/c] cuando te pegan con mas del [kw_number]90%[/c] de [kw_health]vida[/c].",
+        "item_serrated_stinger_name": "Aguijon Serrado",
+        "item_serrated_stinger_shortdesc": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c].",
+        "item_amorphous_plush_name": "Peluche Amorfo",
+        "item_amorphous_plush_shortdesc": "Un felino protectivo te sigue.",
+
+        "modifier_unknown_name": "Indefinido",
+        "modifier_unknown_shortdesc": "indefinido"
+    }
+}

@@ -11,8 +11,8 @@ y += (ty - y) / follow_rate
 // constrain to room edges
 if(bounded)
 {
-    x = clamp(x, w_half + 4, room_width - w_half - 4)
-    y = clamp(y, h_half + 4, room_height - h_half - 4)
+    x = clamp(x, w_half, room_width - w_half)
+    y = clamp(y, h_half, room_height - h_half - 4)
 }
 
 // snap to pixels

@@ -36,8 +36,8 @@
   ],
   "solid": false,
   "spriteId": {
-    "name": "spr_platform",
-    "path": "sprites/spr_platform/spr_platform.yy",
+    "name": "spr_tough_wall",
+    "path": "sprites/spr_tough_wall/spr_tough_wall.yy",
   },
   "spriteMaskId": null,
   "visible": true,

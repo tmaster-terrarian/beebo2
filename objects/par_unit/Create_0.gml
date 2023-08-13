@@ -31,7 +31,7 @@ hp = 1
 crit_chance = 0
 jumps = 1
 fxtrail = 0
-can_jump = 0
+can_jump = 1
 
 _apply_stats = function()
 {
@@ -81,3 +81,8 @@ _setstate = function(_state, _resettimer = 0, _resetframe = 0)
     if(_resetframe)
         image_index = 0
 }
+
+items = []
+buffs = []
+
+_team = team.neutral

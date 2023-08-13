@@ -1,3 +1,4 @@
 event_inherited();
 
-image_xscale = facing
+if(facing != 0)
+    image_xscale = sign(facing)
