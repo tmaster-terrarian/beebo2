@@ -1,0 +1,80 @@
+redoing game from the ground up
+
+player
+    [x] physics
+    [] better states and fix state switching clunkiness
+    [] stat management
+    [] merge gun with player code
+    [] death screen
+    [] ledge climb
+    [] more interesting, possibly tighter movement
+
+camera
+    [x] following
+    [x] application_surface fuckery
+
+item definitions and stat changing
+    [] defining and referencing
+    [] inventories; for player and enemy
+    [] better implementation
+    [] all units have the same modifiable stat properties
+
+modifiers
+    [] picker screen
+    [] make some more besides the first 2
+
+buffs and debuffs
+    [] redo entire logic
+    [] less scope issues
+
+enemies
+    [] behavior states
+    [] stats
+    [] teams
+    [] leveling up
+    [] unique mechanics
+    [] aggro
+    [] infighting?
+
+menu screen
+    [] translations
+    [] run starting screen (lobby)
+    [] settings
+    [] run initialization
+
+sounds / audio
+    [] unique hit sounds (instead of stealing from ror2 lmao)
+    [] original music
+
+shop and currency
+    [] money pickups and ui counter
+    [] risk and reward options, with player skill in mind
+
+stages and progression
+    [] arenas
+    [] bosses
+    [] loot
+    [] transitions to and from stages
+    [] difficulty
+
+internal structure
+    [] mega cleanup
+        less object-heavy
+    [] more tightly controled execution order
+    [] more centralized
+        stats being handled by gm as well
+        all menu screens should part of the same system, instead of three different ones lmao
+    [x] import scribble
+    [] MORE STRUCTS MMMMM YUM YUM
+
+commands
+    [] bring back the commands console, with more helpful structure and format
+    [] port over the logging system
+
+art assets
+    [] yippeeeee
+
+hud
+    [] health bar with difference visualization
+    [] inventory
+    [] 
