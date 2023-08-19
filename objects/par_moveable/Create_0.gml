@@ -32,9 +32,9 @@ _oncollide_v = function()
     vsp = 0
 }
 
-movex = function(_x, _oncollide = _oncollide_h)
+movex = function(_x, _oncollide = noone, _dt = 0)
 {
-    rx += _x
+    rx += _x // * ((_dt) ? global.dt : 1)
     mx = round(rx)
     if(abs(mx))
     {
@@ -57,7 +57,7 @@ movex = function(_x, _oncollide = _oncollide_h)
                     x += s
                     continue
                 }
-                else
+                else if(_oncollide != noone)
                     _oncollide()
                 break
             }
@@ -74,9 +74,9 @@ movex = function(_x, _oncollide = _oncollide_h)
     }
     mx = 0
 }
-movey = function(_y, _oncollide = _oncollide_v)
+movey = function(_y, _oncollide = noone, _dt = 0)
 {
-    ry += _y
+    ry += _y // * ((_dt) ? global.dt : 1)
     my = round(ry)
     if(abs(my))
     {
@@ -105,7 +105,7 @@ movey = function(_y, _oncollide = _oncollide_v)
                     y += s
                     continue
                 }
-                else
+                else if(_oncollide != noone)
                     _oncollide()
                 break
             }

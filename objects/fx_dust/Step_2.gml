@@ -1,4 +1,4 @@
-x += vx
-y += vy
-image_angle += vz
+x += vx * global.dt
+y += vy * global.dt
+image_angle += vz * global.dt
 if(fade) image_alpha = life

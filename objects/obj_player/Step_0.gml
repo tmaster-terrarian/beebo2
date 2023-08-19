@@ -1,7 +1,10 @@
 if(sprite_index == spr_player || sprite_index == spr_player_lookup)
-    image_index += 0.2
+    image_index += 0.2 * global.dt
 
 running = (sprite_index == spr_player_run) || (sprite_index == spr_player_run_rev)
+
+if(state != "ledgeclimb")
+    ledgegrabTimer = approach(ledgegrabTimer, 0, 1 * global.dt)
 
 input_dir = 0
 input_dir = sign
@@ -15,7 +18,7 @@ if(on_ground && state != "ledgegrab")
 {
     platformtarget = instance_place((bbox_left + bbox_right)/2, bbox_bottom + 2, par_solid)
 }
-else if(place_meeting(x + 2 * input_dir, y, par_solid) && state == "wallslide")
+else if(_place_meeting(x + 2 * input_dir, y, par_solid) && state == "wallslide")
 {
     platformtarget = instance_place(x + 2 * input_dir, y, par_solid)
 }
@@ -24,7 +27,7 @@ else if(jump_buffer < 10 && state != "ledgegrab")
     platformtarget = noone
 }
 
-if(place_meeting(x, y, par_solid) && !ghost) y--;
+if(place_meeting(x, y, par_solid) && !ghost) y -= 1 * global.dt;
 
 if(!on_ground)
     duck = 0
@@ -32,7 +35,7 @@ if(duck)
 {
     spd *= 0.5
     if(abs(hsp) > spd)
-        hsp = approach(hsp, spd * input_dir, 0.25)
+        hsp = approach(hsp, spd * input_dir, 0.25 * global.dt)
 }
 
 if(on_ground)
@@ -91,7 +94,7 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
 
         if(!on_ground)
         {
-            if place_meeting(x + spd, y, par_solid) && can_walljump
+            if _place_meeting(x + spd, y, par_solid) && can_walljump
             {
                 state = "normal"
                 hsp = -spd
@@ -100,7 +103,7 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
                 audio_stop_sound(s)
                 audio_play_sound(sn_walljump, 0, false)
             }
-            else if place_meeting(x - spd, y, par_solid) && can_walljump
+            else if _place_meeting(x - spd, y, par_solid) && can_walljump
             {
                 state = "normal"
                 hsp = spd
@@ -142,11 +145,10 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             }
         }
     }
-    else if(state == "ledgegrab")
+    else if(state == "ledgegrab" || state == "ledgeclimb")
     {
+        ledgegrabTimer = 15
         ghost = 0
-        state = "normal"
-        mask_index = _sp.m_default
         var c = platformtarget
         if c
         {
@@ -156,21 +158,42 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             if(c.vsp < 0)
                 vsp = c.vsp
         }
-        if(!place_meeting(x, y - 1, par_solid))
-            vsp -= 2.7
-        else
+
+        mask_index = _sp.m_default
+        timer0 = 0
+
+        if(abs(input_dir)) // if input then jump off with some horizontal speed
         {
-            x -= 4 * facing
-            y += 12
-            sprite_index = _sp.jump
-            image_index = 3
+            hsp += spd * 0.8 * input_dir + (0.4 * -facing)
+
+            if(!_place_meeting(x, (c) ? c.bbox_top : y, par_solid)) // if theres space jump as normal
+                vsp -= 2.7
+            else // else displace the player first
+            {
+                if(state == "ledgegrab")
+                    x -= 4 * facing
+                y += 12
+                vsp -= 2.7
+                sprite_index = _sp.jump
+                image_index = 0
+            }
+		    audio_play_sound(sn_walljump, 0, false)
         }
-        if(abs(input_dir))
-            hsp += spd * 0.75 * -facing
+        else // otherwise just hop off
+        {
+            if(state == "ledgegrab")
+                x -= 4 * facing
+            y += 12
+            vsp -= 2.7
+            sprite_index = _sp.jump
+            image_index = 0
+		    audio_play_sound(sn_walljump, 0, false)
+        }
+        state = "normal"
     }
     else if(can_walljump)
     {
-        if place_meeting(x + spd, y, par_solid)
+        if _place_meeting(x + spd, y, par_solid)
         {
             platformtarget = noone
             state = "normal"
@@ -179,7 +202,7 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             facing = -1
             audio_play_sound(sn_walljump, 0, false)
         }
-        if place_meeting(x - spd, y, par_solid)
+        else if _place_meeting(x - spd, y, par_solid)
         {
             platformtarget = noone
             state = "normal"
@@ -199,7 +222,7 @@ if(keyboard_check(_dbkey))
     y = mouse_y
 }
 
-if place_meeting(x, y + 2, par_solid)
+if _position_meeting(x, y + 1, par_solid)
 {
     var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
     if(running && (ceil(image_index) == 5 || ceil(image_index) == 1))
@@ -218,5 +241,8 @@ if place_meeting(x, y + 2, par_solid)
         }
     }
 }
+
+fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
+fire_angle = round(fire_angle / 10) * 10;
 
 spd = stats.spd

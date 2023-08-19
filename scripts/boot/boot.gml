@@ -246,7 +246,13 @@ global.gamestarted = false
 global.pausetimer = false
 global.gunlesspercent = false
 global.player = noone
-global.fx_bias = 1
+global.fx_bias = 0
+
+global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM", 0, -1)
+global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890KM", 1, -1)
+
+#macro SC_W 320
+#macro SC_H 180
 
 // functions
 // the following eight functions are credited to D'Andrëw Box on Github and are licensed under the MIT license.
@@ -443,6 +449,27 @@ function debug_log(src, str)
 	file_text_write_string(file, $"[{timer_to_timestamp(get_timer())}] [{src}]: {str}")
 	file_text_writeln(file)
 	file_text_close(file)
+}
+
+function string_real_shortened(val)
+{
+	var _val
+	if(val < 1000)
+		return (string(val))
+	else if(val < 1000000)
+		return (string(round(val / 1000)) + "K")
+	else
+		return (string(round(val / 1000000)) + "M")
+}
+function string_real_shortened_ceil(val)
+{
+	var _val
+	if(val < 1000)
+		return (string(val))
+	else if(val < 1000000)
+		return (string(ceil(val / 1000)) + "K")
+	else
+		return (string(ceil(val / 1000000)) + "M")
 }
 
 function string_to_real(str)

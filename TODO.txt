@@ -3,21 +3,21 @@ redoing game from the ground up
 player
     [x] physics
     [x] better states and fix state switching clunkiness
-    [] stat management
+    [x] stat management
     [] merge gun with player code
     [] death screen
     [x] ledge climb
-    [] more interesting, possibly tighter movement
+    [x] more interesting, possibly tighter movement
 
 camera
     [x] following
     [x] application_surface fuckery
 
 item definitions and stat changing
-    [] defining and referencing
-    [] inventories; for player and enemy
-    [] better implementation
-    [] all units have the same modifiable stat properties
+    [x] defining and referencing
+    [x] inventories; for player and enemy
+    [x] better implementation
+    [x] all units have the same modifiable stat properties
 
 modifiers
     [] picker screen
@@ -60,8 +60,8 @@ stages and progression
 internal structure
     [] mega cleanup
         less object-heavy
-    [] more tightly controled execution order
-    [] more centralized
+    [] more tightly controlled execution order
+    [x] more centralized
         stats being handled by gm as well
         all menu screens should part of the same system, instead of three different ones lmao
     [x] import scribble
@@ -69,7 +69,7 @@ internal structure
 
 commands
     [] bring back the commands console, with more helpful structure and format
-    [] port over the logging system
+    [x] port over the logging system
 
 art assets
     [] yippeeeee

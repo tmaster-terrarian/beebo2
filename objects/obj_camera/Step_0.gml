@@ -5,8 +5,8 @@ w_half = camera_get_view_width(cam) * 0.5 * (1 / zoom)
 h_half = camera_get_view_height(cam) * 0.5 * (1 / zoom)
 
 // approach the targeted object
-x += (tx - x) / follow_rate
-y += (ty - y) / follow_rate
+x += (tx - x) / follow_rate * global.dt
+y += (ty - y) / follow_rate * global.dt
 
 // constrain to room edges
 if(bounded)
@@ -22,7 +22,7 @@ _y = round(y - h_half)
 // offset with camera shake
 x += irandom_range(-round(shake), round(shake))
 y += irandom_range(-round(shake), round(shake))
-shake = approach(shake, 0, shake_decay * 1/shake_time)
+shake = approach(shake, 0, shake_decay * 1/shake_time * global.dt)
 
 // apply position and zoom
 camera_set_view_pos(cam, _x, _y)

@@ -9,6 +9,6 @@ vx = random_range(-1, 1)
 vy = random_range(-1, 1)
 vz = random_range(-10, 10)
 vz += 10 * sign(vz)
-fric = 0.1
+fric = 0.08
 life = 3
 fade = 1

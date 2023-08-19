@@ -32,6 +32,7 @@ can_attack = 1
 can_jump = 1
 can_walljump = 1
 can_dodge = 1
+can_ledgegrab = 1
 
 vsp_max = 20
 
@@ -43,6 +44,7 @@ lookup = 0
 run = 0
 landTimer = 0
 wallslideTimer = 0
+ledgegrabTimer = 0
 shake = 0
 image_speed = 0
 image_index = 0
@@ -60,6 +62,7 @@ dashtimer = 0
 firing = 0
 firedelay = 0
 recoil = 0
+fire_angle = 0
 
 _sp =
 {
@@ -74,41 +77,49 @@ _sp =
     jump: spr_player_jump,
     run: spr_player_run,
     wallslide: spr_player_wallslide,
-    ledgegrab: spr_player_ledgegrab
+    ledgegrab: spr_player_ledgegrab,
+    ledgeclimb: spr_player_ledgeclimb
 }
 sprite_index = _sp.idle
 
 _oncollide_h = function()
 {
-    if(!place_meeting(x + sign(hsp), y - 4, par_solid))
+    var input_dir = 0
+    input_dir = sign
+    (
+        gamepad_axis_value(0, gp_axislh)
+        + (gamepad_button_check(0, gp_padr) - gamepad_button_check(0, gp_padl))
+        + (keyboard_check(ord("D")) - keyboard_check(ord("A")))
+    )
+
+    repeat(round(max(global.dt, 1)))
     {
-        for(var i = 0; i < 4; i++)
+        if(!place_meeting(x + input_dir, y - 2, par_solid) && abs(hsp) >= 0.6)
         {
-            y -= 1
-            if(!place_meeting(x + sign(hsp), y, par_solid))
-            {
-                x += sign(hsp);
-                break
-            }
+            movey(-2)
+            movex(input_dir * 2)
         }
-    }
-    else
-    {
-        if (abs(hsp) >= 1)
+        else
         {
-            audio_play_sound(sn_player_land, 0, false)
-            for (var i = 0; i < 3; i++)
+            if (abs(hsp) >= 1)
             {
-                with(instance_create_depth((x + (4 * sign(facing))), random_range((bbox_bottom - 12), (bbox_bottom - 2)), (depth - 1), fx_dust))
+                audio_play_sound(sn_player_land, 0, false)
+                for (var i = 0; i < 3; i++)
                 {
-                    sprite_index = spr_fx_dust2
-                    vz = 0
+                    with(instance_create_depth((x + (4 * sign(facing))), random_range((bbox_bottom - 12), (bbox_bottom - 2)), (depth - 1), fx_dust))
+                    {
+                        sprite_index = spr_fx_dust2
+                        vy = (abs(other.vsp) > 0.6) ? other.vsp * 0.5 : vy
+                        vz = 0
+                    }
                 }
             }
+            hsp = 0
+            break
         }
-        hsp = 0
     }
 }
+
 _oncollide_v = function()
 {
     var input_dir = 0
@@ -118,6 +129,7 @@ _oncollide_v = function()
         + (gamepad_button_check(0, gp_padr) - gamepad_button_check(0, gp_padl))
         + (keyboard_check(ord("D")) - keyboard_check(ord("A")))
     )
+
     if (state == "normal")
     {
         landTimer = 8
@@ -126,7 +138,7 @@ _oncollide_v = function()
     }
     if (vsp > 0.2)
         audio_play_sound(sn_player_land, 0, false)
-    if (vsp >= 0)
+    if (vsp > 0)
     {
         for (var i = 0; i < 4; i++)
         {
@@ -152,6 +164,8 @@ _squish = function()
 
 items = []
 
+draw_hud = 1
+
 states =
 {
     braindead : function()
@@ -165,6 +179,7 @@ states =
     normal : function()
     {with(obj_player){
         can_walljump = 1
+        can_jump = 1
         ghost = 0
         if (duck > 0)
             mask_index = _sp.m_duck
@@ -174,7 +189,7 @@ states =
         {
             if (hsp < 0)
             {
-                hsp = approach(hsp, 0, fric)
+                hsp = approach(hsp, 0, fric * global.dt)
             }
             else if (on_ground && vsp >= 0)
             {
@@ -192,9 +207,9 @@ states =
             else
                 run = 0
             if (hsp < spd)
-                hsp = approach(hsp, spd, accel)
+                hsp = approach(hsp, spd, accel * global.dt)
             if (hsp > spd) && on_ground
-                hsp = approach(hsp, spd, fric/2)
+                hsp = approach(hsp, spd, fric/2 * global.dt)
             if on_ground
             {
                 running = 1
@@ -207,7 +222,7 @@ states =
         {
             if (hsp > 0)
             {
-                hsp = approach(hsp, 0, fric)
+                hsp = approach(hsp, 0, fric * global.dt)
             }
             else if (on_ground && vsp >= 0)
             {
@@ -225,9 +240,9 @@ states =
             else
                 run = 0
             if (hsp > -spd)
-                hsp = approach(hsp, -spd, accel)
+                hsp = approach(hsp, -spd, accel * global.dt)
             if (hsp < -spd) && on_ground
-                hsp = approach(hsp, -spd, fric/2)
+                hsp = approach(hsp, -spd, fric/2 * global.dt)
             if on_ground
             {
                 running = 1
@@ -239,7 +254,7 @@ states =
         else
         {
             running = 0
-            hsp = approach(hsp, lasthsp, fric * 2)
+            hsp = approach(hsp, lasthsp, fric * 2 * global.dt)
             if (abs(hsp) < spd)
             {
                 if run
@@ -267,9 +282,13 @@ states =
             }
         }
         if ((keyboard_check(ord("S")) || gamepad_axis_value(0, gp_axislv) > 0 || gamepad_button_check(0, gp_padd)) && on_ground)
-            duck = approach(duck, 3, 1)
-        else if (!(place_meeting(x, (y - 6), par_solid)))
-            duck = approach(duck, 0, 1)
+            duck = approach(duck, 3, 1 * global.dt)
+        else if (!(place_meeting(x, y - 6, par_solid)))
+        {
+            if(duck)
+                _place_meeting(x, y - 6, par_solid)
+            duck = approach(duck, 0, 1 * global.dt)
+        }
         if (!on_ground)
         {
             lookup = 0
@@ -278,14 +297,15 @@ states =
             {
                 if place_meeting((x + (2 * input_dir)), y, par_solid)
                 {
-                    wallslideTimer++
+                    wallslideTimer += global.dt
                     var _a = 1
                     var _w = instance_place(x + (2 * input_dir), y, par_solid)
-                    if(!position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && round(_w.image_angle / 90) * 90 == _w.image_angle)
+                    if(can_ledgegrab && ledgegrabTimer <= 0)
+                    if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
                     {
                         _a = sign(bbox_top - _w.bbox_top)
 
-                        if(_a <= 0 && !place_meeting(x, _w.bbox_top - 1, par_solid) && !place_meeting(x, y + 2, par_solid))
+                        if(_a <= 0 && !_place_meeting(x, _w.bbox_top - 1, par_solid) && !_place_meeting(x, y + 2, par_solid) && y - _w.bbox_top > 4)
                         {
                             y = _w.bbox_top
                             x = (input_dir == 1) ? _w.bbox_left : _w.bbox_right
@@ -306,20 +326,19 @@ states =
             if (wallslideTimer >= 5)
                 state = "wallslide"
 
-            if jump_buffer
-                jump_buffer--
+            jump_buffer = approach(jump_buffer, 0, 1 * global.dt)
 
             sprite_index = _sp.jump
             if (vsp >= 0.1)
-                vsp = approach(vsp, vsp_max, grv)
+                vsp = approach(vsp, vsp_max, grv * global.dt)
             if (vsp < 0)
-                vsp = approach(vsp, vsp_max, grv)
+                vsp = approach(vsp, vsp_max, grv * global.dt)
             else if (vsp < 2)
-                vsp = approach(vsp, vsp_max, grv * 0.25)
+                vsp = approach(vsp, vsp_max, grv * global.dt * 0.25)
             if (vsp < 0)
-                image_index = approach(image_index, 1, 0.2)
+                image_index = approach(image_index, 1, 0.2 * global.dt)
             else if (vsp >= 0.5)
-                image_index = approach(image_index, 5, 0.5)
+                image_index = approach(image_index, 5, 0.5 * global.dt)
             else
                 image_index = 3
         }
@@ -330,12 +349,17 @@ states =
             lastvsp = 0
             jump_buffer = 10
             jumps = jumps_max
+
+            if(!place_meeting(x + 1, y + 1, par_solid) || !place_meeting(x - 1, y + 1, par_solid))
+            {
+                vsp += 0.1
+            }
         }
         if (running)
-            image_index += abs(hsp / 6)
+            image_index += abs(hsp / 6) * global.dt
         else if (duck)
-            image_index += abs(hsp / 4)
-        landTimer = approach(landTimer, 0, 1)
+            image_index += abs(hsp / 4) * global.dt
+        landTimer = approach(landTimer, 0, 1 * global.dt)
 
         if(abs(hsp) > spd * 1.3)
         {
@@ -348,9 +372,9 @@ states =
         jumps = jumps_max
         can_walljump = 1
         if (vsp < 0)
-            vsp = approach(vsp, vsp_max, 0.5)
+            vsp = approach(vsp, vsp_max, 0.5 * global.dt)
         else
-            vsp = approach(vsp, vsp_max / 3, grv / 3)
+            vsp = approach(vsp, vsp_max / 3, grv / 3 * global.dt)
         if (!(place_meeting(x + (input_dir * 2), y, par_solid)))
         {
             state = "normal"
@@ -360,11 +384,12 @@ states =
         {
             var _a = 1
             var _w = instance_place(x + (2 * input_dir), y, par_solid)
-            if(!position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && round(_w.image_angle / 90) * 90 == _w.image_angle)
+            if(can_ledgegrab && ledgegrabTimer == 0)
+            if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
             {
                 _a = sign(bbox_top - _w.bbox_top)
 
-                if(_a <= 0 && !place_meeting(x, y - 1, par_solid) && !place_meeting(x, y + 1, par_solid))
+                if(_a <= 0 && !_place_meeting(x, _w.bbox_top - 1, par_solid) && !_place_meeting(x, y + 2, par_solid))
                 {
                     wallslideTimer = 0
                     y = _w.bbox_top
@@ -386,6 +411,8 @@ states =
             with (instance_create_depth(x + 4 * sign(facing), random_range(bbox_bottom - 12, bbox_bottom), depth - 1, fx_dust))
             {
                 vz = 0
+                if(instance_exists(other.platformtarget))
+                    vx += other.platformtarget.hsp
                 sprite_index = spr_fx_dust2
             }
         if (input_dir == 0 || on_ground)
@@ -407,41 +434,100 @@ states =
         can_jump = 1
         can_walljump = 0
         ghost = 0
+        hsp = 0
+        vsp = 0
         if(timer0 == 0)
         {
             if(facing == 0)
             {
                 facing = 1
             }
-            hsp = 0
-            vsp = 0
             image_speed = 0
             image_index = 0
             sprite_index = _sp.ledgegrab
             mask_index = _sp.m_ledgegrab
+            timer0++
         }
-        // if(place_meeting(x, y, par_solid))
-        // {
-        //     y = platformtarget.bbox_top
-        //     platformtarget = noone
-        //     state = "normal"
-        //     sprite_index = _sp.jump
-        //     mask_index = _sp.m_default
-        //     x += 8 * facing
-        //     ghost = 0
-        // }
+
+        if(abs(input_dir) && !_place_meeting(x + 4 * facing, platformtarget.bbox_top - 10, par_solid))
+        {
+            timer0 = approach(timer0, 16, 1 * global.dt)
+            if(timer0 == 16)
+            {
+                hsp = 0
+                vsp = 0
+                state = "ledgeclimb"
+                x += 4 * facing
+                timer0 = 0
+                return
+            }
+        }
+        else
+            timer0 = 1
+
         if(!place_meeting(x + 1, y, platformtarget) && !place_meeting(x - 1, y, platformtarget))
         {
             platformtarget = noone
             state = "normal"
+            timer0 = 0
             sprite_index = _sp.jump
             mask_index = _sp.m_default
-            movex(-4 * facing)
-            movey(12)
+            movex(-4 * facing, _oncollide_h, 0)
+            movey(12, _oncollide_h, 0)
             ghost = 0
+        }
+    }},
+    ledgeclimb: function()
+    {with(obj_player){
+        duck = 0
+        can_jump = 1
+        can_walljump = 0
+        ghost = 0
+        hsp = 0
+        vsp = 0
+        if(timer0 == 0)
+        {
+            y++
+            if(facing == 0)
+            {
+                facing = 1
+            }
+            image_speed = 0
+            image_index = 0
+            sprite_index = _sp.ledgeclimb
+            mask_index = _sp.m_duck
+        }
+        if(timer0 < 8)
+        {
+            if(timer0 == 5)
+            {
+                sprite_index = _sp.duck
+                image_index = 0
+            }
+            if(timer0 < 5)
+            {
+                image_index = approach(image_index, 2, 0.5 * global.dt)
+                timer0 = approach(timer0, 5, 1 * global.dt)
+            }
+            else
+            {
+                image_index = approach(image_index, 3, 1 * global.dt)
+                timer0 = approach(timer0, 8, 1 * global.dt)
+            }
+        }
+        if(timer0 == 8)
+        {
+            timer0 = 0
+
+            state = "normal"
+            sprite_index = _sp.idle
+            mask_index = _sp.m_default
+            image_index = 0
         }
     }}
 }
 state = "normal"
 
 _dbkey = vk_lcontrol
+
+collision_checks = []

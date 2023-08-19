@@ -1,3 +1,3 @@
 event_inherited();
 
-move(hsp, vsp)
+move(hsp * global.dt, vsp * global.dt)
