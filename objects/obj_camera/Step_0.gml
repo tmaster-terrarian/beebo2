@@ -15,14 +15,14 @@ if(bounded)
     y = clamp(y, h_half, room_height - h_half - 4)
 }
 
+// offset with camera shake
+x += random_range(-shake, shake)
+y += random_range(-shake, shake)
+shake = approach(shake, 0, shake_decay * 1/shake_time * global.dt)
+
 // snap to pixels
 _x = round(x - w_half)
 _y = round(y - h_half)
-
-// offset with camera shake
-x += irandom_range(-round(shake), round(shake))
-y += irandom_range(-round(shake), round(shake))
-shake = approach(shake, 0, shake_decay * 1/shake_time * global.dt)
 
 // apply position and zoom
 camera_set_view_pos(cam, _x, _y)

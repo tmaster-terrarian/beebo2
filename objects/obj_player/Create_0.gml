@@ -64,6 +64,8 @@ firedelay = 0
 recoil = 0
 fire_angle = 0
 
+_team = team.player
+
 _sp =
 {
     m_default: mask_player,
@@ -82,6 +84,14 @@ _sp =
 }
 sprite_index = _sp.idle
 
+gun_spr = spr_player_gun
+gun_spr_ind = 0
+gun_pos = {x: -3, y: -7}
+gun_behind = 0
+gun_flip = 1
+draw_gun = 1
+has_gun = 0
+
 _oncollide_h = function()
 {
     var input_dir = 0
@@ -94,7 +104,7 @@ _oncollide_h = function()
 
     repeat(round(max(global.dt, 1)))
     {
-        if(!place_meeting(x + input_dir, y - 2, par_solid) && abs(hsp) >= 0.6)
+        if(abs(input_dir) && !place_meeting(x + input_dir, y - 2, par_solid) && abs(hsp) >= 0.6)
         {
             movey(-2)
             movex(input_dir * 2)
@@ -531,3 +541,21 @@ state = "normal"
 _dbkey = vk_lcontrol
 
 collision_checks = []
+
+var c1 = make_color_rgb(52, 28, 39)
+var c2 = make_color_rgb(96, 44, 44)
+ponytail_colors = [c1,c2,c1,c2,c1,c2,c1]
+ponytail_points_count = 7
+ponytail_segment_len = []
+ponytail_points = []
+ponytail_visible = 1
+for(var a = 0; a < ponytail_points_count; a++)
+{
+    ponytail_points[a] = [0, 0]
+    if a % 2 == 0
+        ponytail_segment_len[a] = 1
+    else
+        ponytail_segment_len[a] = 2
+}
+
+hair_visible = 1

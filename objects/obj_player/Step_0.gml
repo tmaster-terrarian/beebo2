@@ -3,6 +3,129 @@ if(sprite_index == spr_player || sprite_index == spr_player_lookup)
 
 running = (sprite_index == spr_player_run) || (sprite_index == spr_player_run_rev)
 
+ponytail_visible = 1
+gun_behind = 0
+if(running)
+{
+    ponytail_visible = 1
+    switch(floor(image_index))
+    {
+        case 0:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 1:
+            gun_pos.x = -3; gun_pos.y = -5;
+            break;
+        case 2:
+            gun_pos.x = -3; gun_pos.y = -5;
+            break;
+        case 3:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 4:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 5:
+            gun_pos.x = -3; gun_pos.y = -5;
+            break;
+        case 6:
+            gun_pos.x = -3; gun_pos.y = -5;
+            break;
+        case 7:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+    }
+}
+else if(sprite_index == _sp.crawl)
+{
+    ponytail_visible = 0
+    gun_behind = 1
+    switch(floor(image_index))
+    {
+        case 0:
+            gun_pos.x = -4; gun_pos.y = -5;
+            break;
+        case 1:
+            gun_pos.x = -4; gun_pos.y = -4;
+            break;
+        case 2:
+            gun_pos.x = -4; gun_pos.y = -4;
+            break;
+        case 3:
+            gun_pos.x = -4; gun_pos.y = -4;
+            break;
+        case 4:
+            gun_pos.x = -4; gun_pos.y = -4;
+            break;
+        case 5:
+            gun_pos.x = -4; gun_pos.y = -4;
+            break;
+        case 6:
+            gun_pos.x = -4; gun_pos.y = -5;
+            break;
+        case 7:
+            gun_pos.x = -4; gun_pos.y = -5;
+            break;
+    }
+}
+else if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
+{
+    ponytail_visible = 0
+    switch(floor(image_index))
+    {
+        case 0:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break
+        case 1:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 2:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 3:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+        case 4:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+        case 5:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+    }
+}
+else if(state == "wallslide")
+{
+    ponytail_visible = 1
+    gun_pos.x = 3;
+    gun_pos.y = -7;
+}
+else if(state == "ledgegrab")
+{
+    gun_behind = 0
+    ponytail_visible = 1
+    gun_pos.x = -4;
+    gun_pos.y = 3;
+}
+else if(state == "ledgeclimb")
+{
+    gun_behind = 1
+    ponytail_visible = (timer0 <= 5)
+    gun_pos.x = -4;
+    gun_pos.y = -5;
+}
+else if(duck)
+{
+    ponytail_visible = 0
+    gun_pos.x = (-3 + (1/3 * duck));
+    gun_pos.y = -5 + duck;
+}
+else
+{
+    ponytail_visible = 1
+    gun_pos.x = -3;
+    gun_pos.y = -7;
+}
+
 if(state != "ledgeclimb")
     ledgegrabTimer = approach(ledgegrabTimer, 0, 1 * global.dt)
 
@@ -51,7 +174,7 @@ else
         fric *= 0.1
 }
 
-states[$ state]()
+states[$ state]() //MAGIC
 
 if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1)) && can_jump
 {
@@ -100,6 +223,8 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
                 hsp = -spd
                 vsp = jumpspd
                 facing = -1
+                var w = instance_place(x + spd, y, par_solid)
+                hsp += w.hsp / 2
                 audio_stop_sound(s)
                 audio_play_sound(sn_walljump, 0, false)
             }
@@ -109,6 +234,8 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
                 hsp = spd
                 vsp = jumpspd
                 facing = 1
+                var w = instance_place(x - spd, y, par_solid)
+                hsp += w.hsp / 2
                 audio_stop_sound(s)
                 audio_play_sound(sn_walljump, 0, false)
             }
@@ -167,13 +294,13 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             hsp += spd * 0.8 * input_dir + (0.4 * -facing)
 
             if(!_place_meeting(x, (c) ? c.bbox_top : y, par_solid)) // if theres space jump as normal
-                vsp -= 2.7
+                vsp -= 2.7 * !keyboard_check(ord("S"))
             else // else displace the player first
             {
                 if(state == "ledgegrab")
                     x -= 4 * facing
                 y += 12
-                vsp -= 2.7
+                vsp -= 2.7 * !keyboard_check(ord("S"))
                 sprite_index = _sp.jump
                 image_index = 0
             }
@@ -184,7 +311,7 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             if(state == "ledgegrab")
                 x -= 4 * facing
             y += 12
-            vsp -= 2.7
+            vsp -= 2.7 * !keyboard_check(ord("S"))
             sprite_index = _sp.jump
             image_index = 0
 		    audio_play_sound(sn_walljump, 0, false)
@@ -200,6 +327,8 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             hsp = -spd
             vsp = jumpspd
             facing = -1
+            var w = instance_place(x + spd, y, par_solid)
+            hsp += w.hsp / 2
             audio_play_sound(sn_walljump, 0, false)
         }
         else if _place_meeting(x - spd, y, par_solid)
@@ -209,6 +338,8 @@ if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1
             hsp = spd
             vsp = jumpspd
             facing = 1
+            var w = instance_place(x - spd, y, par_solid)
+            hsp += w.hsp / 2
             audio_play_sound(sn_walljump, 0, false)
         }
     }
@@ -218,8 +349,8 @@ if(keyboard_check(_dbkey))
 {
     hsp = 0
     vsp = 0
-    x = mouse_x
-    y = mouse_y
+    x = round(mouse_x)
+    y = round(mouse_y)
 }
 
 if _position_meeting(x, y + 1, par_solid)
@@ -242,7 +373,57 @@ if _position_meeting(x, y + 1, par_solid)
     }
 }
 
-fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
-fire_angle = round(fire_angle / 10) * 10;
+if(has_gun)
+{
+    fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
+    fire_angle = round(fire_angle / 10) * 10;
+
+    gun_flip = (fire_angle <= 270 && fire_angle > 90) ? -1 : 1
+
+    if(state == "normal")
+        facing = gun_flip
+
+    if(mouse_check_button(mb_left) && !firedelay)
+    {
+        firing = 1;
+        if(hp > 1)
+        {
+            with(obj_camera)
+                shake = 2
+
+            recoil = 2;
+            firedelay = firerate;
+
+            var v = spread
+
+            with (instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, obj_bullet))
+            {
+                parent = other
+                _team = team.player
+                audio_play_sound(sn_player_shoot, 1, false);
+
+                _speed = 12;
+                direction = other.fire_angle + random_range(-v, v);
+                image_angle = direction;
+
+                damage = other.damage
+            }
+            with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
+            {
+                image_yscale = other.image_yscale
+                angle = other.fire_angle
+                dir = other.gun_flip
+                hsp = -other.gun_flip * random_range(1, 1.5)
+                vsp = -1 + random_range(-0.2, 0.1)
+            }
+        }
+    }
+
+    recoil = approach(recoil, 0, 1 * global.dt)
+    firedelay = approach(firedelay, 0, 1 * global.dt)
+}
 
 spd = stats.spd
+
+x = round(x)
+y = round(y)

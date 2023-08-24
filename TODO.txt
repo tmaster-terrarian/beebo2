@@ -4,8 +4,8 @@ player
     [x] physics
     [x] better states and fix state switching clunkiness
     [x] stat management
-    [] merge gun with player code
-    [] death screen
+    [x] merge gun with player code
+    [] dead state
     [x] ledge climb
     [x] more interesting, possibly tighter movement
 
@@ -23,14 +23,17 @@ modifiers
     [] picker screen
     [] make some more besides the first 2
 
+gun upgrades
+    
+
 buffs and debuffs
     [] redo entire logic
     [] less scope issues
 
 enemies
     [] behavior states
-    [] stats
-    [] teams
+    [x] stats
+    [x] teams
     [] leveling up
     [] unique mechanics
     [] aggro
@@ -58,14 +61,14 @@ stages and progression
     [] difficulty
 
 internal structure
-    [] mega cleanup
+    [x] mega cleanup
         less object-heavy
-    [] more tightly controlled execution order
+    [x] more tightly controlled execution order
     [x] more centralized
         stats being handled by gm as well
         all menu screens should part of the same system, instead of three different ones lmao
     [x] import scribble
-    [] MORE STRUCTS MMMMM YUM YUM
+    [] pausing
 
 commands
     [] bring back the commands console, with more helpful structure and format
