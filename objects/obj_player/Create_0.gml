@@ -90,7 +90,7 @@ gun_pos = {x: -3, y: -7}
 gun_behind = 0
 gun_flip = 1
 draw_gun = 1
-has_gun = 0
+has_gun = 1
 
 _oncollide_h = function()
 {

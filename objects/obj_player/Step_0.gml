@@ -378,6 +378,14 @@ if(has_gun)
     fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
     fire_angle = round(fire_angle / 10) * 10;
 
+    if(duck)
+    {
+        if(fire_angle > 180 && fire_angle <= 270)
+            fire_angle = 180
+        if(fire_angle < 360 && fire_angle > 270)
+            fire_angle = 0
+    }
+
     gun_flip = (fire_angle <= 270 && fire_angle > 90) ? -1 : 1
 
     if(state == "normal")

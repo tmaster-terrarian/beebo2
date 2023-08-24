@@ -1,5 +1,10 @@
-if(gun_behind && draw_gun && has_gun)
-    draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing), y + gun_pos.y, 1, 1 * gun_flip, fire_angle, c_white, 1)
+var drawgun = function(_v)
+{
+    if(_v && draw_gun && has_gun)
+        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing), y + gun_pos.y, 1, 1 * gun_flip, fire_angle, c_white, 1)
+}
+
+drawgun(gun_behind)
 
 // ponytail
 var px = x - 5 * facing
@@ -30,7 +35,7 @@ if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
 if(sprite_index == _sp.ledgegrab)
 {
     px = x - 1
-    py = y + 1
+    py = y - 2
 }
 if(sprite_index == _sp.ledgeclimb)
 {
@@ -58,24 +63,20 @@ if(sprite_index == _sp.ledgeclimb)
 }
 py += duck
 ponytail_points[0] = [px, py]
-for (r = 0; r < 30; r++) // thumbtack magic that i dont understand
+for (i = 0; i < ponytail_points_count - 1; i++) // slimepunk magic
 {
     magnitude = 1
-    choice = random_range(0, ponytail_points_count - 1)
-    if (choice > 0)
-    {
-        pointA = ponytail_points[choice]
-        pointB = ponytail_points[choice + 1]
-        vector = [(pointB[0] - pointA[0]), (pointB[1] - pointA[1])]
-        if (!collision_point(pointB[0], pointB[1], par_solid, 1, 0))
-            vector[1] += grv - (0.18 * clamp(abs(hsp), 0, 1))
-        vector[1] += random_range(-0.01, 0)
-        magnitude = point_distance(0, 0, vector[0], vector[1])
-        normal_vec = [vector[0] / magnitude, vector[1] / magnitude]
-        normal_vec = [vector[0] / magnitude, vector[1] / magnitude]
-        corrected_vec = [normal_vec[0] * ponytail_segment_len[choice], normal_vec[1] * ponytail_segment_len[choice]]
-        ponytail_points[choice + 1] = [pointA[0] + corrected_vec[0], pointA[1] + corrected_vec[1]]
-    }
+    pointA = ponytail_points[i]
+    pointB = ponytail_points[i + 1]
+    vector = [(pointB[0] - pointA[0]), (pointB[1] - pointA[1])]
+    if (!collision_point(pointB[0], pointB[1], par_solid, 1, 0))
+        vector[1] += grv * 2 - (0.36 * clamp(abs(hsp), 0, 1))
+    vector[1] += random_range(-0.01, 0)
+    magnitude = point_distance(0, 0, vector[0], vector[1])
+    normal_vec = [vector[0] / magnitude, vector[1] / magnitude]
+    normal_vec = [vector[0] / magnitude, vector[1] / magnitude]
+    corrected_vec = [normal_vec[0] * ponytail_segment_len[i], normal_vec[1] * ponytail_segment_len[i]]
+    ponytail_points[i + 1] = [pointA[0] + corrected_vec[0], pointA[1] + corrected_vec[1]]
 }
 ponytail_points[0] = [px, py]
 if(ponytail_visible)
@@ -94,8 +95,7 @@ if(ponytail_visible)
 
 draw_self()
 
-if(!gun_behind && draw_gun && has_gun)
-    draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing), y + gun_pos.y, 1, 1 * gun_flip, fire_angle, c_white, 1)
+drawgun(!gun_behind)
 
 if(global.draw_debug)
 {
