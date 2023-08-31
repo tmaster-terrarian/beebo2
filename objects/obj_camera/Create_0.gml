@@ -1,17 +1,15 @@
 depth = 0
 
-cam = view_camera[0]
+view_set_visible(cam_id, 1)
+cam = view_camera[cam_id]
 cam_x = 0
 cam_y = 0
-cam_w = 320
-cam_h = 180
+cam_w = SC_W
+cam_h = SC_H
 camera_set_view_size(cam, cam_w, cam_h)
-w_half = cam_w * 0.5
-h_half = cam_h * 0.5
+wh = cam_w * 0.5
+hh = cam_h * 0.5
 
-zoom = 1
-
-target = obj_player
 follow = 1
 tx = x
 ty = y

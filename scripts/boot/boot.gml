@@ -315,13 +315,14 @@ function file_text_get_lines_array(_file) {
 	return _file_arr;
 }
 
+// do not pass in a value for _iteration when using this function !
 function json2file(_filename, _json = {}, _iteration = 0) {
 	if (!is_struct(_json)) return "";
 
 	var _str	= "{";
-	var _keys	= struct_keys(_json);
+	var _keys	= struct_get_names(_json);
 	array_sort(_keys, true);
-	for (var i = 0; i < get_size(_keys); i++) {
+	for (var i = 0; i < array_length(_keys); i++) {
 		var _value = _json[$ _keys[i]];
 		if (is_struct(_value)) {
 			_value = json2file("", _value, _iteration + 1);
@@ -338,7 +339,7 @@ function json2file(_filename, _json = {}, _iteration = 0) {
 			_keys[i],
 			_value
 		);
-		_str += ( i != get_size(_keys) - 1 ? "," : "" );
+		_str += ( i != array_length(_keys) - 1 ? "," : "" );
 	}
 	_str += "\n";
 	for (var j = 0; j < _iteration; j++) {
@@ -474,12 +475,14 @@ function string_real_shortened_ceil(val)
 
 function string_to_real(str)
 {
-	return (string_starts_with(str, "-") ? -1 : 1) * real(string_digits(str))
+    var _str = string_split(str, ".")
+    var _dec = (array_length(_str) > 1) ? real(string_digits(_str[1])) * 1/(power(10, string_length(_str[1]))) : 0
+	return (string_starts_with(str, "-") ? -1 : 1) * (real(string_digits(_str[0])) + _dec)
 }
 
 function string_is_real(str)
 {
-	return !((string_digits(str) == "") || (string_replace(str, "-", "") != string_digits(str)))
+	return !((string_digits(str) == "") || (string_replace(string_replace(str, ".", ""), "-", "") != string_digits(str)))
 }
 
 // localization
@@ -826,5 +829,29 @@ function modifier_set_stacks(modifier_id, stacks)
 		array_push(statmanager.run_modifiers, new modifier(modifier_id, stacks))
 	}
 }
+
+// run info storage method
+
+function _rundata() constructor
+{
+	wave = -1
+	money = 0
+	run_time = 0
+	total_dmg = 0
+	run_start_time = $"{current_month}-{current_day}-{current_year} {current_hour}-{current_minute}-{current_second}"
+
+	static save = function()
+	{
+		if(!directory_exists("past_runs"))
+			directory_create("past_runs")
+
+		var file = file_text_open_write(working_directory + $"past_runs/{run_start_time}.json")
+		file_text_write_string(file, json2file("", self))
+		file_text_close(file)
+	}
+}
+
+global.rundata = new _rundata()
+// global.rundata.save()
 
 debug_log("startup", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

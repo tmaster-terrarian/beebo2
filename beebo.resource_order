@@ -152,6 +152,7 @@
     {"name":"__scribble_get_external_sound_map","order":7,"path":"scripts/__scribble_get_external_sound_map/__scribble_get_external_sound_map.yy",},
     {"name":"scribble_anim_rainbow","order":4,"path":"scripts/scribble_anim_rainbow/scribble_anim_rainbow.yy",},
     {"name":"spr_player_crawl","order":3,"path":"sprites/spr_player_crawl/spr_player_crawl.yy",},
+    {"name":"rm_boot","order":1,"path":"rooms/rm_boot/rm_boot.yy",},
     {"name":"mask_player_ledgegrab","order":12,"path":"sprites/mask_player_ledgegrab/mask_player_ledgegrab.yy",},
     {"name":"scribble_font_get_glyph_ranges","order":10,"path":"scripts/scribble_font_get_glyph_ranges/scribble_font_get_glyph_ranges.yy",},
     {"name":"_place_meeting","order":5,"path":"scripts/_place_meeting/_place_meeting.yy",},

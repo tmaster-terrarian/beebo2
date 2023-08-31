@@ -192,6 +192,7 @@
     {"id":{"name":"__scribble_get_external_sound_map","path":"scripts/__scribble_get_external_sound_map/__scribble_get_external_sound_map.yy",},},
     {"id":{"name":"scribble_anim_rainbow","path":"scripts/scribble_anim_rainbow/scribble_anim_rainbow.yy",},},
     {"id":{"name":"spr_player_crawl","path":"sprites/spr_player_crawl/spr_player_crawl.yy",},},
+    {"id":{"name":"rm_boot","path":"rooms/rm_boot/rm_boot.yy",},},
     {"id":{"name":"mask_player_ledgegrab","path":"sprites/mask_player_ledgegrab/mask_player_ledgegrab.yy",},},
     {"id":{"name":"scribble_font_get_glyph_ranges","path":"scripts/scribble_font_get_glyph_ranges/scribble_font_get_glyph_ranges.yy",},},
     {"id":{"name":"_place_meeting","path":"scripts/_place_meeting/_place_meeting.yy",},},
@@ -257,6 +258,7 @@
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
   "RoomOrderNodes": [
+    {"roomId":{"name":"rm_boot","path":"rooms/rm_boot/rm_boot.yy",},},
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
   ],
   "TextureGroups": [

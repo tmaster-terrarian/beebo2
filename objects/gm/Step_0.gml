@@ -20,17 +20,3 @@ if(global.draw_debug)
         game_set_speed(framerates[framerate_choice], gamespeed_fps)
     }
 }
-
-switch(game_get_speed(gamespeed_fps))
-{
-    case 60: case 30: case 15:
-    {
-        global.fx_bias = 0
-        break;
-    }
-    case 144:
-    {
-        global.fx_bias = 0.41
-        break;
-    }
-}
