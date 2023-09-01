@@ -1,7 +1,7 @@
-if(sprite_index == spr_player || sprite_index == spr_player_lookup)
+if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
     image_index += 0.2 * global.dt
 
-running = (sprite_index == spr_player_run) || (sprite_index == spr_player_run_rev)
+running = (sprite_index == _sp.run)
 
 ponytail_visible = 1
 gun_behind = 0
@@ -132,9 +132,9 @@ if(state != "ledgeclimb")
 input_dir = 0
 input_dir = sign
 (
-    gamepad_axis_value(0, gp_axislh)
-    + (gamepad_button_check(0, gp_padr) - gamepad_button_check(0, gp_padl))
-    + (keyboard_check(ord("D")) - keyboard_check(ord("A")))
+    gamepad_axis_value(player_id, gp_axislh)
+    + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
+    + (input.right() - input.left())
 ) * hascontrol
 
 if(on_ground && state != "ledgegrab")
@@ -176,7 +176,7 @@ else
 
 states[$ state]() //MAGIC
 
-if (keyboard_check_pressed(vk_space) || gamepad_button_check_pressed(0, gp_face1)) && can_jump
+if (input.jump() || gamepad_button_check_pressed(player_id, gp_face1)) && can_jump
 {
     if(on_ground) || (jump_buffer && vsp > 0) || (jumps - 1 && state != "ledgegrab")
     {
@@ -378,6 +378,10 @@ if(has_gun)
     fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
     fire_angle = round(fire_angle / 10) * 10;
 
+    recoil = approach(recoil, 0, 1 * global.dt)
+    firedelay = approach(firedelay, 0, 1 * global.dt)
+    bombdelay = approach(bombdelay, 0, 1 * global.dt)
+
     if(duck)
     {
         if(fire_angle > 180 && fire_angle <= 270)
@@ -394,44 +398,19 @@ if(has_gun)
     if(mouse_check_button(mb_left) && !firedelay)
     {
         firing = 1;
-        if(hp > 1)
-        {
-            with(obj_camera)
-                shake = 2
 
-            recoil = 2;
-            firedelay = firerate;
+        with(obj_camera)
+            shake = 2
 
-            var v = spread
+        recoil = 2;
+        firedelay = firerate;
 
-            with (instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, obj_bullet))
-            {
-                parent = other
-                _team = team.player
-                audio_play_sound(sn_player_shoot, 1, false);
-
-                _speed = 12;
-                direction = other.fire_angle + random_range(-v, v);
-                image_angle = direction;
-
-                damage = other.damage
-            }
-            with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
-            {
-                image_yscale = other.image_yscale
-                angle = other.fire_angle
-                dir = other.gun_flip
-                hsp = -other.gun_flip * random_range(1, 1.5)
-                vsp = -1 + random_range(-0.2, 0.1)
-            }
-        }
+        if(gun_upgrade != "")
+            getdef(gun_upgrade, 2).fire(id)
+        else
+            getdef("base", 2).fire(id)
     }
-
-    recoil = approach(recoil, 0, 1 * global.dt)
-    firedelay = approach(firedelay, 0, 1 * global.dt)
 }
-
-spd = stats.spd
 
 x = round(x)
 y = round(y)

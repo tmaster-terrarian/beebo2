@@ -1,4 +1,4 @@
-_team = team.neutral
+team = Team.neutral
 parent = noone
 damage = 1
 proc = 0

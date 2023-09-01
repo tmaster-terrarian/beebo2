@@ -1,7 +1,7 @@
 var drawgun = function(_v)
 {
     if(_v && draw_gun && has_gun)
-        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing), y + gun_pos.y, 1, 1 * gun_flip, fire_angle, c_white, 1)
+        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) + lengthdir_x(-recoil, fire_angle), y + gun_pos.y + lengthdir_y(-recoil, fire_angle), 1, 1 * gun_flip, fire_angle, c_white, 1)
 }
 
 drawgun(gun_behind)

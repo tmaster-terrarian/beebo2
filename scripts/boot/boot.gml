@@ -31,7 +31,7 @@ global.bgm_volume = ini_read_real("settings", "music_volume", 0.8)
 ini_close()
 
 // enums
-enum team
+enum Team
 {
     player,
 	enemy,
@@ -72,7 +72,8 @@ enum healtype
 enum deftype
 {
 	item,
-	modifier
+	modifier,
+	upgrade
 }
 
 // classes
@@ -116,7 +117,7 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 				damage *= dmg_fac
 			}
 
-			if(attacker._team == team.player)
+			if(attacker.team == Team.player)
 			{
 				if(!crit)
 					audio_play_sound(sn_hit, 5, false)
@@ -193,12 +194,12 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 	}
 }
 
-function heal_event(target, value, healtype = healtype.generic)
+function heal_event(target, value, _healtype = healtype.generic)
 {
 	var heal_fac = 1
 	target.hp += value * heal_fac
 
-	if(healtype != healtype.regen)
+	if(_healtype != healtype.regen)
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: value, dir: -target.facing})
 }
 
@@ -245,8 +246,9 @@ global.introsequence = false
 global.gamestarted = false
 global.pausetimer = false
 global.gunlesspercent = false
-global.player = noone
+global.players = [obj_player, obj_player]
 global.fx_bias = 0
+global.usesplitscreen = 0
 
 global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM", 0, -1)
 global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890KM", 1, -1)
@@ -384,12 +386,17 @@ function getdef(_defid, _deftype = 0)
 		case deftype.item: default:
 		{
 			return global.itemdefs[$ _defid]
-			break
+			break;
 		}
 		case deftype.modifier:
 		{
 			return global.modiferdefs[$ _defid]
-			break
+			break;
+		}
+		case deftype.upgrade:
+		{
+			return global.upgradedefs[$ _defid]
+			break;
 		}
 	}
 }
@@ -513,18 +520,26 @@ function locale()
 
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
-			global.itemdefs[$ _name].displayname = string_loc($"item.{_name}.name")
-			global.itemdefs[$ _name].shortdesc = string_loc($"item.{_name}.shortdesc")
-			global.itemdefs[$ _name].lore = string_loc($"item.{_name}.lore")
+			_item.displayname = string_loc($"item.{_name}.name")
+			_item.shortdesc = string_loc($"item.{_name}.shortdesc")
+			_item.lore = string_loc($"item.{_name}.lore")
 		})
 		debug_log("system", "reloaded item language data")
 
 		struct_foreach(global.modifierdefs as (_name, _item)
 		{
-			global.modifierdefs[$ _name].displayname = string_loc($"modifier.{_name}.name")
-			global.modifierdefs[$ _name].desc = string_loc($"modifier.{_name}.desc")
+			_item.displayname = string_loc($"modifier.{_name}.name")
+			_item.desc = string_loc($"modifier.{_name}.desc")
 		})
 		debug_log("system", "reloaded modifier language data")
+
+		struct_foreach(global.upgradedefs as (_name, _item)
+		{
+			_item.displayname = string_loc($"upgrade.{_name}.name")
+			_item.desc = string_loc($"upgrade.{_name}.desc")
+			_item.lore = string_loc($"upgrade.{_name}.lore")
+		})
+		debug_log("system", "reloaded gun module language data")
 
 		debug_log("system", $"language data reload completed, elapsed time: [{timer_to_timestamp(get_timer() - _starttime)}]")
 	}
@@ -539,8 +554,9 @@ debug_log("startup", $"loaded languages: {struct_get_names(global.lang)}")
 // itemdefs.gml
 function _itemdef(_name) constructor {
     name = _name
-    displayname = string_loc("item.unknown.name")
-    shortdesc = string_loc("item.unknown.shortdesc")
+    displayname = string_loc($"item.{name}.name")
+    shortdesc = string_loc($"item.{name}.shortdesc")
+    lore = string_loc($"item.{name}.lore")
 	proc_type = proctype.none
     rarity = item_rarity.none
 
@@ -573,8 +589,6 @@ global.itemdefs =
 {
 	unknown : new _itemdef("unknown"),
 	beeswax : itemdef(new _itemdef("beeswax"), {
-		displayname : string_loc("item.beeswax.name"),
-    	shortdesc : string_loc("item.beeswax.shortdesc"),
 		rarity : item_rarity.common,
 		calc : function(_s)
 		{
@@ -582,8 +596,6 @@ global.itemdefs =
 		}
 	}),
 	eviction_notice : itemdef(new _itemdef("eviction_notice"), {
-		displayname : string_loc("item.eviction_notice.name"),
-		shortdesc : string_loc("item.eviction_notice.shortdesc"),
 		proc_type : proctype.onhit,
 		rarity : item_rarity.rare,
 		proc : function(_a, _t, _d, _p, _s) //attacker, target, damage, proc coefficient, item stacks
@@ -599,7 +611,7 @@ global.itemdefs =
 
 				var p = instance_create_depth(_a.x + offx, _a.y + offy, _a.depth + 2, obj_paperwork)
 				p.damage = _a.base_damage * (4 + _s) * _p
-				p._team = _a._team
+				p.team = _a.team
 				p.dir = point_direction(_a.x + offx, _a.y + offy, _t.x, _t.y)
 				p.pmax = point_distance(_a.x + offx, _a.y + offy, _t.x, _t.y)
 				p.target = _t
@@ -608,8 +620,6 @@ global.itemdefs =
 		}
 	}),
 	serrated_stinger : itemdef(new _itemdef("serrated_stinger"), {
-		displayname : string_loc("item.serrated_stinger.name"),
-		shortdesc : string_loc("item.serrated_stinger.shortdesc"),
 		proc_type : proctype.onhit,
 		rarity : item_rarity.common,
 		proc : function(_a, _t, _d, _p = 1, _s = 1)
@@ -619,14 +629,12 @@ global.itemdefs =
 		}
 	}),
 	amorphous_plush : itemdef(new _itemdef("amorphous_plush"), {
-		displayname : string_loc("item.amorphous_plush.name"),
-		shortdesc : string_loc("item.amorphous_plush.shortdesc"),
 		rarity : item_rarity.rare,
 		step : function(target, _s)
 		{
 			if(instance_exists(target) && (target.t % 600) == 30) && (target.object_index != obj_catfriend) && (instance_number(obj_catfriend) < 1)
 			{
-				var o = instance_create_depth(target.x + random_range(-8, 8), target.y, 0, obj_catfriend, { _team : target._team, parent : target})
+				var o = instance_create_depth(target.x + random_range(-8, 8), target.y, 0, obj_catfriend, { team : target.team, parent : target})
 				o.stats.hp_max += (0.1 * o.stats.hp_max * (_s - 1))
 				o.stats.spd += (0.1 * o.stats.spd * (_s - 1))
 				o.stats.damage += (0.2 * o.stats.damage * (_s - 1))
@@ -634,23 +642,15 @@ global.itemdefs =
 		}
 	}),
 	emergency_field_kit : itemdef(new _itemdef("emergency_field_kit"), {
-		displayname : string_loc("item.emergency_field_kit.name"),
-		shortdesc : string_loc("item.emergency_field_kit.shortdesc"),
 		rarity : item_rarity.legendary
 	}),
 	emergency_field_kit_consumed : itemdef(new _itemdef("emergency_field_kit_consumed"), {
-		displayname : string_loc("item.emergency_field_kit_consumed.name"),
-		shortdesc : string_loc("item.emergency_field_kit_consumed.shortdesc"),
 		rarity : item_rarity.none
 	}),
 	bloody_dagger : itemdef(new _itemdef("bloody_dagger"), {
-		displayname : string_loc("item.bloody_dagger.name"),
-		shortdesc : string_loc("item.bloody_dagger.shortdesc"),
 		rarity : item_rarity.common
 	}),
 	lucky_clover : itemdef(new _itemdef("lucky_clover"), {
-		displayname : string_loc("item.lucky_clover.name"),
-		shortdesc : string_loc("item.lucky_clover.shortdesc"),
 		rarity : item_rarity.common
 	})
 }
@@ -731,8 +731,8 @@ function item_set_stacks(item_id, target, stacks, notify = 1)
 function _modifierdef(_name) constructor
 {
 	name = _name
-	displayname = string_loc("modifier.unknown.name")
-	desc = string_loc("modifier.unknown.desc")
+	displayname = string_loc($"modifier.{name}.name")
+	desc = string_loc($"modifier.{name}.desc")
 
 	on_pickup = function() {}
 }
@@ -758,12 +758,8 @@ global.modifierdefs =
 {
 	unknown : new _modifierdef("unknown"),
 	reckless : modifierdef(new _modifierdef("reckless"), {
-		displayname : string_loc("modifier.reckless.name"),
-    	desc : string_loc("modifier.reckless.shortdesc")
 	}),
 	evolution : modifierdef(new _modifierdef("evolution"), {
-		displayname : string_loc("modifier.evolution.name"),
-    	desc : string_loc("modifier.evolution.shortdesc"),
 		on_pickup : function()
 		{
 			var _item = item_id_get_random(1, itemdata.item_tables.chest_small)
@@ -784,11 +780,11 @@ function modifier(_modifier_id, _stacks = 1) constructor
 
 function modifier_get_stacks(modifier_id)
 {
-    for(var i = 0; i < array_length(statmanager.run_modifiers); i++)
+    for(var i = 0; i < array_length(global.rundata.modifiers); i++)
     {
-        if(statmanager.run_modifiers[i].modifier_id == modifier_id)
+        if(global.rundata.modifiers[i].modifier_id == modifier_id)
         {
-            return statmanager.run_modifiers[i].stacks
+            return global.rundata.modifiers[i].stacks
         }
     }
     return 0
@@ -796,56 +792,131 @@ function modifier_get_stacks(modifier_id)
 
 function modifier_add_stacks(modifier_id, stacks = 1)
 {
-    for(var i = 0; i < array_length(statmanager.run_modifiers); i++)
+    for(var i = 0; i < array_length(global.rundata.modifiers); i++)
     {
-        if(statmanager.run_modifiers[i].modifier_id == modifier_id)
+        if(global.rundata.modifiers[i].modifier_id == modifier_id)
         {
-            statmanager.run_modifiers[i].stacks += stacks
-			if(statmanager.run_modifiers[i].stacks <= 0)
-				array_delete(statmanager.run_modifiers, i, 1)
+            global.rundata.modifiers[i].stacks += stacks
+			if(global.rundata.modifiers[i].stacks <= 0)
+				array_delete(global.rundata.modifiers, i, 1)
 			return;
         }
     }
 	if(stacks > 0)
 	{
-		array_push(statmanager.run_modifiers, new modifier(modifier_id, stacks))
+		array_push(global.rundata.modifiers, new modifier(modifier_id, stacks))
 	}
 }
 
 function modifier_set_stacks(modifier_id, stacks)
 {
-    for(var i = 0; i < array_length(statmanager.run_modifiers); i++)
+    for(var i = 0; i < array_length(global.rundata.modifiers); i++)
     {
-        if(statmanager.run_modifiers[i].modifier_id == modifier_id)
+        if(global.rundata.modifiers[i].modifier_id == modifier_id)
         {
-            statmanager.run_modifiers[i].stacks = stacks
-			if(statmanager.run_modifiers[i].stacks <= 0)
-				array_delete(statmanager.run_modifiers, i, 1)
+            global.rundata.modifiers[i].stacks = stacks
+			if(global.rundata.modifiers[i].stacks <= 0)
+				array_delete(global.rundata.modifiers, i, 1)
 			return;
         }
     }
 	if(stacks > 0)
 	{
-		array_push(statmanager.run_modifiers, new modifier(modifier_id, stacks))
+		array_push(global.rundata.modifiers, new modifier(modifier_id, stacks))
 	}
+}
+
+// gun modules
+function _upgradedef(_name) constructor {
+    name = _name
+    displayname = string_loc($"upgrade.{name}.name")
+    desc = string_loc($"upgrade.{name}.desc")
+    lore = string_loc($"upgrade.{name}.lore")
+    rarity = item_rarity.none
+	firerate = 5
+	bombrate = 80
+	bulletprojectile = obj_bullet
+	bombprojectile = noone
+
+    step = function(target) {}
+    on_pickup = function(target) {}
+    fire = function(target)
+	{
+		with(target)
+		{
+			var v = spread
+
+			with (instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, other.bulletprojectile))
+			{
+				parent = other
+				team = other.team
+				audio_play_sound(sn_player_shoot, 1, false);
+
+				_speed = 12;
+				direction = other.fire_angle + random_range(-v, v);
+				image_angle = direction;
+
+				damage = other.damage
+			}
+			with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
+			{
+				image_yscale = other.facing
+				angle = other.fire_angle
+				dir = other.facing
+				hsp = -other.facing * random_range(1, 1.5)
+				vsp = -1 + random_range(-0.2, 0.1)
+			}
+		}
+	}
+    fire_bomb = function(target) {}
+}
+
+function upgradedef(__struct, _struct)
+{
+	static total_upgrades = 0
+	total_upgrades++
+
+	// hhhhhh i hate scope issues so much
+	var names = variable_struct_get_names(_struct)
+    var size = variable_struct_names_count(_struct);
+
+    for (var i = 0; i < size; i++) {
+        var name = names[i];
+        var element = variable_struct_get(_struct, name);
+        variable_struct_set(__struct, name, element)
+    }
+	delete _struct
+	return __struct
+}
+
+global.upgradedefs =
+{
+	base : new _upgradedef("base"),
+	bomberman : upgradedef(new _upgradedef("bomberman"), {
+		rarity : item_rarity.common,
+		bulletprojectile : obj_bullet
+	})
 }
 
 // run info storage method
 
 function _rundata() constructor
 {
+	start_time = $"{current_month}-{current_day}-{current_year} {current_hour}-{current_minute}-{current_second}"
 	wave = -1
 	money = 0
 	run_time = 0
 	total_dmg = 0
-	run_start_time = $"{current_month}-{current_day}-{current_year} {current_hour}-{current_minute}-{current_second}"
+	modifiers = []
+	items = []
+	gun_upgrade = ""
 
 	static save = function()
 	{
 		if(!directory_exists("past_runs"))
 			directory_create("past_runs")
 
-		var file = file_text_open_write(working_directory + $"past_runs/{run_start_time}.json")
+		var file = file_text_open_write(working_directory + $"past_runs/{start_time}.json")
 		file_text_write_string(file, json2file("", self))
 		file_text_close(file)
 	}

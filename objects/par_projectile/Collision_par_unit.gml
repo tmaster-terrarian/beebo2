@@ -1,4 +1,4 @@
-if(_team != other._team)
+if(team != other.team)
 {
 	damage_event(parent, other, proctype.onhit, damage, proc)
 

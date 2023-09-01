@@ -30,6 +30,28 @@ with(par_unit)
     var spreadFac = 1
     if(spreadFac < 0) spreadFac = 0
 
-    firerate = stats.firerate * 1
-    spread = stats.spread * 1
+    spread = stats.spread * spreadFac
+
+    var firerateFac = 1
+    firerate = stats.firerate * firerateFac
+    if(gun_upgrade != "")
+    {
+        firerate = getdef(gun_upgrade, 2).firerate * firerateFac
+    }
+
+    var bombrateFac = 1
+    bombrate = stats.bombrate * bombrateFac
+    if(gun_upgrade != "")
+    {
+        bombrate = getdef(gun_upgrade, 2).bombrate * bombrateFac
+    }
+}
+
+if(gamepad_button_check_any_pressed())
+{
+    global.controller = true
+}
+if(keyboard_check_pressed(vk_anykey) || mouse_check_button_pressed(mb_any))
+{
+    global.controller = false
 }

@@ -31,6 +31,7 @@ var w = cam_w / global.zoom
 var h = cam_h / global.zoom
 
 // splitscreen
+if(global.usesplitscreen)
 switch(instance_number(obj_camera))
 {
     case 1:
@@ -45,42 +46,6 @@ switch(instance_number(obj_camera))
 
         view_set_xport(cam_id, 0.5 * w * cam_id)
         view_set_wport(cam_id, 0.5 * w)
-
-        break;
-    }
-    case 3:
-    {
-        camera_set_view_size(cam, w * 0.5, h * 0.5)
-
-        if(cam_id != 2)
-        {
-            view_set_xport(cam_id, 0.5 * w * cam_id)
-        }
-        else
-        {
-            view_set_xport(cam_id, 0.25 * w)
-            view_set_yport(cam_id, 0.5 * h)
-        }
-        view_set_wport(cam_id, 0.5 * w)
-        view_set_hport(cam_id, 0.5 * h)
-
-        break;
-    }
-    case 4: default:
-    {
-        camera_set_view_size(cam, w * 0.5, h * 0.5)
-
-        if(cam_id < 2)
-        {
-            view_set_xport(cam_id, 0.5 * w * cam_id)
-        }
-        else
-        {
-            view_set_xport(cam_id, 0.5 * w * (cam_id - 2))
-            view_set_yport(cam_id, 0.5 * h)
-        }
-        view_set_wport(cam_id, 0.5 * w)
-        view_set_hport(cam_id, 0.5 * h)
 
         break;
     }

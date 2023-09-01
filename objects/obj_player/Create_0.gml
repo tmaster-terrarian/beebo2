@@ -7,6 +7,7 @@ stats =
     spd : 2,
     jumpspd : -3.7,
     firerate : 5,
+    bombrate : 80,
     spread : 4,
     damage : 10,
     ground_accel : 0.12,
@@ -61,10 +62,12 @@ dashtimer = 0
 
 firing = 0
 firedelay = 0
+bombdelay = 0
 recoil = 0
 fire_angle = 0
 
-_team = team.player
+team = Team.player
+player_id = 0
 
 _sp =
 {
@@ -92,14 +95,24 @@ gun_flip = 1
 draw_gun = 1
 has_gun = 1
 
+input =
+{
+    left: function() {return keyboard_check(ord("A"))}, right: function() {return keyboard_check(ord("D"))},
+    up: function() {return keyboard_check(ord("W"))}, down: function() {return keyboard_check(ord("S"))},
+    jump: function() {return keyboard_check_pressed(vk_space)}
+}
+
+gamepad_set_axis_deadzone(0, 0.25)
+gamepad_set_axis_deadzone(1, 0.25)
+
 _oncollide_h = function()
 {
     var input_dir = 0
     input_dir = sign
     (
-        gamepad_axis_value(0, gp_axislh)
-        + (gamepad_button_check(0, gp_padr) - gamepad_button_check(0, gp_padl))
-        + (keyboard_check(ord("D")) - keyboard_check(ord("A")))
+        gamepad_axis_value(player_id, gp_axislh)
+        + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
+        + (input.right() - input.left())
     )
 
     repeat(round(max(global.dt, 1)))
@@ -135,9 +148,9 @@ _oncollide_v = function()
     var input_dir = 0
     input_dir = sign
     (
-        gamepad_axis_value(0, gp_axislh)
-        + (gamepad_button_check(0, gp_padr) - gamepad_button_check(0, gp_padl))
-        + (keyboard_check(ord("D")) - keyboard_check(ord("A")))
+        gamepad_axis_value(player_id, gp_axislh)
+        + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
+        + (input.right() - input.left())
     )
 
     if (state == "normal")
@@ -179,7 +192,7 @@ draw_hud = 1
 states =
 {
     braindead : function()
-    {with(obj_player){
+    {with(other){
         fxtrail = 0
         can_jump = 0
         can_walljump = 0
@@ -187,7 +200,7 @@ states =
         vsp = 0
     }},
     normal : function()
-    {with(obj_player){
+    {with(other){
         can_walljump = 1
         can_jump = 1
         ghost = 0
@@ -270,9 +283,9 @@ states =
                 if run
                     run--
             }
-            if (abs(hsp) < 0.5 && on_ground && !landTimer)
+            if (abs(hsp) < 1.5 && on_ground && !landTimer)
             {
-                up = (keyboard_check(ord("W")) || gamepad_button_check(0, gp_padu))
+                up = (input.up() || gamepad_button_check(player_id, gp_padu))
                 sprite_index = _sp.idle
                 if duck
                 {
@@ -291,7 +304,7 @@ states =
                 }
             }
         }
-        if ((keyboard_check(ord("S")) || gamepad_axis_value(0, gp_axislv) > 0 || gamepad_button_check(0, gp_padd)) && on_ground)
+        if ((input.down() || gamepad_axis_value(player_id, gp_axislv) > 0 || gamepad_button_check(player_id, gp_padd)) && on_ground)
             duck = approach(duck, 3, 1 * global.dt)
         else if (!(place_meeting(x, y - 6, par_solid)))
         {
@@ -378,7 +391,7 @@ states =
         else fxtrail = 0
     }},
     wallslide: function()
-    {with(obj_player){
+    {with(other){
         jumps = jumps_max
         can_walljump = 1
         if (vsp < 0)
@@ -439,7 +452,7 @@ states =
         vsp = clamp(vsp, -99, 2)
     }},
     ledgegrab: function()
-    {with(obj_player){
+    {with(other){
         duck = 0
         can_jump = 1
         can_walljump = 0
@@ -488,7 +501,7 @@ states =
         }
     }},
     ledgeclimb: function()
-    {with(obj_player){
+    {with(other){
         duck = 0
         can_jump = 1
         can_walljump = 0

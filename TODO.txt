@@ -24,7 +24,7 @@ modifiers
     [] make some more besides the first 2
 
 gun upgrades
-    
+    [] upgradedefs
 
 buffs and debuffs
     [] redo entire logic

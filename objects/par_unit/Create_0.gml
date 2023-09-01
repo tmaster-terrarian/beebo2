@@ -7,6 +7,7 @@ stats =
     spd : 2,
     jumpspd : -3.7,
     firerate : 5,
+    bombrate : 0,
     spread : 4,
     damage : 10,
     ground_accel : 0.12,
@@ -43,6 +44,7 @@ _apply_stats = function()
     base_damage = stats.damage
     spread = stats.spread
     firerate = stats.firerate
+    bombrate = stats.bombrate
     spd = stats.spd
     jumpspd = stats.jumpspd
     ground_accel = stats.ground_accel
@@ -85,4 +87,8 @@ _setstate = function(_state, _resettimer = 0, _resetframe = 0)
 items = []
 buffs = []
 
-_team = team.neutral
+gun_upgrade = ""
+fire_angle = 0
+gun_pos = {x:0,y:0}
+
+team = Team.neutral
