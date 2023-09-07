@@ -124,7 +124,6 @@
     {"name":"inst_172F5A25","path":"rooms/Room1/Room1.yy",},
     {"name":"inst_5319F4F7","path":"rooms/Room1/Room1.yy",},
     {"name":"inst_2741F3E9","path":"rooms/Room1/Room1.yy",},
-    {"name":"inst_5ADD2C95","path":"rooms/Room1/Room1.yy",},
   ],
   "isDnd": false,
   "layers": [
@@ -255,7 +254,6 @@
             {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_circleplatform","path":"objects/obj_circleplatform/obj_circleplatform.yy",},"propertyId":{"name":"w_freq","path":"objects/obj_circleplatform/obj_circleplatform.yy",},"value":"4",},
             {"resourceType":"GMOverriddenProperty","resourceVersion":"1.0","name":"","objectId":{"name":"obj_circleplatform","path":"objects/obj_circleplatform/obj_circleplatform.yy",},"propertyId":{"name":"w_amp","path":"objects/obj_circleplatform/obj_circleplatform.yy",},"value":"16",},
           ],"rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":384.0,"y":120.0,},
-        {"resourceType":"GMRInstance","resourceVersion":"1.0","name":"inst_5ADD2C95","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"objectId":{"name":"obj_player_rival","path":"objects/obj_player_rival/obj_player_rival.yy",},"properties":[],"rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":184.0,"y":120.0,},
       ],"layers":[],"properties":[],"userdefinedDepth":false,"visible":true,},
     {"resourceType":"GMRBackgroundLayer","resourceVersion":"1.0","name":"Background","animationFPS":15.0,"animationSpeedType":0,"colour":4286545791,"depth":1000,"effectEnabled":true,"effectType":null,"gridX":16,"gridY":16,"hierarchyFrozen":false,"hspeed":0.0,"htiled":false,"inheritLayerDepth":false,"inheritLayerSettings":false,"inheritSubLayers":true,"inheritVisibility":true,"layers":[],"properties":[],"spriteId":null,"stretch":false,"userdefinedAnimFPS":false,"userdefinedDepth":true,"visible":true,"vspeed":0.0,"vtiled":false,"x":0,"y":0,},
   ],

@@ -1,7 +1,7 @@
-global.dt = (delta_time / 1000000) * 60 * global.timescale
-global.sc = window_get_width() / 320
+global.dt = (delta_time / 1000000) * 60 * global.timescale * !global.pause
+global.sc = window_get_width() / SC_W
 
-global.t += global.dt
+global.t += global.dt * !global.pause
 
 with(par_unit)
 {

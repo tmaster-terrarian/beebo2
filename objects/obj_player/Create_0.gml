@@ -9,7 +9,7 @@ stats =
     firerate : 5,
     bombrate : 80,
     spread : 4,
-    damage : 10,
+    damage : 12,
     ground_accel : 0.12,
     ground_fric : 0.08,
     air_accel : 0.07,

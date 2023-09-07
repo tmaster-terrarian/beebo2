@@ -63,6 +63,7 @@ if(sprite_index == _sp.ledgeclimb)
 }
 py += duck
 ponytail_points[0] = [px, py]
+if(!global.pause)
 for (i = 0; i < ponytail_points_count - 1; i++) // slimepunk magic
 {
     magnitude = 1

@@ -19,4 +19,26 @@ if(global.draw_debug)
             framerate_choice = array_length(framerates) - 1
         game_set_speed(framerates[framerate_choice], gamespeed_fps)
     }
+
+}
+
+if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start) || gamepad_button_check_pressed(1, gp_start))
+{
+    global.pause = !global.pause
+    if(global.pause)
+    {
+        audio_play_sound(sn_pause, 10, 0, 1, 0, 1)
+        audio_sound_pitch(current_bgm, 0)
+    }
+    else
+    {
+        audio_play_sound(sn_pause, 10, 0, 1, 0, 2)
+        audio_sound_pitch(current_bgm, 1)
+    }
+}
+
+if(!wave_active && round(global.t % 600) == 599)
+{
+    wave_active = 1
+    
 }

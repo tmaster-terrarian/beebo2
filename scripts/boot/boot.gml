@@ -77,7 +77,7 @@ enum deftype
 }
 
 // classes
-function damage_event(attacker, target, proc_type, damage, proc, attacker_has_items = 1, force_crit = 0, reduceable = 1)
+function damage_event(attacker, target, proc_type, damage, proc, attacker_has_items = 1, force_crit = -1, reduceable = 1)
 {
 	var _damage_type = damage_notif_type.generic
 	var crit = 0
@@ -94,6 +94,11 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 			{
 				crit = 1
 				_damage_type = damage_notif_type.crit
+			}
+			if(force_crit == 0)
+			{
+				crit = 0
+				_damage_type = damage_notif_type.generic
 			}
 
 			if(attacker_has_items)
@@ -127,14 +132,15 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 		}
 		else 
 		{
-			if(force_crit)
+			if(force_crit > -1)
 			{
-				crit = 1
-				_damage_type = damage_notif_type.crit
+				crit = force_crit
+				if(force_crit)
+					_damage_type = damage_notif_type.crit
 			}
 		}
 
-		damage *= 1 + crit
+		damage *= (1 + crit)
 
 		var dmg = damage
 		if(reduceable)
@@ -236,6 +242,8 @@ global.timescale = 1
 global.dt = 1
 global.t = 0
 
+global.pause = 0
+
 global.retro = 0 // experimental color limit shader
 
 global.snd_volume = 1
@@ -255,6 +263,10 @@ global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890KM", 1, 
 
 #macro SC_W 320
 #macro SC_H 180
+
+#macro PAUSECHECK if(global.pause) return;
+
+#macro MINUTE 3600
 
 // functions
 // the following eight functions are credited to D'Andrëw Box on Github and are licensed under the MIT license.
@@ -358,6 +370,28 @@ function json2file(_filename, _json = {}, _iteration = 0) {
 	return _str;
 }
 // end of 3rd party functions
+
+function screen_shake_set(_strength, _frames)
+{
+	with(obj_camera)
+	{
+		if (_strength > shake)
+		{
+			shake_strength = _strength
+			shake = _strength
+			shake_length = _frames
+		}
+	}
+}
+function screen_shake_add(_strength, _frames)
+{
+	with(obj_camera)
+	{
+		shake_strength = _strength
+		shake += _strength
+		shake_length = _frames
+	}
+}
 
 function item_id_get_random(_by_rarity, _table = itemdata.item_tables.any_obtainable)
 {
@@ -836,7 +870,7 @@ function _upgradedef(_name) constructor {
 	firerate = 5
 	bombrate = 80
 	bulletprojectile = obj_bullet
-	bombprojectile = noone
+	bombprojectile = obj_bomb
 
     step = function(target) {}
     on_pickup = function(target) {}
@@ -845,8 +879,9 @@ function _upgradedef(_name) constructor {
 		with(target)
 		{
 			var v = spread
+			var _obj = instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, other.bulletprojectile)
 
-			with (instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, other.bulletprojectile))
+			with (_obj)
 			{
 				parent = other
 				team = other.team
@@ -856,7 +891,7 @@ function _upgradedef(_name) constructor {
 				direction = other.fire_angle + random_range(-v, v);
 				image_angle = direction;
 
-				damage = other.damage
+				damage = other.damage * 0.8333
 			}
 			with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
 			{
@@ -866,9 +901,29 @@ function _upgradedef(_name) constructor {
 				hsp = -other.facing * random_range(1, 1.5)
 				vsp = -1 + random_range(-0.2, 0.1)
 			}
+
+			return _obj;
 		}
 	}
-    fire_bomb = function(target) {}
+    fire_bomb = function(target)
+	{
+		with(target)
+		{
+			var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, other.bombprojectile)
+
+			with(_obj)
+			{
+				parent = other
+				team = other.team
+				damage = other.damage * 4
+
+				hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
+				vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
+			}
+
+			return _obj;
+		}
+	}
 }
 
 function upgradedef(__struct, _struct)
@@ -898,8 +953,7 @@ global.upgradedefs =
 	})
 }
 
-// run info storage method
-
+// run data storage method
 function _rundata() constructor
 {
 	start_time = $"{current_month}-{current_day}-{current_year} {current_hour}-{current_minute}-{current_second}"
@@ -922,7 +976,17 @@ function _rundata() constructor
 	}
 }
 
-global.rundata = new _rundata()
-// global.rundata.save()
+// SPAWNING LOGIC
+function spawn_card(index, weight, cost) constructor
+{
+	self.index = index
+	self.weight = weight
+	self.cost = cost
+}
+
+global.spawn_cards =
+{
+	test: new spawn_card(obj_test, 1, 10)
+}
 
 debug_log("startup", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

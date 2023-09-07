@@ -1,4 +1,6 @@
-if(!global.usesplitscreen && follow)
+PAUSECHECK
+
+if(!global.usesplitscreen && follow && instance_number(obj_player) > 1)
 {
     // target the AVERAGE of the target positions
     ts = [{x, y}, {x, y}]

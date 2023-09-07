@@ -17,7 +17,7 @@ ty = y
 follow_rate = 5
 
 shake = 0
-shake_decay = 0.15
-shake_time = 0
+shake_length = 0
+shake_strength = 1
 
 bounded = 1

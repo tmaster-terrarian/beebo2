@@ -1,3 +1,6 @@
+if(global.pause)
+    return;
+
 if(hp <= 0) && !ded
 {
     ded = 1

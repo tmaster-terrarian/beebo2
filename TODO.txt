@@ -24,7 +24,7 @@ modifiers
     [] make some more besides the first 2
 
 gun upgrades
-    [] upgradedefs
+    [x] upgradedefs
 
 buffs and debuffs
     [] redo entire logic
@@ -68,7 +68,7 @@ internal structure
         stats being handled by gm as well
         all menu screens should part of the same system, instead of three different ones lmao
     [x] import scribble
-    [] pausing
+    [x] pausing
 
 commands
     [] bring back the commands console, with more helpful structure and format

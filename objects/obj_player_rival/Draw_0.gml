@@ -54,6 +54,7 @@ if(sprite_index == _sp.ledgeclimb)
 }
 py1 += duck
 hair1_points[0] = [px1, py1]
+if(!global.pause)
 for (i = 0; i < hair1_points_count - 1; i++)
 {
     magnitude = 1
@@ -140,6 +141,7 @@ if(sprite_index == _sp.ledgeclimb)
 }
 py2 += duck
 hair2_points[0] = [px2, py2]
+if(!global.pause)
 for (i = 0; i < hair2_points_count - 1; i++)
 {
     magnitude = 1

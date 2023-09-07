@@ -1,1 +1,1 @@
-
+if(global.pause) return;

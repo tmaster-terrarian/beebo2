@@ -1,4 +1,4 @@
-function _draw_rect(x1, y1, x2, y2, _c = c_white, _a = 1, _o = 0)
+function _draw_rect(x1, y1, x2, y2, _c = c_white, _a = 1, _o = 0) //_o: outline
 {
 	_o = clamp(floor(_o), 0, 1)
 	var __c = draw_get_color()

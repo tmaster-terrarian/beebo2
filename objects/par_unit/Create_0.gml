@@ -23,7 +23,6 @@ level_stats =
     damage: 2.4
 }
 
-level = 1
 t = 0
 regen = 1
 accel = 0
@@ -84,11 +83,5 @@ _setstate = function(_state, _resettimer = 0, _resetframe = 0)
         image_index = 0
 }
 
-items = []
-buffs = []
-
-gun_upgrade = ""
 fire_angle = 0
 gun_pos = {x:0,y:0}
-
-team = Team.neutral

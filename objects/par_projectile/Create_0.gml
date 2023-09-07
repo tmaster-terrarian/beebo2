@@ -1,6 +1,8 @@
+event_inherited()
+
 team = Team.neutral
 parent = noone
-damage = 1
+damage = 0
 proc = 0
 lifetime = -1
 

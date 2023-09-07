@@ -1,5 +1,5 @@
 if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
-    image_index += 0.2 * global.dt
+    image_index += 0.2 * global.dt * !global.pause
 
 running = (sprite_index == _sp.run)
 
@@ -150,7 +150,7 @@ else if(jump_buffer < 10 && state != "ledgegrab")
     platformtarget = noone
 }
 
-if(place_meeting(x, y, par_solid) && !ghost) y -= 1 * global.dt;
+if(place_meeting(x, y, par_solid) && !ghost && !global.pause) y -= 1 * global.dt;
 
 if(!on_ground)
     duck = 0
@@ -173,6 +173,8 @@ else
     if(abs(hsp) > spd * 1.3)
         fric *= 0.1
 }
+
+PAUSECHECK //prevent any further code from running if the game is paused (hopefully)
 
 states[$ state]() //MAGIC
 
@@ -345,14 +347,6 @@ if (input.jump() || gamepad_button_check_pressed(player_id, gp_face1)) && can_ju
     }
 }
 
-if(keyboard_check(_dbkey))
-{
-    hsp = 0
-    vsp = 0
-    x = round(mouse_x)
-    y = round(mouse_y)
-}
-
 if _position_meeting(x, y + 1, par_solid)
 {
     var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
@@ -395,12 +389,11 @@ if(has_gun)
     if(state == "normal")
         facing = gun_flip
 
-    if(mouse_check_button(mb_left) && !firedelay)
+    if(mouse_check_button(mb_left) && firedelay <= 0)
     {
         firing = 1;
 
-        with(obj_camera)
-            shake = 2
+        screen_shake_set(1, 5)
 
         recoil = 2;
         firedelay = firerate;
@@ -409,6 +402,23 @@ if(has_gun)
             getdef(gun_upgrade, 2).fire(id)
         else
             getdef("base", 2).fire(id)
+    }
+
+    if(mouse_check_button(mb_right) && bombdelay <= 0)
+    {
+        audio_play_sound(sn_throw, 0, 0)
+
+        firing = 1;
+
+        screen_shake_set(2, 10)
+
+        recoil = 4;
+        bombdelay = bombrate;
+
+        if(gun_upgrade != "")
+            getdef(gun_upgrade, 2).fire_bomb(id)
+        else
+            getdef("base", 2).fire_bomb(id)
     }
 }
 

@@ -14,7 +14,10 @@
     "name": "parents",
     "path": "folders/Objects/parents.yy",
   },
-  "parentObjectId": null,
+  "parentObjectId": {
+    "name": "par_moveable",
+    "path": "objects/par_moveable/par_moveable.yy",
+  },
   "persistent": false,
   "physicsAngularDamping": 0.1,
   "physicsDensity": 0.5,

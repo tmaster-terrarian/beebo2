@@ -1,3 +1,5 @@
+PAUSECHECK
+
 // get camera position and size
 cam_x = camera_get_view_x(cam)
 cam_y = camera_get_view_y(cam)
@@ -15,14 +17,10 @@ if(bounded)
     y = clamp(y, hh, room_height - hh - 4)
 }
 
-// offset with camera shake
-x += random_range(-shake, shake)
-y += random_range(-shake, shake)
-shake = approach(shake, 0, shake_decay * 1/shake_time * global.dt)
-
-// snap to pixels
-_x = round(x - wh)
-_y = round(y - hh)
+// snap to pixels and offset with camera shake
+_x = round(x - wh + random_range(-shake, shake))
+_y = round(y - hh + random_range(-shake, shake))
+shake = max(0, shake - ((1 / shake_length) * shake_strength) * global.dt)
 
 // apply position and zoom
 camera_set_view_pos(cam, _x, _y)

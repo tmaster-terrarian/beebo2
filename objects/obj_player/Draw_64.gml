@@ -1,12 +1,3 @@
-if(draw_hud)
-{
-    var _fps = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{fps}FPS")
-
-    _draw_rect(1, SC_H - 8, _fps.get_width(), SC_H - 2, c_black, 0.5)
-
-    _fps.draw(2, SC_H - 1)
-}
-
 if(global.draw_debug)
 {
     _draw_rect(1, 1, 200, 62, c_black, 0.2)
