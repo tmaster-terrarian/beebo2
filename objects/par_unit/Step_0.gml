@@ -4,7 +4,7 @@ if(global.pause)
 if(hp <= 0) && !ded
 {
     ded = 1
-    event_perform(ev_other, ev_user2)
+    instance_destroy()
 }
 
 if(y > room_height + 48)

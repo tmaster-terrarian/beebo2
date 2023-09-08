@@ -255,6 +255,8 @@ global.gamestarted = false
 global.pausetimer = false
 global.gunlesspercent = false
 global.players = [obj_player, obj_player]
+global.playerCount = 1
+global.enemyCount = 0
 global.fx_bias = 0
 global.usesplitscreen = 0
 
@@ -469,8 +471,8 @@ function timer_to_timestamp(_t)
 {
 	var _c = floor((abs(_t) / 10000) % 100)
 	var _s = floor((abs(_t) / 1000000) % 60)
-	var _m = floor((_s / 60) % 60)
-	var _h = floor((_m / 60) % 60)
+	var _m = floor(_s / 60) % 60
+	var _h = floor(_m / 60) % 60
 	var h = string(_h) + ":"
 
 	if(_c < 10) _c = "0" + string(_c)
@@ -491,6 +493,18 @@ function debug_log(src, str)
 	file_text_write_string(file, $"[{timer_to_timestamp(get_timer())}] [{src}]: {str}")
 	file_text_writeln(file)
 	file_text_close(file)
+}
+
+function get_nearest_notme(_x, _y, inst)
+{
+	var __x = _x
+	var __y = _y
+	x -= 1000000
+	y -= 1000000
+	var _inst = instance_nearest(__x, __y, inst)
+	x += 1000000
+	y += 1000000
+	return (_inst != id) ? _inst : noone
 }
 
 function string_real_shortened(val)
@@ -965,7 +979,7 @@ function _rundata() constructor
 	items = []
 	gun_upgrade = ""
 
-	static save = function()
+	save = function()
 	{
 		if(!directory_exists("past_runs"))
 			directory_create("past_runs")
@@ -974,19 +988,181 @@ function _rundata() constructor
 		file_text_write_string(file, json2file("", self))
 		file_text_close(file)
 	}
-}
 
-// SPAWNING LOGIC
-function spawn_card(index, weight, cost) constructor
+	ResetStartTime = function()
+	{
+		start_time = $"{current_month}-{current_day}-{current_year} {current_hour}-{current_minute}-{current_second}"
+	}
+}
+global.rundata = new _rundata()
+
+// SPAWNING AND DIFFICULTY
+function spawn_card(index, weight, cost, spawnsOnGround = 1) constructor
 {
 	self.index = index
 	self.weight = weight
 	self.cost = cost
+	self.spawnsOnGround = spawnsOnGround
 }
 
 global.spawn_cards =
+[
+	[ // normal
+		new spawn_card("obj_e_bombguy", 1, 10)
+	],
+	[ // strong
+		new spawn_card("obj_test", 1, 40)
+	],
+	[ // boss
+		new spawn_card("obj_test", 1, 600)
+	]
+]
+
+for(var i = 0; i < 3; i++)
 {
-	test: new spawn_card(obj_test, 1, 10)
+	array_sort(global.spawn_cards[i], function(_e1, _e2) { return sign(_e1.cost - _e2.cost) })
+}
+
+// global.spawn_cards[random_weighted([{v: 2, w: 1}, {v: 1, w: 2}, {v: 0, w: 4}])]
+
+global.difficultySetting = 2 // regular difficulty is 2
+global.difficultyCoeff = 1
+global.wave = 0
+global.enemyLevel = 1
+global.enemyItems = []
+
+function Director(creditsStart, expMult, creditMult, waveInterval, interval, maxSpawns) constructor
+{
+	self.creditsStart = creditsStart
+	self.expMult = expMult
+	self.creditMult = creditMult
+	self.waveInterval = waveInterval
+	self.interval = interval
+	self.maxSpawns = maxSpawns
+	self.enabled = 0
+
+	self.credits = 0
+	self.creditsPerSecond = 0
+
+	self.waveType = 0
+	self.waveImmediateCreditsFraction = [0.15, 0.3]
+	self.wavePeriods = [30, 60]
+	self.waveBaseCredits = [159, 500]
+
+	self.generatorTicker = 0
+	self.generatorTickerSeconds = 0
+
+	self.spawnTimer = 0
+	self.spawnCounter = 0
+	self.lastSpawnSucceeded = 0
+	self.lastSpawnCard = noone
+	self.lastSpawnPos = {x: SC_W / 2, y: SC_H / 2}
+
+	self.Enable = function()
+	{
+		self.enabled = 1
+		self.generatorTicker = 0
+		self.generatorTickerSeconds = 0
+		self.spawnTimer = 0
+		self.spawnCounter = 0
+		self.lastSpawnSucceeded = 0
+		self.lastSpawnCard = noone
+
+		var totalWaveCreds = self.waveBaseCredits[self.waveType] * global.difficultyCoeff
+
+		self.credits = self.creditsStart + self.waveImmediateCreditsFraction[self.waveType] * totalWaveCreds
+		self.creditsPerSecond = 	 (1 - self.waveImmediateCreditsFraction[self.waveType]) * totalWaveCreds/self.wavePeriods[self.waveType]
+
+		if(self.waveType == 1) // boss wave
+		{
+			var choice, r
+			for(var c = 0; c < 100; c++) // doing this instead of a while loop in the case where nothing can spawn
+			{
+				r = irandom(array_length(global.spawn_cards[2]) - 1)
+				var rr = global.spawn_cards[2][r]
+				if(rr.cost <= self.credits) // 10000 is a placeholder value for "most expensive option available"
+				{
+					choice = rr
+					self.credits -= rr.cost
+
+					// spawn
+
+					break
+				}
+			}
+		}
+	}
+
+	self.Disable = function()
+	{
+		self.enabled = 0
+		self.waveType = 0
+	}
+
+	self.Step = function() // the spawn loop
+	{
+		if(!self.enabled)
+			return;
+
+		if(global.enemyCount < 30)
+			self.generatorTicker = approach(self.generatorTicker, 60, global.dt)
+
+		// aiming for 800!
+		self.BuildCreditScore()
+		self.spawnTimer = max(0, self.spawnTimer - global.dt)
+
+		if(self.spawnTimer > 0) return;
+
+		var card = self.lastSpawnCard
+		if(self.lastSpawnSucceeded == 0) // if the last spawn failed, obtain a new card
+		{
+			var _catagory = random_weighted([{v: 0, w: 2}, {v: 1, w: 1}])
+			self.lastSpawnCard = global.spawn_cards[_catagory][irandom(array_length(global.spawn_cards[_catagory]) - 1)]
+			card = self.lastSpawnCard
+			self.lastSpawnPos = {x: obj_player.x, y: obj_player.y}
+		}
+
+		var _spawnIndex = asset_get_index(card.index)
+		if(self.spawnCounter < self.maxSpawns && card.cost <= self.credits && (card.cost >= self.credits / 6 && card.cost < 10000) && _spawnIndex != -1 && global.enemyCount < 30)
+		{
+			self.credits -= card.cost
+			var xpReward = global.difficultyCoeff * card.cost * self.expMult
+			var moneyReward = round(2 * global.difficultyCoeff * card.cost * self.expMult)
+
+			instance_create_depth(self.lastSpawnPos.x + irandom_range(-32, 32), self.lastSpawnPos.y + irandom_range(-32, 0), 60, _spawnIndex, {xpReward, moneyReward})
+
+			self.spawnCounter++
+			self.lastSpawnSucceeded = 1
+			self.spawnTimer = random_range(self.interval.minval, self.interval.maxval)
+		}
+		else
+		{
+			self.spawnCounter = 0
+			self.lastSpawnSucceeded = 0
+			self.spawnTimer = random_range(self.waveInterval.minval, self.waveInterval.maxval)
+		}
+	}
+
+	self.BuildCreditScore = function() // the credit generator
+	{
+		if(self.generatorTicker == 60 && self.generatorTickerSeconds < self.wavePeriods[self.waveType])
+		{
+			self.generatorTicker = 0
+			self.generatorTickerSeconds++
+			self.credits += self.creditsPerSecond
+		}
+	}
+}
+
+function range(minval, maxval) constructor
+{
+	self.minval = minval
+	self.maxval = maxval
+
+	toString = function()
+	{
+		return $"({minval} - {maxval})"
+	}
 }
 
 debug_log("startup", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

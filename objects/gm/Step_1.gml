@@ -1,10 +1,106 @@
-global.dt = (delta_time / 1000000) * 60 * global.timescale * !global.pause
+global.dt = (delta_time / 1000000) * 60 * global.timescale
 global.sc = window_get_width() / SC_W
 
-global.t += global.dt * !global.pause
+if(keyboard_check_pressed(vk_enter))
+{
+    wavetimer = 0
+}
+
+if(!global.pause)
+{
+    global.t += global.dt
+
+    if(wavetimer > 0)
+        wavetimer = max(wavetimer - global.dt, 0)
+
+    if(wavetimer == 0)
+    {
+        wavetimer = -1
+        global.wave++
+
+        var waveType = 0
+        var shopWave = 0
+        switch((global.wave - 1) % 5)
+        {
+            case 3:
+            {
+                waveType = 0
+                shopWave = 1
+                break;
+            }
+            case 4:
+            {
+                waveType = 1
+                shopWave = 0
+                break;
+            }
+            default:
+            {
+                waveType = 0
+                shopWave = 0
+                break;
+            }
+        }
+        if(!shopWave)
+        {
+            mainDirector.waveType = waveType
+            mainDirector.Enable()
+        }
+        else
+        {
+            mainDirector.Disable()
+            wavetimer = 900
+        }
+    }
+
+    var waveFac = 1.5 * global.wave
+    var diffFac = 0.0506 * global.difficultySetting
+    global.difficultyCoeff = (1 + diffFac * waveFac) * power(1.02, global.wave) // ror2 is so cool man
+
+    global.enemyLevel = min(1 + round((global.difficultyCoeff - 1)/0.33), 9999)
+
+    global.enemyCount = 0
+    with(par_unit)
+    {
+        if(team == Team.enemy)
+        {
+            global.enemyCount++
+        }
+    }
+
+    mainDirector.Step()
+
+    // if the director is totally pooped and we are not on a shop wave, proceed to next wave
+    if((mainDirector.credits < 10 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1 && global.wave % 5 != 3)
+    {
+        if(global.enemyCount == 0)
+        {
+            killzoneTimer = MINUTE
+            // destroy fog of death
+
+            mainDirector.Disable()
+            wavetimer = 600
+        }
+        else
+        {
+            if(killzoneTimer > 0)
+                killzoneTimer = approach(killzoneTimer, 0, global.dt)
+            if(killzoneTimer == 0)
+            {
+                killzoneTimer = -1
+                // create fog of death here
+            }
+        }
+    }
+}
 
 with(par_unit)
 {
+    if(team == Team.enemy)
+    {
+        level = global.enemyLevel
+    }
+
     var hpFac = 1
     hp_max = (stats.hp_max + level_stats.hp_max * (level - 1)) * hpFac
 

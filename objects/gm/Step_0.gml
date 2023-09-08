@@ -29,16 +29,22 @@ if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start
     {
         audio_play_sound(sn_pause, 10, 0, 1, 0, 1)
         audio_sound_pitch(current_bgm, 0)
+        with(all)
+        {
+            __image_speed = image_speed
+            image_speed = 0
+            __speed = speed
+            speed = 0
+        }
     }
     else
     {
         audio_play_sound(sn_pause, 10, 0, 1, 0, 2)
         audio_sound_pitch(current_bgm, 1)
+        with(all)
+        {
+            image_speed = __image_speed
+            speed = __speed
+        }
     }
-}
-
-if(!wave_active && round(global.t % 600) == 599)
-{
-    wave_active = 1
-    
 }

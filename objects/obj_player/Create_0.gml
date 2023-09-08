@@ -1,7 +1,7 @@
 event_inherited()
 stats =
 {
-    hp_max : 180,
+    hp_max : 100,
     regen_rate : 1,
     curse : 1,
     spd : 2,
@@ -117,7 +117,7 @@ _oncollide_h = function()
 
     repeat(round(max(global.dt, 1)))
     {
-        if(abs(input_dir) && !place_meeting(x + input_dir, y - 2, par_solid) && abs(hsp) >= 0.6)
+        if(abs(input_dir) && !place_meeting(x + input_dir, y - 2, par_solid))
         {
             movey(-2)
             movex(input_dir * 2)
@@ -547,6 +547,15 @@ states =
             mask_index = _sp.m_default
             image_index = 0
         }
+    }},
+    dead: function()
+    {with(other){
+        duck = 0
+        can_jump = 0
+        can_walljump = 0
+        ghost = 0
+        hsp = 0
+        vsp = 0
     }}
 }
 state = "normal"

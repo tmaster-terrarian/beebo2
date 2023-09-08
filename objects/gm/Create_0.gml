@@ -25,8 +25,10 @@ bgm_fade = function(index, fadetime, loop = 1, gain = 1, offset = 0, pitch = 1)
     audio_sound_gain(current_bgm, gain, fadetime * 1000)
 }
 
-wave_creation = 0
-wave_active = 0
+global.wave = 0
+wavetimer = 600
+killzoneTimer = MINUTE
 
-rundata = new _rundata()
-rundata.wave = 1
+mainDirector = new Director(0, 0.1, 0.75, new range(0.5, 0.5), new range(2, 3), 10)
+
+global.lastsecond = current_second

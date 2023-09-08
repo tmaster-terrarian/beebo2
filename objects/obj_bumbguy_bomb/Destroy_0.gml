@@ -1,22 +1,10 @@
-_size = 1
+_size = 0.75
 _dmg = damage
-_fps = 0.25
+_fps = 0.5
 
-if(bulleted)
-{
-    _size *= 1.3
-    _dmg *= 2
-    _fps = 0.167
-
-    screen_shake_set(6, 60)
-}
-else
-{
-    screen_shake_set(4, 40)
-}
+screen_shake_set(2, 20)
 
 audio_play_sound(sn_bomb_explosion, 0, 0)
-audio_stop_sound(throwsound)
 
 with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, parent, team, killtimer: 16 / _fps}))
 {
@@ -26,13 +14,11 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
     image_xscale = _size
     image_yscale = _size
 
-    crit = other.bulleted
-
     with(par_unit)
     {
         if(place_meeting(x, y, other) && team != other.team)
         {
-            damage_event(other.parent, id, proctype.onhit, other._dmg, other.proc, 1, other.crit)
+            damage_event(other.parent, id, proctype.onhit, other._dmg, other.proc, 1)
         }
     }
 }

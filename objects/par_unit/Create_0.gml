@@ -32,6 +32,9 @@ crit_chance = 0
 jumps = 1
 fxtrail = 0
 can_jump = 1
+firedelay = 0
+invincible = 0
+ded = 0
 
 _apply_stats = function()
 {
@@ -59,7 +62,7 @@ _apply_stats()
 _apply_level = function(_newlevel)
 {
     hp_max = stats.hp_max + level_stats.hp_max * (_newlevel - 1)
-    hp = min(hp + hp_max * 0.1, hp_max)
+    hp = min(hp + hp_max * 0.05, hp_max)
 
     base_damage = stats.damage + level_stats.damage * (_newlevel - 1)
 
