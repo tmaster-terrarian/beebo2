@@ -6,6 +6,18 @@ if(keyboard_check_pressed(vk_f2))
     ini_close()
 }
 
+//192 = `
+if(keyboard_check_pressed(192))
+{
+    global.showDebugOverlay = !global.showDebugOverlay
+    show_debug_log(global.showDebugOverlay)
+}
+
+if(keyboard_check_pressed(ord("R")))
+{
+    game_restart()
+}
+
 var _fpsswitch = keyboard_check_pressed(ord("P")) - keyboard_check_pressed(ord("O"))
 
 if(global.draw_debug)
@@ -19,7 +31,6 @@ if(global.draw_debug)
             framerate_choice = array_length(framerates) - 1
         game_set_speed(framerates[framerate_choice], gamespeed_fps)
     }
-
 }
 
 if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start) || gamepad_button_check_pressed(1, gp_start))

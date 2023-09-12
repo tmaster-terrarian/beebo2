@@ -15,7 +15,8 @@ stats =
     air_accel : 0.07,
     air_fric : 0.02,
     jumps_max : 1,
-    grv : 0.2
+    grv : 0.2,
+    attack_speed : 1
 }
 level_stats =
 {
@@ -26,7 +27,7 @@ _apply_stats()
 
 depth = 50
 
-xp_max = 50
+xpTarget = 155
 xp = 0
 
 can_attack = 1
@@ -189,6 +190,7 @@ items = []
 
 draw_hud = 1
 
+state = "intro"
 states =
 {
     braindead : function()
@@ -551,14 +553,44 @@ states =
     dead: function()
     {with(other){
         duck = 0
+        fxtrail = 0
         can_jump = 0
         can_walljump = 0
         ghost = 0
         hsp = 0
         vsp = 0
+    }},
+    intro : function()
+    {with(other){
+        if(timer0 == 0)
+        {
+            instance_create_depth(-8, 112, 0, fx_exploder, {image_xscale: 7, image_yscale: 6, lifetime: 60, interval: 6})
+        }
+        duck = 0
+        fxtrail = 0
+        can_jump = 0
+        can_walljump = 0
+        ghost = 0
+        hsp = 0
+        vsp = 0
+        has_gun = 0
+        image_alpha = 0
+        if(timer0 < 60)
+            timer0 = approach(timer0, 60, global.dt)
+        if(timer0 == 60)
+        {
+            timer0 = 0
+            state = "normal"
+            image_alpha = 1
+            has_gun = 1
+            hsp = 3
+            vsp = -2
+            audio_play_sound(sn_walljump, 2, 0)
+            audio_play_sound(sn_walljump, 2, 0)
+            audio_play_sound(sn_walljump, 2, 0)
+        }
     }}
 }
-state = "normal"
 
 _dbkey = vk_lcontrol
 

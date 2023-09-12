@@ -15,7 +15,8 @@ stats =
     air_accel : 0.07,
     air_fric : 0.02,
     jumps_max : 1,
-    grv : 0
+    grv : 0,
+    attack_speed : 1
 }
 level_stats =
 {
@@ -35,6 +36,8 @@ can_jump = 1
 firedelay = 0
 invincible = 0
 ded = 0
+attack_speed = 1
+flash = 0
 
 _apply_stats = function()
 {
@@ -56,6 +59,7 @@ _apply_stats = function()
     jumps_max = stats.jumps_max
     jumps = jumps_max
     grv = stats.grv
+    attack_speed = stats.attack_speed
 }
 _apply_stats()
 

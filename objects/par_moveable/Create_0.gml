@@ -5,6 +5,9 @@ platformtarget = noone
 on_ground = 0
 facing = 1
 
+lasthsp = 0
+lastvsp = 0
+
 _is_riding = function(_id)
 {
     var s = instance_place((bbox_left + bbox_right)/2, bbox_bottom + 2, par_solid)

@@ -1,12 +1,14 @@
 global.dt = (delta_time / 1000000) * 60 * global.timescale
 global.sc = window_get_width() / SC_W
 
+global.gameTimer += global.dt
+
 if(keyboard_check_pressed(vk_enter))
 {
     wavetimer = 0
 }
 
-if(!global.pause)
+if(!global.pause && global.runEnabled)
 {
     global.t += global.dt
 
@@ -19,34 +21,25 @@ if(!global.pause)
         global.wave++
 
         var waveType = 0
-        var shopWave = 0
         switch((global.wave - 1) % 5)
         {
-            case 3:
-            {
-                waveType = 0
-                shopWave = 1
-                break;
-            }
             case 4:
             {
                 waveType = 1
-                shopWave = 0
                 break;
             }
             default:
             {
                 waveType = 0
-                shopWave = 0
                 break;
             }
         }
-        if(!shopWave)
+        if(waveType != 1)
         {
             mainDirector.waveType = waveType
             mainDirector.Enable()
         }
-        else
+        else // make shop appear
         {
             mainDirector.Disable()
             wavetimer = 900
@@ -100,6 +93,15 @@ with(par_unit)
     {
         level = global.enemyLevel
     }
+    if(object_index == obj_player || object_index == obj_player_rival)
+    {
+        if(xp > xpTarget)
+        {
+            xp = 0
+            xpTarget *= 1.55
+            level += 1
+        }
+    }
 
     var hpFac = 1
     hp_max = (stats.hp_max + level_stats.hp_max * (level - 1)) * hpFac
@@ -129,7 +131,8 @@ with(par_unit)
     spread = stats.spread * spreadFac
 
     var firerateFac = 1
-    firerate = stats.firerate * firerateFac
+    attack_speed = stats.attack_speed * firerateFac
+    firerate = stats.firerate * stats.attack_speed
     if(gun_upgrade != "")
     {
         firerate = getdef(gun_upgrade, 2).firerate * firerateFac

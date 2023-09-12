@@ -152,17 +152,16 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 		}
 		target.hp -= dmg
 
-		if(target.object_index == obj_player)
+		if(target.object_index == obj_player || target.object_index == obj_player_rival)
 		{
 			audio_play_sound(sn_player_hit, 5, false)
-			oCamera.alarm[0] = 10
 			_damage_type = damage_notif_type.playerhurt
 		}
 
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
 
 		// activate on kill items if target died
-		if(target.hp <= 0) && (target.object_index != obj_player)
+		if(target.hp <= 0) && (target.object_index != obj_player) && (target.object_index != obj_player_rival)
 		{
 			if(instance_exists(attacker)) && (attacker_has_items)
 			{
@@ -177,6 +176,11 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 							_item.proc(attacker, target, damage, proc, _stacks)
 						}
 					}
+				}
+
+				if(attacker.object_index == obj_player || attacker.object_index == obj_player_rival)
+				{
+					attacker.xp += target.xpReward
 				}
 			}
 			for(var i = 0; i < array_length(target.items); i++)
@@ -240,11 +244,12 @@ itemdata()
 
 global.timescale = 1
 global.dt = 1
-global.t = 0
+global.t = 0 // run timer
+global.gameTimer = 0 // time elapsed since the gm object was created
 
 global.pause = 0
 
-global.retro = 0 // experimental color limit shader
+// global.retro = 0 // experimental color limit shader
 
 global.snd_volume = 1
 global.bgm_volume = 1
@@ -1008,7 +1013,7 @@ function spawn_card(index, weight, cost, spawnsOnGround = 1) constructor
 global.spawn_cards =
 [
 	[ // normal
-		new spawn_card("obj_e_bombguy", 1, 10)
+		new spawn_card("obj_e_bombguy", 1, 30)
 	],
 	[ // strong
 		new spawn_card("obj_test", 1, 40)

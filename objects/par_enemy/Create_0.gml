@@ -23,3 +23,15 @@ agpos = {x:x, y:y, cy:y-8}
 seethruwalls = 0
 
 braindead = 0
+
+INPUT =
+{
+    LEFT: 0,
+    RIGHT: 0,
+    UP: 0,
+    DOWN: 0,
+    JUMP: 0,
+    FIRE: 0
+}
+
+state = "normal"

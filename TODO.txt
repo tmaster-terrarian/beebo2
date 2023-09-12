@@ -5,7 +5,7 @@ player
     [x] better states and fix state switching clunkiness
     [x] stat management
     [x] merge gun with player code
-    [] dead state
+    [x] dead state
     [x] ledge climb
     [x] more interesting, possibly tighter movement
 
@@ -31,12 +31,12 @@ buffs and debuffs
     [] less scope issues
 
 enemies
-    [] behavior states
+    [x] behavior states
     [x] stats
     [x] teams
-    [] leveling up
+    [x] leveling up
     [] unique mechanics
-    [] aggro
+    [x] aggro
     [] infighting?
 
 menu screen
@@ -58,7 +58,7 @@ stages and progression
     [] bosses
     [] loot
     [] transitions to and from stages
-    [] difficulty
+    [x] difficulty
 
 internal structure
     [x] mega cleanup
@@ -82,19 +82,18 @@ hud
     [] inventory
 
 gameplay mechanics
-    [] waves of enemies, progression based on waves
+    [x] waves of enemies, progression based on waves
         [] shop appears after every x waves
         [] next level every y waves
         [] boss waves
-    [] enemies level up every/every other wave, instead of every/every other minute
+    [x] enemies level up based on waves
     [] gun upgrade system
         upgrade tree with points to spend
         AND/OR
         interesting gimmick-based modules (only one can be carried at a time)
-    [] enemies drop money
+    [x] enemies drop money
     [] shop bonuses based on time spent, prices based on waves
 
 multiplayer???
     [x] splitscreen cameras
     [] only enable splitscreen when players are far enough away from each other
-    [] balancing

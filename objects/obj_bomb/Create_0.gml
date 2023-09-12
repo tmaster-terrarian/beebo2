@@ -1,6 +1,5 @@
 event_inherited();
 destroy_on_hit = 1
-max_instances = 1
 
 grv = 0.1
 
@@ -37,4 +36,9 @@ _oncollide_v = function()
     }
     else
         instance_destroy()
+}
+
+_squish = function()
+{
+    instance_destroy()
 }

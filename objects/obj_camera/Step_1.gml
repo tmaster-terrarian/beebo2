@@ -34,6 +34,6 @@ if(instance_exists(target) && follow)
 {
     // target the screen the object is in
     var w = SC_H * 4/3
-    tx = floor(target.x / w) * w + w/2 + 40
-    ty = floor(target.y / SC_H) * SC_H + SC_H/2
+    tx = max(floor(target.x / w) * w + w/2 + 40, w/2 + 40)
+    ty = max(floor(target.y / SC_H) * SC_H + SC_H/2, SC_H/2)
 }

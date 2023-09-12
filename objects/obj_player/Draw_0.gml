@@ -1,3 +1,6 @@
+if(flash)
+    shader_set(sh_flash)
+
 var drawgun = function(_v)
 {
     if(_v && draw_gun && has_gun)
@@ -97,6 +100,8 @@ if(ponytail_visible)
 draw_self()
 
 drawgun(!gun_behind)
+
+shader_reset()
 
 if(global.draw_debug)
 {

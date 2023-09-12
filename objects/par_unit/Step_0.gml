@@ -12,3 +12,6 @@ if(y > room_height + 48)
 
 if(!on_ground)
     vsp = approach(vsp, 20, grv)
+
+if(firedelay > 0)
+    firedelay = approach(firedelay, 0, global.dt)
