@@ -1,10 +1,13 @@
-if(flash)
-    shader_set(sh_flash)
-
 var drawgun = function(_v)
 {
     if(_v && draw_gun && has_gun)
+    {
+        if(flash > 0)
+            shader_set(sh_flash)
         draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) + lengthdir_x(-recoil, fire_angle), y + gun_pos.y + lengthdir_y(-recoil, fire_angle), 1, 1 * gun_flip, fire_angle, c_white, 1)
+
+        shader_reset()
+    }
 }
 
 drawgun(gun_behind)
@@ -96,12 +99,14 @@ if(ponytail_visible)
         draw_line_width_colour(ponytail_points[i, 0], ponytail_points[i, 1], ponytail_points[i + 1, 0], ponytail_points[i + 1, 1], 1, ponytail_colors[i], ponytail_colors[i])
     }
 }
+if(flash > 0)
+    shader_set(sh_flash)
 
 draw_self()
 
-drawgun(!gun_behind)
-
 shader_reset()
+
+drawgun(!gun_behind)
 
 if(global.draw_debug)
 {
