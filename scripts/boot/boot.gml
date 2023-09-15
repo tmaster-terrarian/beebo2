@@ -152,7 +152,7 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 		}
 		target.hp -= dmg
 
-		if(target.object_index == obj_player || target.object_index == obj_player_rival)
+		if(object_get_parent(target.object_index) == obj_player)
 		{
 			audio_play_sound(sn_player_hit, 5, false)
 			_damage_type = damage_notif_type.playerhurt
@@ -160,8 +160,8 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
 
-		// activate on kill items if target died
-		if(target.hp <= 0) && (target.object_index != obj_player) && (target.object_index != obj_player_rival)
+		// activate on kill items if target died and target's on death items
+		if(target.hp <= 0)
 		{
 			if(instance_exists(attacker)) && (attacker_has_items)
 			{
@@ -178,9 +178,10 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 					}
 				}
 
-				if(attacker.object_index == obj_player || attacker.object_index == obj_player_rival)
+				if(object_get_parent(attacker.object_index) == obj_player)
 				{
 					attacker.xp += target.xpReward
+					attacker.money += target.moneyReward
 				}
 			}
 			for(var i = 0; i < array_length(target.items); i++)
@@ -736,10 +737,10 @@ function item_get_stacks(item_id, target)
 
 function item_add_stacks(item_id, target, stacks = 1, notify = 1)
 {
-	if(notify && stacks >= 1 && target.object_index == obj_player)
-	{
-		array_push(oCamera.item_pickup_queue, item_id)
-	}
+	// if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
+	// {
+	// 	array_push(oCamera.item_pickup_queue, item_id)
+	// }
 
     for(var i = 0; i < array_length(target.items); i++)
     {
@@ -759,10 +760,10 @@ function item_add_stacks(item_id, target, stacks = 1, notify = 1)
 
 function item_set_stacks(item_id, target, stacks, notify = 1)
 {
-	if(notify && stacks >= 1 && target.object_index == obj_player)
-	{
-		array_push(oCamera.item_pickup_queue, item_id)
-	}
+	// if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
+	// {
+	// 	array_push(oCamera.item_pickup_queue, item_id)
+	// }
 
     for(var i = 0; i < array_length(target.items); i++)
     {
@@ -1124,7 +1125,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 			var _catagory = random_weighted([{v: 0, w: 2}, {v: 1, w: 1}])
 			self.lastSpawnCard = global.spawn_cards[_catagory][irandom(array_length(global.spawn_cards[_catagory]) - 1)]
 			card = self.lastSpawnCard
-			self.lastSpawnPos = {x: obj_player.x, y: obj_player.y}
+			self.lastSpawnPos = {x: obj_camera.tx + random_range(-80, 80), y: 152}
 		}
 
 		var _spawnIndex = asset_get_index(card.index)
@@ -1134,7 +1135,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 			var xpReward = global.difficultyCoeff * card.cost * self.expMult
 			var moneyReward = round(2 * global.difficultyCoeff * card.cost * self.expMult)
 
-			instance_create_depth(self.lastSpawnPos.x + irandom_range(-32, 32), self.lastSpawnPos.y + irandom_range(-32, 0), 60, _spawnIndex, {xpReward, moneyReward})
+			instance_create_depth(self.lastSpawnPos.x + irandom_range(-24, 24), self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
 
 			self.spawnCounter++
 			self.lastSpawnSucceeded = 1

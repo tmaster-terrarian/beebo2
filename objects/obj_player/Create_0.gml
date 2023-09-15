@@ -29,6 +29,7 @@ depth = 50
 
 xpTarget = 155
 xp = 0
+money = 0
 
 can_attack = 1
 can_jump = 1

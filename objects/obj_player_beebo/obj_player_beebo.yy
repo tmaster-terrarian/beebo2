@@ -1,7 +1,7 @@
 {
   "resourceType": "GMObject",
   "resourceVersion": "1.0",
-  "name": "obj_e_bombguy",
+  "name": "obj_player_beebo",
   "eventList": [
     {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","collisionObjectId":null,"eventNum":0,"eventType":3,"isDnD":false,},
     {"resourceType":"GMEvent","resourceVersion":"1.0","name":"","collisionObjectId":null,"eventNum":0,"eventType":0,"isDnD":false,},
@@ -9,12 +9,12 @@
   "managed": true,
   "overriddenProperties": [],
   "parent": {
-    "name": "enemies",
-    "path": "folders/Objects/enemies.yy",
+    "name": "Objects",
+    "path": "folders/Objects.yy",
   },
   "parentObjectId": {
-    "name": "par_enemy",
-    "path": "objects/par_enemy/par_enemy.yy",
+    "name": "obj_player",
+    "path": "objects/obj_player/obj_player.yy",
   },
   "persistent": false,
   "physicsAngularDamping": 0.1,
@@ -32,8 +32,8 @@
   "properties": [],
   "solid": false,
   "spriteId": {
-    "name": "spr_e_bombguy",
-    "path": "sprites/spr_e_bombguy/spr_e_bombguy.yy",
+    "name": "spr_testplayer",
+    "path": "sprites/spr_testplayer/spr_testplayer.yy",
   },
   "spriteMaskId": null,
   "visible": true,

@@ -38,7 +38,7 @@ _oncollide_v = function()
 movex = function(_x, _oncollide = noone, _dt = 0)
 {
     rx += _x // * ((_dt) ? global.dt : 1)
-    mx = round(rx)
+    var mx = round(rx)
     if(abs(mx))
     {
         rx -= mx
@@ -75,12 +75,11 @@ movex = function(_x, _oncollide = noone, _dt = 0)
             }
         }
     }
-    mx = 0
 }
 movey = function(_y, _oncollide = noone, _dt = 0)
 {
     ry += _y // * ((_dt) ? global.dt : 1)
-    my = round(ry)
+    var my = round(ry)
     if(abs(my))
     {
         ry -= my
@@ -116,5 +115,4 @@ movey = function(_y, _oncollide = noone, _dt = 0)
                 y += s
         }
     }
-    my = 0
 }

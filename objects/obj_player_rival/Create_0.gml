@@ -18,7 +18,6 @@ _sp =
 sprite_index = _sp.idle
 
 player_id = 1
-has_gun = 0
 
 _dbkey = vk_lalt
 
@@ -30,6 +29,8 @@ input =
     up: function() {return keyboard_check(vk_up)}, down: function() {return keyboard_check(vk_down)},
     jump: function() {return keyboard_check_pressed(ord("Z"))}
 }
+
+state = "normal"
 
 var c1 = make_color_rgb(37, 89, 137)
 var c2 = make_color_rgb(32, 64, 105)

@@ -100,7 +100,7 @@ states =
         if(timer0 == 30 || timer0 == 50)
         {
             var left = (timer0 == 30)
-            with(instance_create_depth(x + (4 * left) + (8 * !left), y - 4, depth - 1, obj_bombguy_bomb))
+            with(instance_create_depth(x + (7 * left) + (-5 * !left), y - 4, depth - 1, obj_bombguy_bomb))
             {
                 hsp = 2 * other.facing
                 vsp = -1.8
@@ -108,6 +108,7 @@ states =
                 parent = other
                 damage = other.damage
                 team = other.team
+                _team = other.team
             }
         }
         if(timer0 >= 50 && timer0 < 80)

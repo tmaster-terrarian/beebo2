@@ -89,11 +89,7 @@ if(!global.pause && global.runEnabled)
 
 with(par_unit)
 {
-    if(team == Team.enemy)
-    {
-        level = global.enemyLevel
-    }
-    if(object_index == obj_player || object_index == obj_player_rival)
+    if(object_get_parent(object_index) == obj_player)
     {
         if(xp > xpTarget)
         {
@@ -101,6 +97,10 @@ with(par_unit)
             xpTarget *= 1.55
             level += 1
         }
+    }
+    if(team == Team.enemy)
+    {
+        level = global.enemyLevel
     }
 
     var hpFac = 1
