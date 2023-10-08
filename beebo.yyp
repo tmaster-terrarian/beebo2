@@ -47,6 +47,7 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"anime rival","folderPath":"folders/Sprites/anime rival.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"enemies","folderPath":"folders/Sprites/enemies.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"bombguy","folderPath":"folders/Sprites/enemies/bombguy.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"fly","folderPath":"folders/Sprites/enemies/fly.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"fx","folderPath":"folders/Sprites/fx.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"hud","folderPath":"folders/Sprites/hud.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"items","folderPath":"folders/Sprites/items.yy",},
@@ -55,7 +56,6 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"projectiles","folderPath":"folders/Sprites/projectiles.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Tile Sets","folderPath":"folders/Tile Sets.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Timelines","folderPath":"folders/Timelines.yy",},
-    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"fly","folderPath":"folders/Sprites/enemies/fly.yy",},
   ],
   "IncludedFiles": [
     {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"lang.json","CopyToMask":-1,"filePath":"datafiles/data",},

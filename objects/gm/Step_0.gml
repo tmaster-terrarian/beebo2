@@ -13,9 +13,13 @@ if(keyboard_check_pressed(192))
     show_debug_log(global.showDebugOverlay)
 }
 
-if(keyboard_check_pressed(ord("R")))
+if(keyboard_check(vk_rshift))
 {
-    game_restart()
+    global.timescale = 2
+}
+if(keyboard_check_released(vk_rshift))
+{
+    global.timescale = 1
 }
 
 var _fpsswitch = keyboard_check_pressed(ord("P")) - keyboard_check_pressed(ord("O"))
@@ -47,6 +51,7 @@ if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start
             __speed = speed
             speed = 0
         }
+        time_source_pause(time_source_game)
     }
     else
     {
@@ -57,5 +62,6 @@ if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start
             image_speed = __image_speed
             speed = __speed
         }
+        time_source_resume(time_source_game)
     }
 }

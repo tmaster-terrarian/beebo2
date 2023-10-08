@@ -124,7 +124,7 @@ else
     gun_pos.y = -7;
 }
 
-if(has_gun)
+if(has_gun && !global.pause)
 {
     fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
     fire_angle = round(fire_angle / 10) * 10;
@@ -156,9 +156,9 @@ if(has_gun)
         firedelay = firerate;
 
         if(gun_upgrade != "")
-            getdef(gun_upgrade, 2).fire(id)
+            getdef(gun_upgrade, 3).fire(id)
         else
-            getdef("base", 2).fire(id)
+            getdef("base", 3).fire(id)
     }
 
     if(mouse_check_button(mb_right) && bombdelay <= 0)
@@ -173,8 +173,8 @@ if(has_gun)
         bombdelay = bombrate;
 
         if(gun_upgrade != "")
-            getdef(gun_upgrade, 2).fire_bomb(id)
+            getdef(gun_upgrade, 3).fire_bomb(id)
         else
-            getdef("base", 2).fire_bomb(id)
+            getdef("base", 3).fire_bomb(id)
     }
 }

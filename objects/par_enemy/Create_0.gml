@@ -11,7 +11,6 @@ else if(team == Team.player)
 }
 else if(team == Team.neutral)
 {
-    items = global.enemyItems
     _target = par_unit
 }
 

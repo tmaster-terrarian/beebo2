@@ -36,6 +36,7 @@
     {"name":"anime rival","order":9,"path":"folders/Sprites/anime rival.yy",},
     {"name":"enemies","order":10,"path":"folders/Sprites/enemies.yy",},
     {"name":"bombguy","order":1,"path":"folders/Sprites/enemies/bombguy.yy",},
+    {"name":"fly","order":2,"path":"folders/Sprites/enemies/fly.yy",},
     {"name":"fx","order":14,"path":"folders/Sprites/fx.yy",},
     {"name":"hud","order":6,"path":"folders/Sprites/hud.yy",},
     {"name":"items","order":7,"path":"folders/Sprites/items.yy",},
@@ -44,7 +45,6 @@
     {"name":"projectiles","order":8,"path":"folders/Sprites/projectiles.yy",},
     {"name":"Tile Sets","order":2,"path":"folders/Tile Sets.yy",},
     {"name":"Timelines","order":8,"path":"folders/Timelines.yy",},
-    {"name":"fly","order":2,"path":"folders/Sprites/enemies/fly.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"spr_hudstacksfnt","order":1,"path":"sprites/spr_hudstacksfnt/spr_hudstacksfnt.yy",},

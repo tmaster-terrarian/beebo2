@@ -187,8 +187,6 @@ _squish = function()
     ghost = 0
 }
 
-items = []
-
 draw_hud = 1
 
 state = "intro"

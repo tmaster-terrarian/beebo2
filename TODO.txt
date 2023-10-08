@@ -27,8 +27,8 @@ gun upgrades
     [x] upgradedefs
 
 buffs and debuffs
-    [] redo entire logic
-    [] less scope issues
+    [x] redo entire logic
+    [x] less scope issues
 
 enemies
     [x] behavior states

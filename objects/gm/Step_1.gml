@@ -103,6 +103,16 @@ with(par_unit)
         level = global.enemyLevel
     }
 
+    for(var i = 0; i < array_length(items); i++)
+    {
+        getdef(items[i].item_id, deftype.item).step(id, items[i].stacks)
+    }
+    for(var i = 0; i < array_length(buffs); i++)
+    {
+        getdef(buffs[i].buff_id, deftype.buff).step(buffs[i])
+        getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
+    }
+
     var hpFac = 1
     hp_max = (stats.hp_max + level_stats.hp_max * (level - 1)) * hpFac
 
@@ -135,14 +145,14 @@ with(par_unit)
     firerate = stats.firerate * stats.attack_speed
     if(gun_upgrade != "")
     {
-        firerate = getdef(gun_upgrade, 2).firerate * firerateFac
+        firerate = getdef(gun_upgrade, 3).firerate * firerateFac
     }
 
     var bombrateFac = 1
     bombrate = stats.bombrate * bombrateFac
     if(gun_upgrade != "")
     {
-        bombrate = getdef(gun_upgrade, 2).bombrate * bombrateFac
+        bombrate = getdef(gun_upgrade, 3).bombrate * bombrateFac
     }
 }
 

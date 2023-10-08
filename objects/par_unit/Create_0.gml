@@ -92,3 +92,6 @@ _setstate = function(_state, _resettimer = 0, _resetframe = 0)
 
 fire_angle = 0
 gun_pos = {x:0,y:0}
+
+items = []
+buffs = []
