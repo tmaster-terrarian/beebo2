@@ -1,4 +1,4 @@
-global.dt = (delta_time / 1000000) * 60 * global.timescale
+global.dt = (delta_time / 1000000) * 60 * (global.timescale + 1 * keyboard_check(vk_rshift) * global.draw_debug)
 global.sc = window_get_width() / SC_W
 
 global.gameTimer += global.dt

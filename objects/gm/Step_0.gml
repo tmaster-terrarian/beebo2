@@ -13,15 +13,6 @@ if(keyboard_check_pressed(192))
     show_debug_log(global.showDebugOverlay)
 }
 
-if(keyboard_check(vk_rshift))
-{
-    global.timescale = 2
-}
-if(keyboard_check_released(vk_rshift))
-{
-    global.timescale = 1
-}
-
 var _fpsswitch = keyboard_check_pressed(ord("P")) - keyboard_check_pressed(ord("O"))
 
 if(global.draw_debug)
