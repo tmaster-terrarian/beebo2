@@ -32,9 +32,12 @@
   "properties": [],
   "solid": false,
   "spriteId": {
-    "name": "spr_testplayer",
-    "path": "sprites/spr_testplayer/spr_testplayer.yy",
+    "name": "spr_player",
+    "path": "sprites/spr_player/spr_player.yy",
   },
-  "spriteMaskId": null,
+  "spriteMaskId": {
+    "name": "mask_player",
+    "path": "sprites/mask_player/mask_player.yy",
+  },
   "visible": true,
 }

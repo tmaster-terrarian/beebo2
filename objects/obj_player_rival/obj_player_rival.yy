@@ -36,6 +36,9 @@
     "name": "spr_anime",
     "path": "sprites/spr_anime/spr_anime.yy",
   },
-  "spriteMaskId": null,
+  "spriteMaskId": {
+    "name": "mask_player",
+    "path": "sprites/mask_player/mask_player.yy",
+  },
   "visible": true,
 }

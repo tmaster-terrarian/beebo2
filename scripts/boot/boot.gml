@@ -276,12 +276,13 @@ global.usesplitscreen = 0
 global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM", 0, -1)
 global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890KM", 1, -1)
 
+// constants
 #macro SC_W 320
 #macro SC_H 180
-
-#macro PAUSECHECK if(global.pause) return;
-
 #macro MINUTE 3600
+
+// macro macros
+#macro PAUSECHECK if(global.pause) return;
 
 // functions
 // the following eight functions are credited to D'Andrëw Box on Github and are licensed under the MIT license.
@@ -293,12 +294,12 @@ function array_fill(_array, _val)
 	}
 }
 
-function array_clear(_array)
+function array_clear(_array) // basically just a macro
 {
 	array_delete(_array, 0, array_length(_array));
 }
 
-function array_empty(_array)
+function array_empty(_array) // basically just a macro, 2
 {
 	return (array_length(_array) == 0);
 }
@@ -315,7 +316,8 @@ function array_find_index_by_value(_array, _val)
 	return -1;
 }
 
-function file_text_read_whole(_file) {
+function file_text_read_whole(_file)
+{
 	if (_file < 0) return "";
 
 	var _file_str = ""
@@ -326,12 +328,14 @@ function file_text_read_whole(_file) {
 	return _file_str;
 }
 
-function file_json_read(_file) {
+function file_json_read(_file)
+{
 	var _str = file_text_read_whole(_file);
 	return json_parse(_str);
 }
 
-function file_text_get_lines_array(_file) {
+function file_text_get_lines_array(_file)
+{
 	if (_file < 0) return [];
 
 	var _file_arr = [];
@@ -345,7 +349,8 @@ function file_text_get_lines_array(_file) {
 }
 
 // do not pass in a value for _iteration when using this function !
-function json2file(_filename, _json = {}, _iteration = 0) {
+function json2file(_filename, _json = {}, _iteration = 0)
+{
 	if (!is_struct(_json)) return "";
 
 	var _str	= "{";
@@ -561,7 +566,7 @@ function string_is_real(str)
 // localization
 function string_loc(key) // example key: item.beeswax.name
 {
-	return (variable_struct_exists(global.lang, global.locale) && variable_struct_exists(global.lang[$ global.locale], string_replace_all(key, ".", "_"))) ? global.lang[$ global.locale][$ string_replace_all(key, ".", "_")] : (variable_struct_exists(global.lang.en, string_replace_all(key, ".", "_")) ? global.lang.en[$ string_replace_all(key, ".", "_")] : key)
+	return (variable_struct_exists(global.lang, global.locale) && variable_struct_exists(global.lang[$ global.locale], key)) ? global.lang[$ global.locale][$ key] : (variable_struct_exists(global.lang.en, key) ? global.lang.en[$ key] : key)
 }
 
 function locale()
@@ -587,7 +592,7 @@ function locale()
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"item.{_name}.name")
-			_item.shortdesc = string_loc($"item.{_name}.shortdesc")
+			_item.description = string_loc($"item.{_name}.description")
 			_item.lore = string_loc($"item.{_name}.lore")
 		})
 		debug_log("system", "reloaded item language data")
@@ -595,17 +600,17 @@ function locale()
 		struct_foreach(global.modifierdefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"modifier.{_name}.name")
-			_item.desc = string_loc($"modifier.{_name}.desc")
+			_item.description = string_loc($"modifier.{_name}.description")
 		})
 		debug_log("system", "reloaded modifier language data")
 
 		struct_foreach(global.upgradedefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"upgrade.{_name}.name")
-			_item.desc = string_loc($"upgrade.{_name}.desc")
+			_item.description = string_loc($"upgrade.{_name}.description")
 			_item.lore = string_loc($"upgrade.{_name}.lore")
 		})
-		debug_log("system", "reloaded gun module language data")
+		debug_log("system", "reloaded gun upgrade language data")
 
 		debug_log("system", $"language data reload completed, elapsed time: [{timer_to_timestamp(get_timer() - _starttime)}]")
 	}
@@ -621,7 +626,7 @@ debug_log("Main/INFO", $"loaded languages: {struct_get_names(global.lang)}")
 function _itemdef(name) constructor {
 	self.name = name
 	displayname = string_loc($"item.{name}.name")
-	shortdesc = string_loc($"item.{name}.shortdesc")
+	description = string_loc($"item.{name}.description")
 	lore = string_loc($"item.{name}.lore")
 	proc_type = proctype.none
 	rarity = item_rarity.none
@@ -798,7 +803,7 @@ function _modifierdef(name) constructor
 {
 	self.name = name
 	displayname = string_loc($"modifier.{name}.name")
-	desc = string_loc($"modifier.{name}.desc")
+	description = string_loc($"modifier.{name}.description")
 
 	on_pickup = function() {}
 }
@@ -1051,7 +1056,7 @@ function buff_instance_exists(buff_id, target) // returns 1 if found, otherwise 
 	}
 	return -1
 }
-function buff_get_instance(buff_id, target) // returns buff_instance(struct) if found, otherwise returns -1
+function buff_get_instance(buff_id, target) // returns buff_instance:struct if found, otherwise returns -1
 {
 	for(var i = 0; i < array_length(target.buffs); i++)
 	{
@@ -1178,7 +1183,7 @@ function buff_set_timer(buff_id, target, timer)
 function _upgradedef(_name) constructor {
 	name = _name
 	displayname = string_loc($"upgrade.{name}.name")
-	desc = string_loc($"upgrade.{name}.desc")
+	description = string_loc($"upgrade.{name}.description")
 	lore = string_loc($"upgrade.{name}.lore")
 	rarity = item_rarity.none
 	firerate = 5
