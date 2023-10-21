@@ -102,6 +102,7 @@
     {"name":"scribble_kerning_pair_get","order":18,"path":"scripts/scribble_kerning_pair_get/scribble_kerning_pair_get.yy",},
     {"name":"spr_item_eviction_notice","order":5,"path":"sprites/spr_item_eviction_notice/spr_item_eviction_notice.yy",},
     {"name":"scribble_font_force_bilinear_filtering","order":8,"path":"scripts/scribble_font_force_bilinear_filtering/scribble_font_force_bilinear_filtering.yy",},
+    {"name":"scr_gmre","order":7,"path":"scripts/scr_gmre/scr_gmre.yy",},
     {"name":"scribble_super_create","order":1,"path":"scripts/scribble_super_create/scribble_super_create.yy",},
     {"name":"spr_fx_casing","order":2,"path":"sprites/spr_fx_casing/spr_fx_casing.yy",},
     {"name":"sn_morse","order":13,"path":"sounds/sn_morse/sn_morse.yy",},

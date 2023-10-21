@@ -135,6 +135,7 @@
     {"id":{"name":"spr_item_eviction_notice","path":"sprites/spr_item_eviction_notice/spr_item_eviction_notice.yy",},},
     {"id":{"name":"scribble_font_force_bilinear_filtering","path":"scripts/scribble_font_force_bilinear_filtering/scribble_font_force_bilinear_filtering.yy",},},
     {"id":{"name":"approach","path":"scripts/approach/approach.yy",},},
+    {"id":{"name":"scr_gmre","path":"scripts/scr_gmre/scr_gmre.yy",},},
     {"id":{"name":"scribble_super_create","path":"scripts/scribble_super_create/scribble_super_create.yy",},},
     {"id":{"name":"spr_fx_casing","path":"sprites/spr_fx_casing/spr_fx_casing.yy",},},
     {"id":{"name":"sn_morse","path":"sounds/sn_morse/sn_morse.yy",},},

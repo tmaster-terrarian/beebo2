@@ -78,55 +78,68 @@ enum deftype
 }
 
 // classes
-function damage_event(attacker, target, proc_type, damage, proc, attacker_has_items = 1, force_crit = -1, reduceable = 1)
+function DamageEventContext(attacker, target, proc_type, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
 {
-	if(damage == 0)
+	self.attacker = attacker
+	self.target = target
+	self.damage = damage
+	self.proc = proc
+	self.proc_type = proc_type
+	self.use_attacker_items = use_attacker_items
+	self.force_crit = force_crit
+	self.reduceable = reduceable
+}
+
+function damage_event(ctx)
+{
+	if(ctx.damage <= 0)
 		return;
 
 	var _damage_type = damage_notif_type.generic
 	var crit = 0
 
-	if(instance_exists(target) && !target.invincible)
+	var attacker_has_items = (instance_exists(ctx.attacker) && variable_instance_exists(ctx.attacker, "items"))
+
+	if(instance_exists(ctx.target) && !ctx.target.invincible)
 	{
 		var _dir = random_range(-1, 1)
 
-		if(instance_exists(attacker))
+		if(instance_exists(ctx.attacker))
 		{
-			_dir = random(1) * sign(target.x - attacker.x)
+			_dir = random(1) * sign(ctx.target.x - ctx.attacker.x)
 
-			if(random(1) < attacker.crit_chance) || force_crit
+			if(ctx.force_crit == 0)
+			{
+				crit = 0
+			}
+			if(random(1) < ctx.attacker.crit_chance) || ctx.force_crit
 			{
 				crit = 1
 				_damage_type = damage_notif_type.crit
 			}
-			if(force_crit == 0)
-			{
-				crit = 0
-				_damage_type = damage_notif_type.generic
-			}
 
-			if(attacker_has_items)
+			if(ctx.use_attacker_items && attacker_has_items)
 			{
-				for(var i = 0; i < array_length(attacker.items); i++)
+				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
-					if(variable_struct_exists(global.itemdefs, attacker.items[i].item_id))
+					var _item = ctx.attacker.items[i]
+					var _def = getdef(_item.item_id, deftype.item)
+					if(_def.proc_type == proctype.onhit)
 					{
-						var _item = global.itemdefs[$ attacker.items[i].item_id]
-						var _stacks = attacker.items[i].stacks
-						if(_item.proc_type == proc_type)
-						{
-							_item.proc(attacker, target, damage, proc, _stacks)
-						}
+						_def.proc(ctx, _item.stacks)
 					}
 				}
 
+				// this is where the real shit happens
 				var dmg_fac = 1
-				dmg_fac += ((target.facing == 1 && target.x >= attacker.x) || (target.facing == -1 && target.x < attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", attacker))
 
-				damage *= dmg_fac
+				var bloody_dagger_bonus = ((ctx.target.facing == 1 && ctx.target.x >= ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
+				dmg_fac += bloody_dagger_bonus
+
+				ctx.damage *= dmg_fac
 			}
 
-			if(attacker.team == Team.player)
+			if(ctx.attacker.team == Team.player)
 			{
 				if(!crit)
 					audio_play_sound(sn_hit, 5, false)
@@ -136,75 +149,62 @@ function damage_event(attacker, target, proc_type, damage, proc, attacker_has_it
 		}
 		else 
 		{
-			if(force_crit > -1)
+			if(ctx.force_crit > -1)
 			{
-				crit = force_crit
-				if(force_crit)
+				crit = ctx.force_crit
+				if(ctx.force_crit)
 					_damage_type = damage_notif_type.crit
 			}
 		}
 
-		damage *= (1 + crit)
+		ctx.damage *= (1 + crit)
 
-		var dmg = damage
-		if(reduceable)
+		var dmg = ctx.damage
+		if(ctx.reduceable)
 		{
-			for(var i = 0; i < array_length(target.items); i++)
-			{
-				dmg = global.itemdefs[$ target.items[i].item_id].on_owner_damaged(target, dmg, target.items[i].stacks)
-			}
+			// reduce damage based on various items the target carries
 		}
-		target.hp -= dmg
+		ctx.target.hp -= dmg
 
-		if(object_get_parent(target.object_index) == obj_player)
+		if(object_get_parent(ctx.target.object_index) == obj_player)
 		{
 			audio_play_sound(sn_player_hit, 5, false)
 			_damage_type = damage_notif_type.playerhurt
 		}
 
-		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
+		instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
 
 		// activate on kill items if target died and target's on death items
-		if(target.hp <= 0)
+		if(ctx.target.hp <= 0)
 		{
-			if(instance_exists(attacker)) && (attacker_has_items)
+			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
 			{
-				for(var i = 0; i < array_length(attacker.items); i++)
+				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
-					if(variable_struct_exists(global.itemdefs, attacker.items[i].item_id))
+					var _item = ctx.attacker.items[i]
+					var _def = getdef(_item.item_id, deftype.item)
+					if(_def.proc_type == proctype.onkill)
 					{
-						var _item = global.itemdefs[$ attacker.items[i].item_id]
-						var _stacks = attacker.items[i].stacks
-						if(_item.proc_type == proctype.onkill)
-						{
-							_item.proc(attacker, target, damage, proc, _stacks)
-						}
+						_def.proc(ctx, _item.stacks)
 					}
 				}
 
-				if(object_get_parent(attacker.object_index) == obj_player)
+				if(object_get_parent(ctx.attacker.object_index) == obj_player)
 				{
-					attacker.xp += target.xpReward
-					attacker.money += target.moneyReward
+					ctx.attacker.xp += ctx.target.xpReward
+					ctx.attacker.money += ctx.target.moneyReward
 				}
 			}
-			for(var i = 0; i < array_length(target.items); i++)
+			if(item_get_stacks("emergency_field_kit", ctx.target) > 0)
 			{
-				if(variable_struct_exists(global.itemdefs, target.items[i].item_id))
-				{
-					var _item = global.itemdefs[$ target.items[i].item_id]
-					if(_item.name == "emergency_field_kit")
-					{
-						target.hp = target.hp_max
-						item_add_stacks("emergency_field_kit", target, -1, 0)
-						item_add_stacks("emergency_field_kit_consumed", target, 1, 0)
-					}
-				}
+				ctx.target.hp = ctx.target.hp_max
+				item_add_stacks("emergency_field_kit", ctx.target, -1, 0)
+				item_add_stacks("emergency_field_kit_consumed", ctx.target, 1, 0)
 			}
 		}
 		else
 		{
-			target.flash = 3
+			ctx.target.flash = 3
 		}
 	}
 }
@@ -256,8 +256,6 @@ global.t = 0 // run timer
 global.gameTimer = 0 // time elapsed since the gm object was created
 
 global.pause = 0
-
-// global.retro = 0 // experimental color limit shader
 
 global.snd_volume = 1
 global.bgm_volume = 1
@@ -532,7 +530,6 @@ function get_nearest_notme(_x, _y, inst)
 
 function string_real_shortened(val)
 {
-	var _val
 	if(val < 1000)
 		return (string(val))
 	else if(val < 1000000)
@@ -542,9 +539,8 @@ function string_real_shortened(val)
 }
 function string_real_shortened_ceil(val)
 {
-	var _val
 	if(val < 1000)
-		return (string(val))
+		return (string(ceil(val)))
 	else if(val < 1000000)
 		return (string(ceil(val / 1000)) + "K")
 	else
@@ -604,6 +600,13 @@ function locale()
 		})
 		debug_log("system", "reloaded modifier language data")
 
+		struct_foreach(global.buffdefs as (_name, _item)
+		{
+			_item.displayname = string_loc($"buff.{_name}.name")
+			_item.description = string_loc($"buff.{_name}.description") // likely going to be left underutilized :(
+		})
+		debug_log("system", "reloaded buff language data")
+
 		struct_foreach(global.upgradedefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"upgrade.{_name}.name")
@@ -631,11 +634,10 @@ function _itemdef(name) constructor {
 	proc_type = proctype.none
 	rarity = item_rarity.none
 
-	calc = function(_s) { return 0 }
-	draw = function(_s = 1) {}
-	step = function(target, _s) {}
-	proc = function(_a, _t, _d, _p, _s) {}
-	on_owner_damaged = function(_o, _d, _s) { return _d }
+	calc = function(stacks) { return 0 }
+	draw = function(stacks) {}
+	step = function(target, stacks) {}
+	proc = function(context, stacks) {}
 }
 
 function itemdef(__struct, _struct = {})
@@ -693,22 +695,22 @@ global.itemdefs =
 	serrated_stinger : itemdef(new _itemdef("serrated_stinger"), {
 		proc_type : proctype.onhit,
 		rarity : item_rarity.common,
-		proc : function(_a, _t, _d, _p = 1, _s = 1)
+		proc : function(context, stacks)
 		{
-			if(random(1) <= (0.1 * _s * _p))
-				_inflict(_t, new statmanager._bleed(_a, _p, _a.base_damage))
+			if(random(1) <= (0.1 * stacks * context.proc))
+				buff_instance_create("bleed", context, 1).damage = context.attacker.base_damage
 		}
 	}),
 	amorphous_plush : itemdef(new _itemdef("amorphous_plush"), {
 		rarity : item_rarity.rare,
-		step : function(target, _s)
+		step : function(target, stacks)
 		{
 			if(instance_exists(target) && (target.t % 600) == 30) && (target.object_index != obj_catfriend) && (instance_number(obj_catfriend) < 1)
 			{
 				var o = instance_create_depth(target.x + random_range(-8, 8), target.y, 0, obj_catfriend, { team : target.team, parent : target})
-				o.stats.hp_max += (0.1 * o.stats.hp_max * (_s - 1))
-				o.stats.spd += (0.1 * o.stats.spd * (_s - 1))
-				o.stats.damage += (0.2 * o.stats.damage * (_s - 1))
+				o.stats.hp_max += (0.1 * o.stats.hp_max * (stacks - 1))
+				o.stats.spd += (0.1 * o.stats.spd * (stacks - 1))
+				o.stats.damage += (0.2 * o.stats.damage * (stacks - 1))
 			}
 		}
 	}),
@@ -914,7 +916,7 @@ function _buffdef(name) constructor
 		if(self.timed)
 		{
 			PAUSECHECK
-			instance.timer += -(global.dt / 5) // duration is in seconds
+			instance.timer -= (global.dt / 60) // duration is in seconds
 			if(instance.timer <= 0)
 			{
 				self.on_expire(instance)
@@ -930,7 +932,7 @@ function _buffdef(name) constructor
 		buff_instance_remove(instance)
 	}
 	self.on_remove = function(instance) {
-		debug_log("Main/INFO", $"buff {instance.buff_id} removed from {object_get_name(instance.target.object_index)}")
+		debug_log("Main/INFO", $"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
 	}
 }
 
@@ -961,12 +963,12 @@ global.buffdefs =
 		stackable: 1,
 		apply: function(instance)
 		{
-			instance.damage = instance.attacker.base_damage * 2.4
-			instance.timer = self.duration * instance.proc
+			instance.timer = self.duration * instance.context.proc
 		},
 		tick: function(instance)
 		{
-			damage_event(instance.attacker, instance.target, proctype.none, instance.damage * 0.2, instance.proc, 1, -1, 1)
+			instance.context.damage = instance.context.attacker.base_damage * 2.4
+			damage_event(instance.context)
 		}
 	}),
 	collapse: buffdef(new _buffdef("collapse"), {
@@ -976,11 +978,12 @@ global.buffdefs =
 		stackable: 1,
 		apply: function(instance)
 		{
-			instance.timer = 3
+			instance.timer = self.duration
 		},
 		on_expire: function(instance)
 		{
-			damage_event(instance.attacker, instance.target, proctype.none, instance.attacker.base_damage * (4 * instance.stacks), instance.proc, 1, -1, 1)
+			instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
+			damage_event(instance.context)
 			buff_instance_remove(instance)
 		}
 	})
@@ -988,58 +991,74 @@ global.buffdefs =
 
 debug_log("Main/INFO", $"successfully created {buffdef.total_buffs} buffs")
 
-function buff_instance(buff_id, stacks, target, attacker, proc) constructor
+function buff_instance(buff_id, context, stacks) constructor
 {
 	self.buff_id = buff_id
-	var def = getdef(buff_id, deftype.buff)
-
+	self.context = context
 	self.stacks = stacks
-	self.target = target
-	self.attacker = attacker
-	self.proc = proc
-	self.damage = 0
+
+	var def = getdef(buff_id, deftype.buff)
 	self.timer = def.duration
 
-	var d = def.duration * def.ticksPerSecond * self.proc
-	self.timesource = time_source_create(time_source_game, 1/def.ticksPerSecond, time_source_units_seconds, def.tick, [self], (d != 0) ? d : 1)
-	if(def.ticksPerSecond > 0 && def.timed == 1)
+	// var totalTicks = max(def.duration * def.ticksPerSecond, 1)
+	self.timesource = time_source_create(time_source_game, 1/def.ticksPerSecond, time_source_units_seconds, def.tick, [self], -1)
+	if(def.ticksPerSecond > 0 && def.timed)
 		time_source_start(self.timesource)
 }
 
 // applies a buff instance with id [buff_id] to [target]
-function buff_instance_create(buff_id, stacks, target, attacker = noone, proc = 1)
+//  context example: new DamageEventContext(attacker, target, proctype.none, 0, proc, 1, 0)
+function buff_instance_create(buff_id, context, stacks = 1)
 {
-	var buff = new buff_instance(buff_id, stacks, target, attacker, damage, proc)
+	var buff = new buff_instance(buff_id, context, stacks)
 	getdef(buff_id, deftype.buff).apply(buff)
-	if(buff_instance_exists(buff_id, target))
+	var b = buff_get_instance(buff_id, context.target)
+	if(b)
 	{
-		var b = buff_get_instance(buff_id, target)
 		var def = getdef(buff_id, deftype.buff)
 
-		if(buff_id == "bleed")
+		b.context = buff.context // overrides attacker, target, etc. (essentially a refresh)
+		switch(buff_id) // timer stuff
 		{
-			if(buff.timer > b.timer)
-				b.timer += buff.timer
+			case "collapse":
+			{
+				break;
+			}
+			case "bleed":
+			{
+				if(buff.timer > b.timer)
+					b.timer += buff.timer
+				break;
+			}
+			default:
+			{
+				if(buff.timer > b.timer)
+					b.timer = buff.timer
+				break;
+			}
 		}
-		buff_instance_add_stacks(b, stacks)
+		if(def.stackable)
+			buff_instance_add_stacks(b, stacks)
 
 		time_source_destroy(buff.timesource)
 		delete buff
+
+		return b
 	}
 	else
-		array_push(target.buffs, buff)
+		array_push(context.target.buffs, buff)
 	return buff
 }
 
 function buff_instance_remove(instance)
 {
 	getdef(instance.buff_id, deftype.buff).on_remove(instance)
-	for(var i = 0; i < array_length(instance.target.buffs); i++)
+	for(var i = 0; i < array_length(instance.context.target.buffs); i++)
 	{
-		if(instance.target.buffs[i].buff_id == instance.buff_id)
+		if(instance.context.target.buffs[i].buff_id == instance.buff_id)
 		{
 			time_source_destroy(instance.timesource)
-			array_delete(instance.target.buffs, i, 1)
+			array_delete(instance.context.target.buffs, i, 1)
 			return;
 		}
 	}
@@ -1067,65 +1086,7 @@ function buff_get_instance(buff_id, target) // returns buff_instance:struct if f
 	}
 	return -1
 }
-function buff_replace_instance(buff_id, target, instance)
-{
-	for(var i = 0; i < array_length(target.buffs); i++)
-	{
-		if(target.buffs[i].buff_id == buff_id)
-		{
-			var def = getdef(buff_id, deftype.buff)
-			if(def.stackable)
-			{
-				instance.stacks += target.buffs[i].stacks
-				if(instance.stacks > target.buffs[i].stacks)
-					def.on_stack(target.buffs[i])
-			}
-			def.on_replaced(target.buffs[i], instance)
-			target.buffs[i] = instance
-			return;
-		}
-	}
-}
 
-function buff_get_stacks(buff_id, target)
-{
-	if(buff_instance_exists(buff_id, target))
-		return buff_get_instance(buff_id, target).stacks
-	else
-		return 0
-}
-function buff_add_stacks(buff_id, target, stacks)
-{
-	for(var i = 0; i < array_length(target.buffs); i++)
-	{
-		if(target.buffs[i].buff_id == buff_id)
-		{
-			var oldstacks = target.buffs[i].stacks
-			target.buffs[i].stacks += stacks
-			if(target.buffs[i].stacks <= 0)
-				getdef(buff_id, deftype.buff).on_expire(target.buffs[i])
-			else if(target.buffs[i].stacks > oldstacks)
-				getdef(buff_id, deftype.buff).on_stack(target.buffs[i])
-			return;
-		}
-	}
-}
-function buff_set_stacks(buff_id, target, stacks)
-{
-	for(var i = 0; i < array_length(target.buffs); i++)
-	{
-		if(target.buffs[i].buff_id == buff_id)
-		{
-			var oldstacks = target.buffs[i].stacks
-			target.buffs[i].stacks = stacks
-			if(target.buffs[i].stacks <= 0)
-				getdef(buff_id, deftype.buff).on_expire(target.buffs[i])
-			else if(target.buffs[i].stacks > oldstacks)
-				getdef(buff_id, deftype.buff).on_stack(target.buffs[i])
-			return;
-		}
-	}
-}
 function buff_instance_add_stacks(instance, stacks)
 {
 	var oldstacks = instance.stacks
@@ -1143,6 +1104,45 @@ function buff_instance_set_stacks(instance, stacks)
 		getdef(instance.buff_id, deftype.buff).on_expire(instance)
 	else if(instance.stacks > oldstacks)
 		getdef(instance.buff_id, deftype.buff).on_stack(instance)
+}
+
+function buff_get_stacks(buff_id, target)
+{
+	var b = buff_get_instance(buff_id, target)
+	if(b)
+		return b.stacks
+	else
+		return 0
+}
+function buff_add_stacks(buff_id, target, stacks)
+{
+	var def = getdef(buff_id, deftype.buff)
+	var buff = buff_get_instance(buff_id, target)
+	if(buff)
+	{
+		var oldstacks = buff
+
+		buff.stacks += stacks
+		if(buff.stacks <= 0)
+			def.on_expire(buff)
+		else if(buff.stacks > oldstacks)
+			def.on_stack(buff)
+	}
+}
+function buff_set_stacks(buff_id, target, stacks)
+{
+	var def = getdef(buff_id, deftype.buff)
+	var buff = buff_get_instance(buff_id, target)
+	if(buff)
+	{
+		var oldstacks = buff
+
+		buff.stacks = stacks
+		if(buff.stacks <= 0)
+			def.on_expire(buff)
+		else if(buff.stacks > oldstacks)
+			def.on_stack(buff)
+	}
 }
 
 function buff_get_timer(buff_id, target)

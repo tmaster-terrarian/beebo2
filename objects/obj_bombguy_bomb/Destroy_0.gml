@@ -18,7 +18,7 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
     {
         if(place_meeting(x, y, other) && team != other.team)
         {
-            damage_event(other.parent, id, proctype.onhit, other._dmg, other.proc, other._team == other.team)
+            damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg, other.proc, other._team == other.team))
         }
     }
 }

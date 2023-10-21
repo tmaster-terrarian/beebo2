@@ -7,10 +7,11 @@ player
     [x] physics
     [x] better states and fix state switching clunkiness
     [x] stat management
-    [x] merge gun with player code
-    [-] dead state
+    [/] merge gun with player code
+    [ ] dead state
     [x] ledge climb
     [x] more interesting, possibly tighter movement
+    [-] 
 
 camera
     [x] following
@@ -26,12 +27,12 @@ item definitions and stat changing
 
 modifiers
     [ ] picker screen
-        [ ] decide whether it will be an individual object or a part of gm
-            [ ] individual
-                - make it communicate well with other objects, keep coupling to a minimum
+        [ ] decide whether it will be an individual object or a part of gm:
+            individual
+                - make it communicate well with other objects, keep confusion to a minimum
                 - create and destroy instances effectively
-            [ ] as a part of gm
-                - reduce coupling with other parts of the gm's code
+            as a part of the gm
+                - reduce confusion with other parts of the gm's code
     [ ] make some more besides the first 2
         - lol, lmao
 
@@ -49,7 +50,7 @@ enemies
     [x] leveling up
     [-] aggro
         - pretty incomplete at the moment
-    [-] infighting?
+    [ ] infighting?
 
 menu screen
     [ ] translations
@@ -66,7 +67,8 @@ shop and currency
         - we have money and xp, no ui, and no mechanics that utilize money yet.
 
 risk and reward options
-    [ ]
+    [ ] GAMBLING AHAHHAHHAHHAA
+        - but how would you do it bscit
 
 stages and progression
     [-] arenas
@@ -88,6 +90,7 @@ internal structure
         [ ] create a better method of doing this (unless sign(global.dt) is a good enough option lole)
     [ ] utilize injection and composition more often
     [-] reduce the amount of for loops when it comes to item and especially buff behavior
+        - an EventContext class/interface may be created to reduce this
 
 commands
     [ ] bring back the commands console, with more helpful structure and format
@@ -100,8 +103,7 @@ art assets
     [-] player character animations
         - including standard poses, skills, flinches, etc.
         [ ] translate Gan's coolass designs into sprites
-    [ ] hud and ui
-    [ ] enemies + bosses
+    [-] enemies + bosses
 
 hud
     [-] health bar with difference visualization
