@@ -1466,8 +1466,13 @@ function range(minval, maxval) constructor
 
 	toString = function()
 	{
-		return $"({minval} - {maxval})"
+		return $"{minval} - {maxval}"
 	}
+}
+
+function Skill(name) constructor
+{
+	self.name = name
 }
 
 debug_log("Main", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

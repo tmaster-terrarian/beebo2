@@ -11,7 +11,7 @@ player
     [ ] dead state
     [x] ledge climb
     [x] more interesting, possibly tighter movement
-    [-] 
+    [-] skills
 
 camera
     [x] following
@@ -41,7 +41,7 @@ gun upgrades
 
 buffs and debuffs
     [x] redo entire logic
-    [x] less scope issues
+    [?] less scope issues
 
 enemies
     [x] behavior states
@@ -56,11 +56,7 @@ menu screen
     [ ] translations
     [ ] run starting screen (lobby)
     [ ] settings
-    [ ] run initialization
-
-sounds / audio
-    [ ] unique hit sounds (instead of stealing from ror2 lmao)
-    [ ] original music
+    [x] run initialization
 
 shop and currency
     [-] money pickups and ui counter
