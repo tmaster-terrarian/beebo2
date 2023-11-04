@@ -77,6 +77,15 @@ enum deftype
 	upgrade
 }
 
+enum TimeUnits
+{
+	miliseconds,
+	centiseconds,
+	seconds,
+	minutes,
+	hours
+}
+
 // classes
 function DamageEventContext(attacker, target, proc_type, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
 {
@@ -85,9 +94,27 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 	self.damage = damage
 	self.proc = proc
 	self.proc_type = proc_type
+
 	self.use_attacker_items = use_attacker_items
 	self.force_crit = force_crit
 	self.reduceable = reduceable
+
+	// builder methods
+	self.useAttackerItems = function(value = 1)
+	{
+		self.use_attacker_items = value
+		return self
+	}
+	self.forceCrit = function(value = -1)
+	{
+		self.force_crit = value
+		return self
+	}
+	self.reduceable = function(value = 1)
+	{
+		self.reducable = value
+		return self
+	}
 }
 
 function damage_event(ctx)
@@ -106,7 +133,14 @@ function damage_event(ctx)
 
 		if(instance_exists(ctx.attacker))
 		{
-			_dir = random(1) * sign(ctx.target.x - ctx.attacker.x)
+			_dir = random_range(0.25, 1) * sign(ctx.target.x - ctx.attacker.x)
+
+			ctx.attacker.invokeOnCombatEnter()
+
+			var infightCheck = ((ctx.target.team == Team.enemy || ctx.target.team == Team.neutral) && ctx.target.team == ctx.attacker.team)
+
+			if(ctx.target.team != ctx.attacker.team || infightCheck) // the target's target becomes the attacker
+				ctx.target.target = ctx.attacker
 
 			if(ctx.force_crit == 0)
 			{
@@ -127,24 +161,24 @@ function damage_event(ctx)
 					if(_def.proc_type == proctype.onhit)
 					{
 						_def.proc(ctx, _item.stacks)
+						_item.triggered = 1
 					}
 				}
 
 				// this is where the real shit happens
-				var dmg_fac = 1
-
 				var bloody_dagger_bonus = ((ctx.target.facing == 1 && ctx.target.x >= ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
-				dmg_fac += bloody_dagger_bonus
+
+				var dmg_fac = 1 + bloody_dagger_bonus // + etc
 
 				ctx.damage *= dmg_fac
 			}
 
 			if(ctx.attacker.team == Team.player)
 			{
-				if(!crit)
-					audio_play_sound(sn_hit, 5, false)
-				else
+				if(crit)
 					audio_play_sound(sn_hit_crit, 5, false)
+				else
+					audio_play_sound(sn_hit, 5, false)
 			}
 		}
 		else 
@@ -174,7 +208,7 @@ function damage_event(ctx)
 
 		instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
 
-		// activate on kill items if target died and target's on death items
+		// activate attacker's on kill items and target's on death items if target died
 		if(ctx.target.hp <= 0)
 		{
 			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
@@ -186,6 +220,7 @@ function damage_event(ctx)
 					if(_def.proc_type == proctype.onkill)
 					{
 						_def.proc(ctx, _item.stacks)
+						_item.triggered = 1
 					}
 				}
 
@@ -389,6 +424,22 @@ function json2file(_filename, _json = {}, _iteration = 0)
 }
 // end of 3rd party functions
 
+// thanks for being so awesome YellowAfterLife
+function cycle(value, _min, _max) {
+	var result, delta;
+	delta = (_max - _min);
+	result = (value - _min) % delta;
+	if (result < 0) result += delta;
+	return _min + result;
+}
+function angleRotate(angle, target, speed) {
+	var diff;
+	diff = cycle(target - angle, -180, 180);
+	if (diff < -speed) return angle - speed;
+	if (diff > speed) return angle + speed;
+	return target;
+}
+
 function screen_shake_set(_strength, _frames)
 {
 	with(obj_camera)
@@ -458,13 +509,67 @@ function getdef(_defid, _deftype = 0)
 	}
 }
 
+function team_nearest(x, y, team)
+{
+	with(par_unit)
+	{
+		if(self.team != team) // if team doesnt match move out of the way
+		{
+			self.___x = self.x
+			self.x -= 1000000
+		}
+	}
+
+	var result = instance_nearest(x, y, par_unit)
+	if(instance_exists(result) && result.team != team)
+		result = noone
+
+	with(par_unit)
+	{
+		if(self.team != team)
+		{
+			self.x = self.___x
+			self.___x = undefined
+		}
+	}
+
+	return result
+}
+
+function t_inframes(value, unit)
+{
+	switch(unit)
+	{
+		case TimeUnits.miliseconds:
+		{
+			return (value * 60) * 0.001
+		}
+		case TimeUnits.centiseconds:
+		{
+			return (value * 60) * 0.01
+		}
+		case TimeUnits.seconds:
+		{
+			return (value * 60)
+		}
+		case TimeUnits.minutes:
+		{
+			return (value * 60) * 60
+		}
+		case TimeUnits.hours: // who would ever use this for some timer in a roguelike
+		{
+			return (value * 60) * 60 * 60
+		}
+	}
+}
+
 function getraritycol(_invitem)
 {
 	return itemdata.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
 }
 
 function random_weighted(_list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:5}]; v:value, w:weight. automatically sorted by lowest weight.
-{
+{ // TODO: make this thing ACTUALLY WORK!!!!!!!!
 	var _tw = 0
 	var _w = 0
 	var _v = 0
@@ -476,11 +581,11 @@ function random_weighted(_list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w
 	{
 		_tw += _l[i].w
 	}
+	var _rand = random(1)
 
-	var _rand = random(_tw)
 	for(var j = 0; j < array_length(_l); j++)
 	{
-		if(_rand <= _l[j].w + _w)
+		if(_rand <= (_l[j].w + _w) / _tw)
 			return _l[j].v
 		else
 			_w += _l[j].w
@@ -492,8 +597,8 @@ function timer_to_timestamp(_t)
 {
 	var _c = floor((abs(_t) / 10000) % 100)
 	var _s = floor((abs(_t) / 1000000) % 60)
-	var _m = floor(_s / 60) % 60
-	var _h = floor(_m / 60) % 60
+	var _m = floor(((abs(_t) / 1000000) / 60) % 60)
+	var _h = floor(((abs(_t) / 1000000) / 60) / 60)
 	var h = string(_h) + ":"
 
 	if(_c < 10) _c = "0" + string(_c)
@@ -725,6 +830,9 @@ global.itemdefs =
 	}),
 	lucky_clover : itemdef(new _itemdef("lucky_clover"), {
 		rarity : item_rarity.common
+	}),
+	heal_on_level : itemdef(new _itemdef("heal_on_level"), {
+		rarity : item_rarity.common
 	})
 }
 
@@ -740,6 +848,7 @@ function item_instance(__id, _stacks = 1) constructor
 {
 	item_id = __id
 	stacks = _stacks
+	triggered = 0
 }
 
 function item_get_stacks(item_id, target)
@@ -1313,10 +1422,10 @@ function spawn_card(index, weight, cost, spawnsOnGround = 1) constructor
 global.spawn_cards =
 [
 	[ // normal
-		new spawn_card("obj_e_bombguy", 1, 30)
+		new spawn_card("obj_strikes_back", 1, 8)
 	],
 	[ // strong
-		new spawn_card("obj_test", 1, 40)
+		new spawn_card("obj_e_bombguy", 1, 40)
 	],
 	[ // boss
 		new spawn_card("obj_test", 1, 600)
@@ -1375,8 +1484,8 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 		var totalWaveCreds = self.waveBaseCredits[self.waveType] * global.difficultyCoeff
 
-		self.credits = self.creditsStart + self.waveImmediateCreditsFraction[self.waveType] * totalWaveCreds
-		self.creditsPerSecond = 	 (1 - self.waveImmediateCreditsFraction[self.waveType]) * totalWaveCreds/self.wavePeriods[self.waveType]
+		self.credits = self.creditsStart + (self.waveImmediateCreditsFraction[self.waveType]) * totalWaveCreds
+		self.creditsPerSecond = 	   (1 - self.waveImmediateCreditsFraction[self.waveType]) * totalWaveCreds/self.wavePeriods[self.waveType]
 
 		if(self.waveType == 1) // boss wave
 		{
@@ -1385,12 +1494,13 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 			{
 				r = irandom(array_length(global.spawn_cards[2]) - 1)
 				var rr = global.spawn_cards[2][r]
-				if(rr.cost <= self.credits) // 10000 is a placeholder value for "most expensive option available"
+				if(rr.cost <= self.credits)
 				{
 					choice = rr
 					self.credits -= rr.cost
 
-					// spawn
+					if(object_exists(rr.index))
+						instance_create_depth(obj_camera.tx, 152, 50, rr.index)
 
 					break
 				}
@@ -1421,20 +1531,20 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 		var card = self.lastSpawnCard
 		if(self.lastSpawnSucceeded == 0) // if the last spawn failed, obtain a new card
 		{
-			var _catagory = random_weighted([{v: 0, w: 2}, {v: 1, w: 1}])
+			var _catagory = random_weighted([{v: 2, w: 1}, {v: 1, w: 1}, {v: 1, w: 1.5}])
 			self.lastSpawnCard = global.spawn_cards[_catagory][irandom(array_length(global.spawn_cards[_catagory]) - 1)]
 			card = self.lastSpawnCard
-			self.lastSpawnPos = {x: obj_camera.tx + random_range(-80, 80), y: 152}
+			self.lastSpawnPos = {x: obj_camera.tx + random_range(-80, 80), y: ((card.spawnsOnGround) ? 152 : obj_camera.ty + random_range(-24, 48))}
 		}
 
 		var _spawnIndex = asset_get_index(card.index)
-		if(self.spawnCounter < self.maxSpawns && card.cost <= self.credits && (card.cost >= self.credits / 6 && card.cost < 10000) && _spawnIndex != -1 && global.enemyCount < 30)
+		if(self.spawnCounter < self.maxSpawns && card.cost <= self.credits && (card.cost >= self.credits / 6 && card.cost < 10000) && object_exists(_spawnIndex) && global.enemyCount < 30)
 		{
 			self.credits -= card.cost
 			var xpReward = global.difficultyCoeff * card.cost * self.expMult
 			var moneyReward = round(2 * global.difficultyCoeff * card.cost * self.expMult)
 
-			instance_create_depth(self.lastSpawnPos.x + irandom_range(-24, 24), self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
+			instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
 
 			self.spawnCounter++
 			self.lastSpawnSucceeded = 1

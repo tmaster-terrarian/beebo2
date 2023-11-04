@@ -39,6 +39,22 @@ ded = 0
 attack_speed = 1
 flash = 0
 
+in_combat = 0
+combat_delay = t_inframes(5, TimeUnits.seconds)
+combat_timer = 0
+combat_state_changed = 0
+
+invokeOnCombatEnter = function()
+{
+    in_combat = 1
+    combat_state_changed = 1
+    combat_timer = combat_delay
+    onCombatEnter()
+}
+
+onCombatEnter = function() {}
+onCombatExit = function() {}
+
 _apply_stats = function()
 {
     hp_max = stats.hp_max
@@ -66,9 +82,8 @@ _apply_stats()
 _apply_level = function(_newlevel)
 {
     hp_max = stats.hp_max + level_stats.hp_max * (_newlevel - 1)
-    hp = min(hp + hp_max * 0.05, hp_max)
-
-    base_damage = stats.damage + level_stats.damage * (_newlevel - 1)
+    heal_event(self, hp_max * 0.1 * item_get_stacks(self, "heal_on_level"))
+    hp = min(hp, hp_max)
 
     level = _newlevel
 }

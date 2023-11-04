@@ -1,15 +1,15 @@
 event_inherited();
 stats =
 {
-    hp_max : 100,
+    hp_max : 480,
     regen_rate : 0,
     curse : 1,
-    spd : 1,
-    jumpspd : -3.7,
+    spd : 0.75,
+    jumpspd : 0,
     firerate : 80,
     bombrate : 1,
     spread : 2,
-    damage : 25,
+    damage : 12,
     ground_accel : 0.12,
     ground_fric : 0.08,
     air_accel : 0.07,
@@ -20,7 +20,7 @@ stats =
 }
 level_stats =
 {
-    hp_max: 30,
+    hp_max: 144,
     damage: 2.4
 }
 _apply_stats()
@@ -93,13 +93,13 @@ states =
             timer0++
             // set sprites and such
         }
-        if(timer0 < 30)
-            timer0 = approach(timer0, 30, global.dt * attack_speed)
-        else if(timer0 < 50)
-            timer0 = approach(timer0, 50, global.dt * attack_speed)
-        if(timer0 == 30 || timer0 == 50)
+        if(timer0 < 20)
+            timer0 = approach(timer0, 20, global.dt * attack_speed)
+        else if(timer0 < 40)
+            timer0 = approach(timer0, 40, global.dt * attack_speed)
+        if(timer0 == 20 || timer0 == 40)
         {
-            var left = (timer0 == 30)
+            var left = (timer0 == 20)
             with(instance_create_depth(x + (7 * left) + (-5 * !left), y - 4, depth - 1, obj_bombguy_bomb))
             {
                 hsp = 2 * other.facing
@@ -111,9 +111,9 @@ states =
                 _team = other.team
             }
         }
-        if(timer0 >= 50 && timer0 < 80)
-            timer0 = approach(timer0, 80, global.dt * attack_speed)
-        if(timer0 == 80)
+        if(timer0 >= 40 && timer0 < 70)
+            timer0 = approach(timer0, 70, global.dt * attack_speed)
+        if(timer0 == 70)
         {
             state = "normal"
             timer0 = 0

@@ -4,6 +4,9 @@ framerate_choice = 0
 global.zoom = 1
 global.gameTimer = 0
 
+global.sctint = c_white
+global.sctint_alpha = 0
+
 current_bgm = noone
 bgm_fading = 0
 
@@ -31,7 +34,7 @@ global.runEnabled = 1
 wavetimer = 600
 killzoneTimer = MINUTE
 
-mainDirector = new Director(0, 0.1, 0.75, new range(2, 3), new range(0.5, 0.5), 10)
+mainDirector = new Director(0, 0.1, 0.75, new range(3, 4), new range(0.24, 0.5), 10)
 
 global.lastsecond = current_second
 

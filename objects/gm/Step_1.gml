@@ -64,12 +64,13 @@ if(!global.pause && global.runEnabled)
     mainDirector.Step()
 
     // if the director is totally pooped and we are not on a shop wave, proceed to next wave
-    if((mainDirector.credits < 10 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1 && global.wave % 5 != 3)
+    if((mainDirector.credits < 8 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1 && (global.wave - 1) % 5 != 4)
     {
         if(global.enemyCount == 0)
         {
-            killzoneTimer = MINUTE
-            // destroy fog of death
+            killzoneTimer = MINUTE / 2
+            if(instance_exists(fx_death_fog))
+                fx_death_fog.done = 1
 
             mainDirector.Disable()
             wavetimer = 600
@@ -81,7 +82,7 @@ if(!global.pause && global.runEnabled)
             if(killzoneTimer == 0)
             {
                 killzoneTimer = -1
-                // create fog of death here
+                instance_create_depth(0, 0, 0, fx_death_fog)
             }
         }
     }
@@ -95,7 +96,7 @@ with(par_unit)
         {
             xp = 0
             xpTarget *= 1.55
-            level += 1
+            _apply_level(level + 1)
         }
     }
     if(team == Team.enemy)
@@ -105,6 +106,7 @@ with(par_unit)
 
     for(var i = 0; i < array_length(items); i++)
     {
+        items[i].triggered = 0
         getdef(items[i].item_id, deftype.item).step(id, items[i].stacks)
     }
     for(var i = 0; i < array_length(buffs); i++)

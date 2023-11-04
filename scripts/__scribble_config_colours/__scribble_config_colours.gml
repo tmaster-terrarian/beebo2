@@ -32,13 +32,26 @@ function __scribble_config_colours()
         c_teal:    c_teal,
         c_white:   c_white,
         c_yellow:  c_yellow,
-    
+
         //Here are some example colours
         c_coquelicot: scribble_rgb_to_bgr(0xff3800),
         c_smaragdine: scribble_rgb_to_bgr(0x50c875),
         c_xanadu:     scribble_rgb_to_bgr(0x738678),
         c_amaranth:   scribble_rgb_to_bgr(0xe52b50),
+
+        rc_none:		#798686,
+        rc_common:		#E8F6F4,
+        rc_rare:		#38EB73,
+        rc_legendary:   #F3235E,
+        rc_special:		#D508E5,
+
+		kw_health:		#00cc43,
+		kw_damage:		#ee0077,
+		kw_projectile:	#e5c313,
+		kw_number:		#e8d782,
+		kw_proctype:	#a6f1d1,
+		kw_downside:	#ff0055,
     };
-    
+
     return _colours;
 }

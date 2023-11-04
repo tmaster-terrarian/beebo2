@@ -15,8 +15,6 @@
         "options.delete_save": "Delete Savedata",
         "options.back": "Back",
 
-        "item.unknown.name": "Undefined",
-        "item.unknown.description": "undefined",
         "item.beeswax.name": "Beeswax",
         "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]bullet accuracy[/c].",
         "item.eviction_notice.name": "Eviction Notice",
@@ -33,6 +31,8 @@
         "item.bloody_dagger.description": "Attacks from behind deal [kw_damage]bonus damage[/c] [kw_proctype]on hit[/c].",
         "item.lucky_clover.name": "Lucky Clover",
         "item.lucky_clover.description": "[kw_number]+10%[/c] chance for [kw_proctype]attacks[/c] to [kw_damage]critically hit[/c].",
+        "item.heal_on_level.name": "Torn Platemail",
+        "item.heal_on_level.description": "Heal [kw_number]10%[/c] of [kw_health]max health[/c] on level up.",
 
         "modifier.unknown.name": "Unknown",
         "modifier.unknown.description": "unknown",
@@ -43,6 +43,8 @@
     },
     "es":
     {
+        "ui.warning": "WARNING",
+
         "options.screen_size": "Screen Size",
         "options.sound_volume": "Sound Volume",
         "options.music_volume": "Music Volume",
@@ -55,8 +57,6 @@
         "options.delete_save": "Delete Savedata",
         "options.back": "Back",
 
-        "item.unknown.name": "Indefinido",
-        "item.unknown.description": "indefinido",
         "item.beeswax.name": "Cera de Abejas",
         "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]precision de bala[/c].",
         "item.eviction_notice.name": "Aviso de Desalojo",
@@ -64,9 +64,6 @@
         "item.serrated_stinger.name": "Aguijon Serrado",
         "item.serrated_stinger.description": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c].",
         "item.amorphous_plush.name": "Peluche Amorfo",
-        "item.amorphous_plush.description": "Un felino protectivo te sigue.",
-
-        "modifier.unknown.name": "Indefinido",
-        "modifier.unknown.description": "indefinido"
+        "item.amorphous_plush.description": "Un felino protectivo te sigue."
     }
 }
