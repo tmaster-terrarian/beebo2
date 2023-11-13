@@ -42,7 +42,7 @@ if(!global.pause && global.runEnabled)
         else // make shop appear
         {
             mainDirector.Disable()
-            wavetimer = 900
+            wavetimer = 900 // TODO: Replace this line with shop creation
         }
     }
 

@@ -137,10 +137,13 @@ function damage_event(ctx)
 
 			ctx.attacker.invokeOnCombatEnter()
 
-			var infightCheck = ((ctx.target.team == Team.enemy || ctx.target.team == Team.neutral) && ctx.target.team == ctx.attacker.team)
+			var infightCheck = ((ctx.target.team != Team.player) && ctx.target.team == ctx.attacker.team)
 
 			if(ctx.target.team != ctx.attacker.team || infightCheck) // the target's target becomes the attacker
+			{
 				ctx.target.target = ctx.attacker
+				ctx.target.aggrotimer = 0
+			}
 
 			if(ctx.force_crit == 0)
 			{
@@ -154,6 +157,7 @@ function damage_event(ctx)
 
 			if(ctx.use_attacker_items && attacker_has_items)
 			{
+				if(ctx.proc_type == proctype.onhit)
 				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
 					var _item = ctx.attacker.items[i]
@@ -196,7 +200,11 @@ function damage_event(ctx)
 		var dmg = ctx.damage
 		if(ctx.reduceable)
 		{
+			var fac = 1
+
 			// reduce damage based on various items the target carries
+
+			dmg *= fac
 		}
 		ctx.target.hp -= dmg
 
@@ -213,6 +221,7 @@ function damage_event(ctx)
 		{
 			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
 			{
+				if(ctx.proc_type == proctype.onkill)
 				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
 					var _item = ctx.attacker.items[i]
@@ -568,29 +577,37 @@ function getraritycol(_invitem)
 	return itemdata.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
 }
 
-function random_weighted(_list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:5}]; v:value, w:weight. automatically sorted by lowest weight.
-{ // TODO: make this thing ACTUALLY WORK!!!!!!!!
-	var _tw = 0
-	var _w = 0
-	var _v = 0
+function random_weighted(list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:5}]; v:value, w:weight.
+{
+	var sum = 0
 
-	var _l = []; array_copy(_l, 0, _list, 0, array_length(_list))
-	array_sort(_l, function(_e1, _e2) { return sign(_e1.w - _e2.w) })
-
-	for(var i = 0; i < array_length(_l); i++)
+	for(var i = 0; i < array_length(list); i++)
 	{
-		_tw += _l[i].w
+		sum += list[i].w
 	}
-	var _rand = random(1)
+	var selected = random(1) * sum
 
-	for(var j = 0; j < array_length(_l); j++)
+	var total = 0
+	var lastGoodIndex = -1
+	var chosenIndex = -1
+	for(var i = 0; i < array_length(list); i++)
 	{
-		if(_rand <= (_l[j].w + _w) / _tw)
-			return _l[j].v
-		else
-			_w += _l[j].w
+		total += list[i].w
+		if(selected <= total)
+		{
+			chosenIndex = i
+			break;
+		}
+		lastGoodIndex = i
+
+		// fallback if nothing is found
+		if(i == array_length(list) - 1)
+		{
+			chosenIndex = lastGoodIndex
+		}
 	}
-	return array_last(_l).v
+
+	return list[chosenIndex].v;
 }
 
 function timer_to_timestamp(_t)
@@ -1531,7 +1548,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 		var card = self.lastSpawnCard
 		if(self.lastSpawnSucceeded == 0) // if the last spawn failed, obtain a new card
 		{
-			var _catagory = random_weighted([{v: 2, w: 1}, {v: 1, w: 1}, {v: 1, w: 1.5}])
+			var _catagory = random_weighted([{v: 2, w: 1}, {v: 1, w: 1}, {v: 0, w: 1}])
 			self.lastSpawnCard = global.spawn_cards[_catagory][irandom(array_length(global.spawn_cards[_catagory]) - 1)]
 			card = self.lastSpawnCard
 			self.lastSpawnPos = {x: obj_camera.tx + random_range(-80, 80), y: ((card.spawnsOnGround) ? 152 : obj_camera.ty + random_range(-24, 48))}
@@ -1571,8 +1588,8 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 function range(minval, maxval) constructor
 {
-	self.minval = minval
-	self.maxval = maxval
+	self.minval = min(minval, maxval)
+	self.maxval = max(minval, maxval)
 
 	toString = function()
 	{

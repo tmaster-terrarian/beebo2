@@ -1,7 +1,8 @@
 event_inherited();
 PAUSECHECK
 
-retargetTimer = approach(retargetTimer, 0, global.dt)
+if(!in_combat)
+    retargetTimer = approach(retargetTimer, 0, global.dt)
 
 if autoaggro && !braindead
 {
