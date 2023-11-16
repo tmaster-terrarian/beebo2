@@ -784,21 +784,23 @@ function itemdef(__struct, _struct = {})
 	return __struct
 }
 
-function Registry()
-{
-    static Items = {
-        unknown: new _itemdef("unknown")
-    }
+// experimental idea
 
-    static Add = function(category, def) {
-        Registry[$ string(category)][$ def.name] = def
-    }
-}
-Registry()
+// function Registry()
+// {
+//     static Items = {
+//         unknown: new _itemdef("unknown")
+//     }
 
-var beeswaxItemDef = new _itemdef("beeswax")
-beeswaxItemDef.rarity = item_rarity.common
-Registry.Add("Items", beeswaxItemDef)
+//     static Add = function(category, def) {
+//         Registry[$ string(category)][$ def.name] = def
+//     }
+// }
+// Registry()
+
+// var beeswaxItemDef = new _itemdef("beeswax")
+// beeswaxItemDef.rarity = item_rarity.common
+// Registry.Add("Items", beeswaxItemDef)
 
 global.itemdefs =
 {
@@ -870,6 +872,9 @@ global.itemdefs =
 	}),
 	heal_on_level : itemdef(new _itemdef("heal_on_level"), {
 		rarity : item_rarity.common
+	}),
+	hyperthreader : itemdef(new _itemdef("hyperthreader"), {
+		rarity : item_rarity.legendary
 	})
 }
 

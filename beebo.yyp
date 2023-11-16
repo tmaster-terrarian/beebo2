@@ -120,6 +120,7 @@
     {"id":{"name":"__scribble_gen_9_write_vbuffs","path":"scripts/__scribble_gen_9_write_vbuffs/__scribble_gen_9_write_vbuffs.yy",},},
     {"id":{"name":"spr_anime_run","path":"sprites/spr_anime_run/spr_anime_run.yy",},},
     {"id":{"name":"scribble_is_text_element","path":"scripts/scribble_is_text_element/scribble_is_text_element.yy",},},
+    {"id":{"name":"spr_item_hyperthreader","path":"sprites/spr_item_hyperthreader/spr_item_hyperthreader.yy",},},
     {"id":{"name":"obj_e_bombguy","path":"objects/obj_e_bombguy/obj_e_bombguy.yy",},},
     {"id":{"name":"scribble_fallback_bulletpoint","path":"sprites/scribble_fallback_bulletpoint/scribble_fallback_bulletpoint.yy",},},
     {"id":{"name":"spr_fx_dust2","path":"sprites/spr_fx_dust2/spr_fx_dust2.yy",},},

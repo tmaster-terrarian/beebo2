@@ -33,6 +33,9 @@
         "item.lucky_clover.description": "[kw_number]+10%[/c] chance for [kw_proctype]attacks[/c] to [kw_damage]critically hit[/c].",
         "item.heal_on_level.name": "Torn Platemail",
         "item.heal_on_level.description": "Heal [kw_number]10%[/c] of [kw_health]max health[/c] on level up.",
+        "item.hyperthreader.name": "Hyperthreader",
+        "item.hyperthreader.description": "",
+        "item.hyperthreader.lore": "",
 
         "modifier.unknown.name": "Unknown",
         "modifier.unknown.description": "unknown",
@@ -43,19 +46,7 @@
     },
     "es":
     {
-        "ui.warning": "WARNING",
-
-        "options.screen_size": "Screen Size",
-        "options.sound_volume": "Sound Volume",
-        "options.music_volume": "Music Volume",
-        "options.dont": "dont.",
-        "options.do_not": "do not",
-        "options.timer": "Show Timer",
-        "options.discord_rpc": "Rich Presence",
-        "options.vfx_culling_bias": "VFX Culling Bias",
-        "options.language": "Language",
-        "options.delete_save": "Delete Savedata",
-        "options.back": "Back",
+        "ui.warning": "CUIDADO",
 
         "item.beeswax.name": "Cera de Abejas",
         "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]precision de bala[/c].",

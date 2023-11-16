@@ -92,6 +92,7 @@
     {"name":"__scribble_gen_9_write_vbuffs","order":9,"path":"scripts/__scribble_gen_9_write_vbuffs/__scribble_gen_9_write_vbuffs.yy",},
     {"name":"spr_anime_run","order":4,"path":"sprites/spr_anime_run/spr_anime_run.yy",},
     {"name":"scribble_is_text_element","order":2,"path":"scripts/scribble_is_text_element/scribble_is_text_element.yy",},
+    {"name":"spr_item_hyperthreader","order":10,"path":"sprites/spr_item_hyperthreader/spr_item_hyperthreader.yy",},
     {"name":"scribble_fallback_bulletpoint","order":12,"path":"sprites/scribble_fallback_bulletpoint/scribble_fallback_bulletpoint.yy",},
     {"name":"spr_fx_dust2","order":1,"path":"sprites/spr_fx_dust2/spr_fx_dust2.yy",},
     {"name":"fx_steam","order":4,"path":"objects/fx_steam/fx_steam.yy",},
