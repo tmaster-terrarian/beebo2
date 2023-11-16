@@ -79,6 +79,7 @@
     {"name":"scribble_glyph_set","order":17,"path":"scripts/scribble_glyph_set/scribble_glyph_set.yy",},
     {"name":"sn_wii","order":12,"path":"sounds/sn_wii/sn_wii.yy",},
     {"name":"string_height_scribble_ext","order":3,"path":"scripts/string_height_scribble_ext/string_height_scribble_ext.yy",},
+    {"name":"registry","order":8,"path":"scripts/registry/registry.yy",},
     {"name":"spr_rocket","order":3,"path":"sprites/spr_rocket/spr_rocket.yy",},
     {"name":"sn_stepgrass2","order":6,"path":"sounds/sn_stepgrass2/sn_stepgrass2.yy",},
     {"name":"__scribble_gen_8_position_glyphs","order":8,"path":"scripts/__scribble_gen_8_position_glyphs/__scribble_gen_8_position_glyphs.yy",},

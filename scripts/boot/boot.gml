@@ -77,6 +77,14 @@ enum deftype
 	upgrade
 }
 
+enum SkillType
+{
+	Primary,
+	Secondary,
+	Utility,
+	Special
+}
+
 enum TimeUnits
 {
 	miliseconds,
@@ -265,25 +273,30 @@ function heal_event(target, value, _healtype = healtype.generic)
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: value, dir: -target.facing})
 }
 
-// global variables
-function itemdata()
+function GlobalEvent() constructor
 {
-	static item_tables =
+	listeners = []
+}
+
+// global variables
+global.itemdata =
+{
+	item_tables :
 	{
 		any : [{v: 4, w: 1}, {v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}, {v: 0, w: 1}],
 		any_obtainable : [{v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}],
 		chest_small : [{v: 3, w: 0.01}, {v: 2, w: 1.98}, {v: 1, w: 7.92}],
 		chest_large : [{v: 3, w: 2}, {v: 2, w: 8}]
-	}
-	static rarity_colors =
+	},
+	rarity_colors :
 	[
 		#798686,
 		#E8F6F4,
 		#38EB73,
 		#F3235E,
 		#D508E5
-	]
-	static damage_type_colors =
+	],
+	damage_type_colors :
 	[
 		#E8F6F4,
 		#F3235E,
@@ -292,7 +305,6 @@ function itemdata()
 		#7b003b
 	]
 }
-itemdata()
 
 global.timescale = 1
 global.dt = 1
@@ -471,7 +483,7 @@ function screen_shake_add(_strength, _frames)
 	}
 }
 
-function item_id_get_random(_by_rarity, _table = itemdata.item_tables.any_obtainable)
+function item_id_get_random(_by_rarity, _table = global.itemdata.item_tables.any_obtainable)
 {
 	if(_by_rarity)
 	{
@@ -496,25 +508,17 @@ function getdef(_defid, _deftype = 0)
 	switch(_deftype)
 	{
 		case deftype.item:
-		{
 			return global.itemdefs[$ _defid]
 			break;
-		}
 		case deftype.modifier:
-		{
 			return global.modiferdefs[$ _defid]
 			break;
-		}
 		case deftype.buff:
-		{
 			return global.buffdefs[$ _defid]
 			break;
-		}
 		case deftype.upgrade:
-		{
 			return global.upgradedefs[$ _defid]
 			break;
-		}
 	}
 }
 
@@ -574,7 +578,7 @@ function t_inframes(value, unit)
 
 function getraritycol(_invitem)
 {
-	return itemdata.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
+	return global.itemdata.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
 }
 
 function random_weighted(list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:5}]; v:value, w:weight.
@@ -780,6 +784,22 @@ function itemdef(__struct, _struct = {})
 	return __struct
 }
 
+function Registry()
+{
+    static Items = {
+        unknown: new _itemdef("unknown")
+    }
+
+    static Add = function(category, def) {
+        Registry[$ string(category)][$ def.name] = def
+    }
+}
+Registry()
+
+var beeswaxItemDef = new _itemdef("beeswax")
+beeswaxItemDef.rarity = item_rarity.common
+Registry.Add("Items", beeswaxItemDef)
+
 global.itemdefs =
 {
 	unknown : new _itemdef("unknown"),
@@ -960,7 +980,7 @@ global.modifierdefs =
 	evolution : modifierdef(new _modifierdef("evolution"), {
 		on_pickup : function()
 		{
-			var _item = item_id_get_random(1, itemdata.item_tables.chest_small)
+			var _item = item_id_get_random(1, global.itemdata.item_tables.chest_small)
 			if(instance_exists(obj_player))
 				item_add_stacks(_item, obj_player, 3)
 			item_add_stacks(_item, statmanager, 3, 0)
@@ -1600,6 +1620,12 @@ function range(minval, maxval) constructor
 function Skill(name) constructor
 {
 	self.name = name
+	self.baseStocks = 1
+	self.skillType = SkillType.Primary
+	self.stockCooldown = 0
+	self.animationTime = 6
+
+	self.onActivate = function() {}
 }
 
 debug_log("Main", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

@@ -30,14 +30,14 @@ function _position_meeting(_x, _y, _obj)
 	return result
 }
 
-enum checkType
+enum CollisionCheckType
 {
-	any,
-	all,
-	none
+	Any,
+	All,
+	None
 }
 
-function compound_meeting(checks = [], _type = checkType.any)
+function compound_meeting(checks = [], _type = CollisionCheckType.Any)
 {
 	if(array_length(checks) == 0)
 		return
@@ -53,7 +53,7 @@ function compound_meeting(checks = [], _type = checkType.any)
 			{
 				sum += checks[i]
 			}
-			result =  (sum != 0)
+			result = (sum != 0)
 			break;
 		}
 		case 1:
