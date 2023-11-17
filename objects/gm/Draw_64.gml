@@ -11,8 +11,13 @@ var _timer = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]TIMER: {time}
 _draw_rect(23, SC_H - 8, _timer.get_width() + 22, SC_H - 2, c_black, 0.5)
 _timer.draw(24, SC_H - 1)
 
-// var _debugtext = scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]CREDITS: {mainDirector.credits}\nLASTCARD: {(mainDirector.lastSpawnCard == noone) ? "noone" : mainDirector.lastSpawnCard.index}\nLASTSPAWNSUCCESS: {mainDirector.lastSpawnSucceeded}\nENABLED: {mainDirector.enabled}").wrap(320)
-// _debugtext.draw(1, 1)
+var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.cooldown)} {ceil(global.players[0].skills.secondary.cooldown)} {ceil(global.players[0].skills.utility.cooldown)} {ceil(global.players[0].skills.special.cooldown)}")
+
+_draw_rect(_timer.get_width() + 25, SC_H - 8, _timer.get_width() + _stockcounter.get_width() + 24, SC_H - 2, c_black, 0.5)
+_stockcounter.draw(_timer.get_width() + 26, SC_H - 1)
+
+var _debugtext = scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]CREDITS: {mainDirector.credits}\nLASTCARD: {(mainDirector.lastSpawnCard == noone) ? "noone" : mainDirector.lastSpawnCard.index}\nLASTSPAWNSUCCESS: {mainDirector.lastSpawnSucceeded}\nENABLED: {mainDirector.enabled}").wrap(320)
+_debugtext.draw(1, 1)
 
 if(global.pause)
 {

@@ -1,5 +1,7 @@
 event_inherited();
 
+PAUSECHECK
+
 ponytail_visible = 1
 gun_behind = 0
 if(running)
@@ -124,13 +126,12 @@ else
     gun_pos.y = -7;
 }
 
-if(has_gun && !global.pause)
+if(has_gun)
 {
     fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
     fire_angle = round(fire_angle / 10) * 10;
 
     recoil = approach(recoil, 0, 1 * global.dt)
-    firedelay = approach(firedelay, 0, 1 * global.dt)
     bombdelay = approach(bombdelay, 0, 1 * global.dt)
 
     if(duck)
@@ -145,36 +146,4 @@ if(has_gun && !global.pause)
 
     if(state == "normal")
         facing = gun_flip
-
-    if(mouse_check_button(mb_left) && firedelay <= 0)
-    {
-        firing = 1;
-
-        screen_shake_set(1, 5)
-
-        recoil = 2;
-        firedelay = firerate;
-
-        if(gun_upgrade != "")
-            getdef(gun_upgrade, 3).fire(id)
-        else
-            getdef("base", 3).fire(id)
-    }
-
-    if(mouse_check_button(mb_right) && bombdelay <= 0)
-    {
-        audio_play_sound(sn_throw, 0, 0)
-
-        firing = 1;
-
-        screen_shake_set(2, 10)
-
-        recoil = 4;
-        bombdelay = bombrate;
-
-        if(gun_upgrade != "")
-            getdef(gun_upgrade, 3).fire_bomb(id)
-        else
-            getdef("base", 3).fire_bomb(id)
-    }
 }

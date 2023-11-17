@@ -244,5 +244,31 @@ if _position_meeting(x, y + 1, par_solid)
     }
 }
 
+var names = struct_get_names(skills)
+for(var i = 0; i < array_length(names); i++)
+{
+    var skill = skills[$ names[i]]
+    var def = skill.def
+    if(input[$ names[i]]() && attack_state != names[i] && skill.cooldown <= 0 && skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
+    {
+        if(!def.beginCooldownOnEnd)
+            skill.cooldown = def.baseStockCooldown
+        skill.stocks -= def.stockToConsume
+
+        if(attack_state != noone)
+        {
+            attack_states[$ attack_state].onExit(attack_states[$ attack_state])
+        }
+
+        attack_state = names[i]
+        attack_states[$ attack_state].onEnter(attack_states[$ attack_state])
+    }
+}
+
+if(attack_state != noone)
+{
+    attack_states[$ attack_state].update(attack_states[$ attack_state])
+}
+
 x = round(x)
 y = round(y)

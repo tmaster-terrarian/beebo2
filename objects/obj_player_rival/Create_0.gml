@@ -1,4 +1,11 @@
 event_inherited();
+stats = variable_clone(global.chardefs.rival.stats)
+level_stats = variable_clone(global.chardefs.rival.level_stats)
+_apply_stats()
+
+skills = variable_clone(global.chardefs.rival.skills)
+attack_states = variable_clone(global.chardefs.rival.attack_states)
+
 _sp =
 {
     m_default: mask_player,
@@ -22,13 +29,6 @@ player_id = 1
 _dbkey = vk_lalt
 
 global.players[1] = object_index
-
-input =
-{
-    left: function() {return keyboard_check(vk_left)}, right: function() {return keyboard_check(vk_right)},
-    up: function() {return keyboard_check(vk_up)}, down: function() {return keyboard_check(vk_down)},
-    jump: function() {return keyboard_check_pressed(ord("Z"))}
-}
 
 state = "normal"
 

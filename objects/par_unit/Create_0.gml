@@ -1,28 +1,8 @@
 event_inherited()
-stats =
-{
-    hp_max : 180,
-    regen_rate : 1,
-    curse : 1,
-    spd : 2,
-    jumpspd : -3.7,
-    firerate : 5,
-    bombrate : 0,
-    spread : 4,
-    damage : 10,
-    ground_accel : 0.12,
-    ground_fric : 0.08,
-    air_accel : 0.07,
-    air_fric : 0.02,
-    jumps_max : 1,
-    grv : 0,
-    attack_speed : 1
-}
-level_stats =
-{
-    hp_max: 30,
-    damage: 2.4
-}
+stats = variable_clone(global.chardefs.base.stats)
+level_stats = variable_clone(global.chardefs.base.level_stats)
+skills = variable_clone(global.chardefs.base.skills)
+attack_states = variable_clone(global.chardefs.base.attack_states)
 
 t = 0
 regen = 1
@@ -76,6 +56,13 @@ _apply_stats = function()
     jumps = jumps_max
     grv = stats.grv
     attack_speed = stats.attack_speed
+
+    bonus_stocks = {
+        primary: 0,
+        secondary: 0,
+        utility: 0,
+        special: 0
+    }
 }
 _apply_stats()
 
@@ -88,12 +75,14 @@ _apply_level = function(_newlevel)
     level = _newlevel
 }
 
-states =
-{
-    normal : function() {}
+states = {
+    normal: function() {}
 }
 
+attack_states = {}
+
 state = states.normal
+attack_state = noone
 timer0 = 0 // most powerful fucker ive ever seen
 
 _setstate = function(_state, _resettimer = 0, _resetframe = 0)

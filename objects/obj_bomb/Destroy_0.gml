@@ -5,7 +5,6 @@ _fps = 0.25
 if(bulleted)
 {
     _size *= 1.3
-    _dmg *= 2
     _fps = 0.167
 
     screen_shake_set(6, 60)
