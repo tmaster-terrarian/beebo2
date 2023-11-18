@@ -249,7 +249,29 @@ for(var i = 0; i < array_length(names); i++)
 {
     var skill = skills[$ names[i]]
     var def = skill.def
-    if(input[$ names[i]]() && attack_state != names[i] && skill.cooldown <= 0 && skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
+
+    if(skill.cooldown > 0)
+        skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
+    else if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
+    {
+        skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks + bonus_stocks[$ names[i]])
+
+        if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
+            skill.cooldown = def.baseStockCooldown
+    }
+}
+
+for(var i = 0; i < array_length(names); i++)
+{
+    var skill = skills[$ names[i]]
+    var def = skill.def
+
+    var inputPressed = input[$ names[i]]()
+    var preventSkillSelfInterrupt = attack_state != names[i]
+    var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority)
+    var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
+
+    if(skill.cooldown <= 0 && inputPressed && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
     {
         if(!def.beginCooldownOnEnd)
             skill.cooldown = def.baseStockCooldown
@@ -257,18 +279,30 @@ for(var i = 0; i < array_length(names); i++)
 
         if(attack_state != noone)
         {
-            attack_states[$ attack_state].onExit(attack_states[$ attack_state])
+            attack_states[$ attack_state].onExit(attack_states[$ attack_state], self)
+            attack_state = noone
         }
 
         attack_state = names[i]
-        attack_states[$ attack_state].onEnter(attack_states[$ attack_state])
+        attack_states[$ attack_state].onEnter(attack_states[$ attack_state], self)
     }
 }
 
 if(attack_state != noone)
 {
-    attack_states[$ attack_state].update(attack_states[$ attack_state])
+    attack_states[$ attack_state].update(attack_states[$ attack_state], self)
 }
 
 x = round(x)
 y = round(y)
+
+if(hp <= 0) && !ded
+{
+    ded = 1
+    state = "dead"
+    timer0 = 0
+
+    if(abs(hsp) < 2)
+        hsp = 2
+    vsp = min(vsp, -1)
+}

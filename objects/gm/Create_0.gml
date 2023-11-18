@@ -30,7 +30,8 @@ bgm_fade = function(index, fadetime, loop = 1, gain = 1, offset = 0, pitch = 1)
 }
 
 global.wave = 0
-global.runEnabled = 1
+global.runEnabled = 0
+
 wavetimer = 600
 killzoneTimer = MINUTE
 

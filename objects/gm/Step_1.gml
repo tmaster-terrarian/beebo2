@@ -90,7 +90,12 @@ if(!global.pause && global.runEnabled)
 
 with(par_unit)
 {
-    if(object_get_parent(object_index) == obj_player)
+    if(team == Team.enemy)
+    {
+        if(global.enemyLevel != level)
+            _apply_level(global.enemyLevel)
+    }
+    else if(object_get_parent(object_index) == obj_player)
     {
         if(xp > xpTarget)
         {
@@ -98,10 +103,6 @@ with(par_unit)
             xpTarget *= 1.55
             _apply_level(level + 1)
         }
-    }
-    if(team == Team.enemy)
-    {
-        level = global.enemyLevel
     }
 
     for(var i = 0; i < array_length(items); i++)
@@ -116,7 +117,7 @@ with(par_unit)
     }
 
     var hpFac = 1
-    hp_max = (stats.hp_max + level_stats.hp_max * (level - 1)) * hpFac
+    hp_max = base_hp_max * hpFac
 
     var regenFac = 1 + 0.2 * (level - 1)
     regen_rate = stats.regen_rate * regenFac

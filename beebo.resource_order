@@ -256,6 +256,7 @@
     {"name":"scribble_flush_everything","order":1,"path":"scripts/scribble_flush_everything/scribble_flush_everything.yy",},
     {"name":"spr_item_serrated_stinger","order":8,"path":"sprites/spr_item_serrated_stinger/spr_item_serrated_stinger.yy",},
     {"name":"__scribble_font_add_msdf_from_project","order":8,"path":"scripts/__scribble_font_add_msdf_from_project/__scribble_font_add_msdf_from_project.yy",},
+    {"name":"spr_player_dash","order":16,"path":"sprites/spr_player_dash/spr_player_dash.yy",},
     {"name":"__scribble_gen_7_build_pages","order":7,"path":"scripts/__scribble_gen_7_build_pages/__scribble_gen_7_build_pages.yy",},
     {"name":"obj_e_strikes_backer","order":2,"path":"objects/obj_e_strikes_backer/obj_e_strikes_backer.yy",},
     {"name":"__scribble_class_model","order":3,"path":"scripts/__scribble_class_model/__scribble_class_model.yy",},

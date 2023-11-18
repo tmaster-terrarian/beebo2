@@ -305,6 +305,7 @@
     {"id":{"name":"obj_bullet","path":"objects/obj_bullet/obj_bullet.yy",},},
     {"id":{"name":"spr_item_serrated_stinger","path":"sprites/spr_item_serrated_stinger/spr_item_serrated_stinger.yy",},},
     {"id":{"name":"__scribble_font_add_msdf_from_project","path":"scripts/__scribble_font_add_msdf_from_project/__scribble_font_add_msdf_from_project.yy",},},
+    {"id":{"name":"spr_player_dash","path":"sprites/spr_player_dash/spr_player_dash.yy",},},
     {"id":{"name":"__scribble_gen_7_build_pages","path":"scripts/__scribble_gen_7_build_pages/__scribble_gen_7_build_pages.yy",},},
     {"id":{"name":"obj_e_strikes_backer","path":"objects/obj_e_strikes_backer/obj_e_strikes_backer.yy",},},
     {"id":{"name":"__scribble_class_model","path":"scripts/__scribble_class_model/__scribble_class_model.yy",},},

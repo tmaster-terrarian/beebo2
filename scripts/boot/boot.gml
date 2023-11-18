@@ -461,6 +461,17 @@ function angleRotate(angle, target, speed) {
 	return target;
 }
 
+function instance_get_struct(ins)
+{
+	var struct = {}
+	var array = variable_instance_get_names(ins)
+	for (var i = 0; i < array_length(array); i++)
+	{
+		struct[$ array[i]] = variable_instance_get(ins, array[i])
+	}
+	return struct
+}
+
 function screen_shake_set(_strength, _frames)
 {
 	with(obj_camera)
@@ -1635,7 +1646,8 @@ function FixedTimeline(owner, keyframes) constructor
 		}
 		else
 		{
-			timeline.keyframes[timeline.currentFrame].action()
+			with(timeline.owner)
+				timeline.keyframes[timeline.currentFrame].action()
 
 			time_source_reconfigure(timeline.timesource, time_source_game, timeline.keyframes[timeline.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [timeline], -1)
 			time_source_start(timeline.timesource)
@@ -1647,14 +1659,25 @@ function FixedTimeline(owner, keyframes) constructor
 		delete timeline
 	}
 
+	self.Stop = function() {
+		self.currentFrame = 0
+		time_source_reconfigure(self.timesource, time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
+	}
+
+	self.Start = function() {
+		self.currentFrame = 0
+		time_source_reconfigure(self.timesource, time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
+		time_source_start(self.timesource)
+	}
+
 	self.owner = owner
 	self.keyframes = keyframes
 	self.currentFrame = 0
 
 	self.timesource = time_source_create(time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
 }
-var __trash = new FixedTimeline(noone, [Keyframe(0, function() {})])
-FixedTimeline.Destroy(__trash)
+FixedTimeline(noone, [Keyframe(0, function() {})])
+
 function Keyframe(time, action) // time is delay AFTER LAST KEYFRAME
 {
 	var obj = {}
@@ -1663,59 +1686,41 @@ function Keyframe(time, action) // time is delay AFTER LAST KEYFRAME
 	return obj
 }
 
-function State(func = noone, master = noone) constructor
+function State(func = noone) constructor
 {
-	static base = {
-		baseDuration : 0.5,
-		duration : 0.5,
-		age : 0,
+	self.baseDuration = 0.5
+	self.duration = self.baseDuration
+	self.age = 0
 
-		onEnter : function(ins) {
-			ins.duration = ins.baseDuration
-		},
-		onExit : function(ins) {
-			if(ins.master.beginCooldownOnEnd)
-				skills[$ ins.master.slot].cooldown = ins.master.baseStockCooldown
-			attack_state = noone
-			ins.age = 0
-		},
-		update : function(ins) {
-			ins.age = approach(ins.age, ins.duration, global.dt / 60)
+	self.onEnter = function(ins, obj) {
+		ins.duration = ins.baseDuration
+	}
+	self.onExit = function(ins, obj) {
+		ins.age = 0
+		obj.attack_state = noone
+	}
+	self.update = function(ins, obj) {
+		ins.age = approach(ins.age, ins.duration, global.dt / 60)
+		if(ins.age >= ins.duration)
+		{
+			with(ins) onExit(self, obj)
 		}
-	}
-
-	baseDuration = 0.5
-	duration = baseDuration
-	age = 0
-	if(master != noone)
-		self.master = master
-	else
-		self.master = undefined
-
-	onEnter = function(ins) {
-		with(other) State.base.onEnter(ins)
-	}
-	onExit = function(ins) {
-		with(other) State.base.onExit(ins)
-	}
-	update = function(ins) {
-		with(other) State.base.update(ins)
 	}
 
 	if(func != noone)
 		func(self)
 }
-var __trash = new State()
-delete __trash
+
+global._baseState = new State()
 
 function _baseSkill() constructor
 {
 	self.name = "base"
 	self.displayname = string_loc($"skill.base.name")
 	self.description = string_loc($"skill.base.description")
-	self.activationState = State.base
+	self.activationState = global._baseState
 	self.baseMaxStocks = 1
-	self.baseStockCooldown = 0
+	self.baseStockCooldown = 0.5
 	self.beginCooldownOnEnd = 0
 	self.fullRestockOnAssign = 1
 	self.isCombatSkill = 0
@@ -1724,6 +1729,12 @@ function _baseSkill() constructor
 	self.requiredStock = 1
 	self.stockToConsume = 1
 	self.slot = "primary"
+	self.priority = 0
+	self.buffer = 0 // unused currently, will be used for buffering inputs
+}
+
+global.skilldefs = {
+	base: new _baseSkill()
 }
 
 function Skill(name, func = noone) : _baseSkill() constructor
@@ -1778,17 +1789,17 @@ function CharacterDef(name, func = noone) constructor
 	}
 
 	self.skills = {
-		primary: new SkillInstance(global.skilldefs.base),
+		primary:   new SkillInstance(global.skilldefs.base),
 		secondary: new SkillInstance(global.skilldefs.base),
-		utility: new SkillInstance(global.skilldefs.base),
-		special: new SkillInstance(global.skilldefs.base)
+		utility:   new SkillInstance(global.skilldefs.base),
+		special:   new SkillInstance(global.skilldefs.base)
 	}
 
 	self.attack_states = {
-		primary: variable_clone(self.skills.primary.def.activationState),
+		primary:   variable_clone(self.skills.primary.def.activationState),
 		secondary: variable_clone(self.skills.secondary.def.activationState),
-		utility: variable_clone(self.skills.utility.def.activationState),
-		special: variable_clone(self.skills.special.def.activationState)
+		utility:   variable_clone(self.skills.utility.def.activationState),
+		special:   variable_clone(self.skills.special.def.activationState)
 	}
 
 	if(func != noone)
@@ -1796,10 +1807,6 @@ function CharacterDef(name, func = noone) constructor
 }
 
 // SKILL DEFINITIONS
-
-global.skilldefs = {
-	base: new _baseSkill()
-}
 
 var beeboPrimarySkill = new Skill("beebo.rapidfire", function(def) {
 	def.baseMaxStocks = 1
@@ -1812,11 +1819,13 @@ var beeboPrimarySkill = new Skill("beebo.rapidfire", function(def) {
 	def.requiredStock = 0
 	def.stockToConsume = 0
 	def.slot = "primary"
+	def.priority = 0
+	def.buffer = 0
 })
 
 var beeboSecondarySkill = new Skill("beebo.bomb_throw", function(def) {
 	def.baseMaxStocks = 1
-	def.baseStockCooldown = 8/6
+	def.baseStockCooldown = 3.5
 	def.beginCooldownOnEnd = 0
 	def.fullRestockOnAssign = 1
 	def.isCombatSkill = 1
@@ -1825,93 +1834,171 @@ var beeboSecondarySkill = new Skill("beebo.bomb_throw", function(def) {
 	def.requiredStock = 1
 	def.stockToConsume = 1
 	def.slot = "secondary"
+	def.priority = 1
+	def.buffer = 1
+})
+
+var beeboUtilitySkill = new Skill("beebo.quick_evade", function(def) {
+	def.baseMaxStocks = 1
+	def.baseStockCooldown = 5
+	def.beginCooldownOnEnd = 0
+	def.fullRestockOnAssign = 1
+	def.isCombatSkill = 0
+	def.mustKeyPress = 0
+	def.rechargeStock = 1
+	def.requiredStock = 1
+	def.stockToConsume = 1
+	def.slot = "utility"
+	def.priority = 2
+	def.buffer = 0
+})
+
+var beeboSpecialSkill = new Skill("beebo.hotswap", function(def) {
+	def.baseMaxStocks = 1
+	def.baseStockCooldown = 6
+	def.beginCooldownOnEnd = 0
+	def.fullRestockOnAssign = 1
+	def.isCombatSkill = 1
+	def.mustKeyPress = 0
+	def.rechargeStock = 1
+	def.requiredStock = 1
+	def.stockToConsume = 1
+	def.slot = "special"
+	def.priority = 1
+	def.buffer = 1
 })
 
 var beeboPrimarySkillState = new State(function(def) {
 	def.baseDuration = 5/60
-	def.onEnter = function(ins) {with(other) {
-		with(self) State.base.onEnter(ins)
-		ins.duration = ins.baseDuration * attack_speed
+	def.onEnter = function(ins, obj) {
+		ins.duration = ins.baseDuration * obj.attack_speed
 
-		screen_shake_set(1, 5)
-		recoil = 2
-
-		var v = spread
-		var _obj = instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, obj_bullet)
-
-		with (_obj)
+		with(obj)
 		{
-			parent = other
-			team = other.team
-			audio_play_sound(sn_player_shoot, 1, false);
+			screen_shake_set(1, 5)
+			recoil = 3
 
-			_speed = 12;
-			direction = other.fire_angle + random_range(-v, v);
-			image_angle = direction;
+			var v = spread
+			var _obj = instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, obj_bullet)
 
-			damage = other.damage
+			with (_obj)
+			{
+				parent = other
+				team = other.team
+				audio_play_sound(sn_player_shoot, 1, false);
+
+				_speed = 12;
+				direction = other.fire_angle + random_range(-v, v);
+				image_angle = direction;
+
+				damage = other.damage
+			}
+			with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
+			{
+				image_yscale = other.facing
+				angle = other.fire_angle
+				dir = other.facing
+				hsp = -other.facing * random_range(1, 1.5)
+				vsp = -1 + random_range(-0.2, 0.1)
+			}
 		}
-		with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
-		{
-			image_yscale = other.facing
-			angle = other.fire_angle
-			dir = other.facing
-			hsp = -other.facing * random_range(1, 1.5)
-			vsp = -1 + random_range(-0.2, 0.1)
-		}
-	}}
-
-	def.onExit = function(ins) {with(other) {
-		State.base.onExit(ins)
-		ins.age = 0
-		attack_state = noone
-	}}
-
-	def.update = function(ins) {
-		ins.age += global.dt / 60
-		if(ins.age > ins.duration)
-			ins.onExit(ins)
 	}
 }, beeboPrimarySkill)
 beeboPrimarySkill.activationState = beeboPrimarySkillState
 
 var beeboSecondarySkillState = new State(function(def) {
-	def.baseDuration = 1
-	def.onEnter = function(ins) {with(other) {
-		State.base.onEnter(ins)
-		ins.duration = ins.baseDuration * attack_speed
+	def.baseDuration = 0.25
+	def.onEnter = function(ins, obj) {
+		ins.duration = ins.baseDuration * obj.attack_speed
 
-		screen_shake_set(2, 10)
-    	recoil = 4
-
-		var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb)
-
-		with(_obj)
+		with(obj)
 		{
-			parent = other
-			team = other.team
-			audio_play_sound(sn_throw, 0, 0)
+			screen_shake_set(2, 10)
+			recoil = 6
 
-			hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
-			vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
+			var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb)
 
-			damage = other.damage * 4
+			with(_obj)
+			{
+				parent = other
+				team = other.team
+				audio_play_sound(sn_throw, 0, 0)
+
+				hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
+				vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
+
+				damage = other.damage * 4
+			}
 		}
-	}}
-
-	def.onExit = function(ins) {with(other) {
-		State.base.onExit(ins)
-		ins.age = 0
-		attack_state = noone
-	}}
-
-	def.update = function(ins) {
-		ins.age += global.dt / 60
-		if(ins.age > ins.duration)
-			ins.onExit(ins)
 	}
 }, beeboSecondarySkill)
 beeboSecondarySkill.activationState = beeboSecondarySkillState
+
+var beeboUtilitySkillState = new State(function(def) {
+	def.baseDuration = 0.1
+
+	def.onEnter = function(ins, obj) {
+		ins.duration = ins.baseDuration + obj.spd / obj.stats.spd * 0.1
+
+		with(obj)
+		{
+			hsp = (1 + spd * 2) * sign(facing)
+			vsp = -1
+
+			sprite_index = spr_player_dash
+			mask_index = mask_player
+			image_index = 0
+
+			timer0 = 0
+
+			repeat(8)
+			{
+				with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y - random(10), depth - 2, fx_dust))
+				{
+					vx = random_range(-3, -1) * sign(other.facing)
+					vy = random_range(-0.5, 0.5)
+				}
+			}
+
+			if(!variable_struct_exists(states, "SKILL_quick_evade"))
+			{
+				states.SKILL_quick_evade = function() {with(other) {
+					can_jump = 0
+					can_walljump = 0
+					ghost = 0
+					duck = 0
+					draw_gun = 0
+					fxtrail = 1
+					hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.1 * spd/stats.spd * global.dt)
+					vsp = approach(vsp, 20, grv/2 * global.dt)
+
+					if(abs(hsp) <= spd + 1.5)
+					{
+						state = "normal"
+						draw_gun = 1
+						fxtrail = 0
+						can_jump = 1
+						can_walljump = 1
+					}
+				}}
+			}
+			state = "SKILL_quick_evade"
+		}
+	}
+	self.update = function(ins, obj) {
+		ins.age = approach(ins.age, ins.duration, global.dt / 60)
+		if(ins.age >= ins.duration || obj.state != "SKILL_quick_evade")
+		{
+			with(ins) onExit(self, obj)
+			return;
+		}
+	}
+	self.onExit = function(ins, obj) {
+		ins.age = 0
+		obj.attack_state = noone
+	}
+}, beeboUtilitySkill)
+beeboUtilitySkill.activationState = beeboUtilitySkillState
 
 global.chardefs = {
 	base: new CharacterDef("base")
@@ -1942,17 +2029,17 @@ global.chardefs.beebo = new CharacterDef("beebo", function(def) {
 	}
 
 	def.skills = {
-		primary: new SkillInstance(global.skilldefs[$ "beebo.rapidfire"]),
+		primary:   new SkillInstance(global.skilldefs[$ "beebo.rapidfire"]),
 		secondary: new SkillInstance(global.skilldefs[$ "beebo.bomb_throw"]),
-		utility: new SkillInstance(global.skilldefs.base),
-		special: new SkillInstance(global.skilldefs.base)
+		utility:   new SkillInstance(global.skilldefs[$ "beebo.quick_evade"]),
+		special:   new SkillInstance(global.skilldefs[$ "beebo.hotswap"])
 	}
 
 	def.attack_states = {
-		primary: variable_clone(def.skills.primary.def.activationState),
+		primary:   variable_clone(def.skills.primary.def.activationState),
 		secondary: variable_clone(def.skills.secondary.def.activationState),
-		utility: variable_clone(def.skills.utility.def.activationState),
-		special: variable_clone(def.skills.special.def.activationState)
+		utility:   variable_clone(def.skills.utility.def.activationState),
+		special:   variable_clone(def.skills.special.def.activationState)
 	}
 })
 

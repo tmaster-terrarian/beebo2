@@ -94,15 +94,18 @@ gamepad_set_axis_deadzone(1, 0.25)
 
 _oncollide_h = function()
 {
-    var input_dir = 0
-    input_dir = sign
+    var input_dir = sign
     (
         gamepad_axis_value(player_id, gp_axislh)
         + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
         + (input.right() - input.left())
     )
 
-    repeat(round(max(global.dt, 1)))
+    if(state == "dead")
+    {
+        hsp = -hsp * 0.9
+    }
+    else repeat(round(max(global.dt, 1)))
     {
         if(abs(input_dir) && !place_meeting(x + input_dir, y - 2, par_solid))
         {
@@ -132,8 +135,7 @@ _oncollide_h = function()
 
 _oncollide_v = function()
 {
-    var input_dir = 0
-    input_dir = sign
+    var input_dir = sign
     (
         gamepad_axis_value(player_id, gp_axislh)
         + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
@@ -541,8 +543,13 @@ states =
         can_jump = 0
         can_walljump = 0
         ghost = 0
-        hsp = 0
-        vsp = 0
+        sprite_index = _sp.dead
+        image_index = on_ground
+
+        if(on_ground)
+            hsp = approach(hsp, 0, fric * 2 * global.dt)
+        else
+            vsp = approach(vsp, 20, grv * global.dt)
     }},
     intro : function()
     {with(other){

@@ -19,6 +19,13 @@ ded = 0
 attack_speed = 1
 flash = 0
 
+bonus_stocks = {
+    primary: 0,
+    secondary: 0,
+    utility: 0,
+    special: 0
+}
+
 in_combat = 0
 combat_delay = t_inframes(5, TimeUnits.seconds)
 combat_timer = 0
@@ -38,6 +45,7 @@ onCombatExit = function() {}
 _apply_stats = function()
 {
     hp_max = stats.hp_max
+    base_hp_max = hp_max
     hp = hp_max
     regen_rate = stats.regen_rate
     curse = stats.curse
@@ -68,9 +76,16 @@ _apply_stats()
 
 _apply_level = function(_newlevel)
 {
-    hp_max = stats.hp_max + level_stats.hp_max * (_newlevel - 1)
-    heal_event(self, hp_max * 0.1 * item_get_stacks(self, "heal_on_level"))
-    hp = min(hp, hp_max)
+    var _oldhp_max = hp_max
+    var _oldhp = hp
+    base_hp_max = stats.hp_max + level_stats.hp_max * (_newlevel - 1)
+    if(base_hp_max > _oldhp_max)
+        hp = _oldhp / _oldhp_max * base_hp_max
+
+    if(item_get_stacks(self, "heal_on_level"))
+        heal_event(self, base_hp_max * 0.1 * item_get_stacks(self, "heal_on_level"))
+
+    hp = min(hp, base_hp_max)
 
     level = _newlevel
 }
@@ -99,3 +114,5 @@ gun_pos = {x:0,y:0}
 
 items = []
 buffs = []
+
+skill_queue = []
