@@ -146,4 +146,20 @@ if(has_gun)
 
     if(state == "normal")
         facing = gun_flip
+
+    if(attack_state != "primary" && cool_delay == 0)
+    {
+        heat = approach(heat, 0, cool_rate * global.dt)
+        if(heat % 8 > 8 - round(global.dt))
+        {
+            var dist = random_range(0.1, 1) * 12
+            with(instance_create_depth(x + lengthdir_x(dist, fire_angle) + gun_pos.x * sign(facing), y - 2 + lengthdir_y(dist, fire_angle) + gun_pos.y, depth - 1, fx_dust))
+            {
+                vy = random_range(-1.5, -1) + other.vsp
+                vx += other.hsp
+            }
+            audio_play_sound(sn_steam, 1, false, heat/heat_max)
+        }
+    }
+    cool_delay = approach(cool_delay, 0, global.dt)
 }

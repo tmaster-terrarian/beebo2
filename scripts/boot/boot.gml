@@ -4,9 +4,6 @@ file_delete("latest.log")
 // pixelate gui
 display_set_gui_size(320, 180)
 
-// game is too fucking LOUD
-audio_master_gain(0.5);
-
 // read and apply screenSize and draw_debug flags
 debug_log("Main", "getting settings")
 
@@ -28,7 +25,11 @@ global.locale = ini_read_string("settings", "lang", "en")
 
 global.snd_volume = ini_read_real("settings", "sound_volume", 0.5)
 global.bgm_volume = ini_read_real("settings", "music_volume", 0.8)
+
 ini_close()
+
+// game is too fucking LOUD
+audio_master_gain(0.5 * global.snd_volume);
 
 // enums
 enum Team
@@ -147,7 +148,7 @@ function damage_event(ctx)
 
 			var infightCheck = ((ctx.target.team != Team.player) && ctx.target.team == ctx.attacker.team)
 
-			if(ctx.target.team != ctx.attacker.team || infightCheck) // the target's target becomes the attacker
+			if((ctx.target.team != ctx.attacker.team || infightCheck) && !instance_exists(ctx.target.target)) // the target's target becomes the attacker
 			{
 				ctx.target.target = ctx.attacker
 				ctx.target.aggrotimer = 0
@@ -470,6 +471,11 @@ function instance_get_struct(ins)
 		struct[$ array[i]] = variable_instance_get(ins, array[i])
 	}
 	return struct
+}
+
+function create_fxtrail(obj, life = 15)
+{
+	return instance_create_depth(obj.x, obj.y, obj.depth + 2, fx_afterimage, {sprite_index: obj.sprite_index, image_index: obj.image_index, image_xscale: obj.image_xscale, image_yscale: obj.image_yscale, image_blend: obj.image_blend, image_angle: obj.image_angle, image_alpha: 0.5, life})
 }
 
 function screen_shake_set(_strength, _frames)
@@ -1871,7 +1877,7 @@ var beeboSpecialSkill = new Skill("beebo.hotswap", function(def) {
 var beeboPrimarySkillState = new State(function(def) {
 	def.baseDuration = 5/60
 	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration * obj.attack_speed
+		ins.duration = ins.baseDuration / obj.attack_speed
 
 		with(obj)
 		{
@@ -1901,49 +1907,77 @@ var beeboPrimarySkillState = new State(function(def) {
 				hsp = -other.facing * random_range(1, 1.5)
 				vsp = -1 + random_range(-0.2, 0.1)
 			}
+
+			heat = approach(heat, heat_max, heat_rate * global.dt)
+			var n = irandom_range(0, (heat_max/ceil(heat))/round(global.dt))
+			if(n == 0)
+			{
+				var dist = random_range(0.1, 1) * 12
+				with(instance_create_depth(x + lengthdir_x(dist, fire_angle) + gun_pos.x * sign(facing), y - 2 + lengthdir_y(dist, fire_angle) + gun_pos.y, depth - 1, fx_dust))
+				{
+					vy = random_range(-1.5, -1) + other.vsp
+					vx += other.hsp
+				}
+			}
+			cool_delay = ins.duration + 30
 		}
 	}
 }, beeboPrimarySkill)
 beeboPrimarySkill.activationState = beeboPrimarySkillState
 
 var beeboSecondarySkillState = new State(function(def) {
-	def.baseDuration = 0.25
+	def.baseDuration = 0.33
 	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration * obj.attack_speed
+		ins.duration = ins.baseDuration / obj.attack_speed
 
 		with(obj)
 		{
 			screen_shake_set(2, 10)
 			recoil = 6
 
-			var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb)
+			var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {damage_boosted : ((heat > 20) ? heat : 0)})
 
 			with(_obj)
 			{
 				parent = other
 				team = other.team
-				audio_play_sound(sn_throw, 0, 0)
+				audio_play_sound(sn_throw, 0, 0, 1, 0, 1)
 
 				hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
 				vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
 
-				damage = other.damage * 4
+				damage = other.damage * (2 + 3 * (other.heat/other.heat_max))
+
+				bulleted_delay = 20
 			}
+			repeat(6)
+			{
+				var dist = random_range(0.1, 1) * 12
+				with(instance_create_depth(x + lengthdir_x(dist, fire_angle) + gun_pos.x * sign(facing), y - 2 + lengthdir_y(dist, fire_angle) + gun_pos.y, depth - 1, fx_dust))
+				{
+					vy = random_range(-1.5, -1) + other.vsp
+					vx += other.hsp
+					vx *= 1.5
+					fric *= 0.2
+				}
+				audio_play_sound(sn_steam, 0, false, heat/heat_max)
+			}
+			heat = 0
 		}
 	}
 }, beeboSecondarySkill)
 beeboSecondarySkill.activationState = beeboSecondarySkillState
 
 var beeboUtilitySkillState = new State(function(def) {
-	def.baseDuration = 0.1
+	def.baseDuration = 5/60
 
 	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration + obj.spd / obj.stats.spd * 0.1
+		ins.duration = ins.baseDuration
 
 		with(obj)
 		{
-			hsp = (1 + spd * 2) * sign(facing)
-			vsp = -1
+			hsp = (1.5 + (spd * 2) + (((spd / stats.spd) * 1) * on_ground) + (((spd / stats.spd - 2) * 0.1) * !on_ground)) * sign(facing)
+			vsp = -1 * !on_ground
 
 			sprite_index = spr_player_dash
 			mask_index = mask_player
@@ -1960,25 +1994,41 @@ var beeboUtilitySkillState = new State(function(def) {
 				}
 			}
 
+			__utilityHit = []
+
 			if(!variable_struct_exists(states, "SKILL_quick_evade"))
 			{
 				states.SKILL_quick_evade = function() {with(other) {
-					can_jump = 0
+					can_jump = 1
 					can_walljump = 0
 					ghost = 0
 					duck = 0
-					draw_gun = 0
 					fxtrail = 1
-					hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.1 * spd/stats.spd * global.dt)
-					vsp = approach(vsp, 20, grv/2 * global.dt)
+					hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.25 * spd/stats.spd * global.dt)
+					if(!on_ground)
+						vsp = approach(vsp, 20, grv/2 * global.dt)
+
+					if(on_ground && fxtrailtimer <= 1)
+					{
+						with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y, depth - 2, fx_dust))
+						{
+							vx = random_range(-3, -1) * sign(other.facing)
+							vy = random_range(-1.5, 0)
+						}
+					}
+
+					var e = instance_place(x, y, par_unit)
+					if(e && e.team != team && !array_contains(__utilityHit, e))
+					{
+						array_push(__utilityHit, e)
+						damage_event(new DamageEventContext(id, e, proctype.onhit, base_damage * 0.5, 1, 1, 0))
+					}
 
 					if(abs(hsp) <= spd + 1.5)
 					{
 						state = "normal"
-						draw_gun = 1
+						__utilityHit = []
 						fxtrail = 0
-						can_jump = 1
-						can_walljump = 1
 					}
 				}}
 			}
@@ -1989,6 +2039,7 @@ var beeboUtilitySkillState = new State(function(def) {
 		ins.age = approach(ins.age, ins.duration, global.dt / 60)
 		if(ins.age >= ins.duration || obj.state != "SKILL_quick_evade")
 		{
+			obj.__utilityHit = []
 			with(ins) onExit(self, obj)
 			return;
 		}
@@ -2021,7 +2072,10 @@ global.chardefs.beebo = new CharacterDef("beebo", function(def) {
 		air_fric: 0.02,
 		jumps_max: 1,
 		grv: 0.2,
-		attack_speed: 1
+		attack_speed: 1,
+		heat_max: 100,
+		heat_rate: 1,
+		cool_rate: 1
 	}
 	def.level_stats = {
 		hp_max: 30,

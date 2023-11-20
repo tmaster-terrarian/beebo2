@@ -4,3 +4,11 @@ if(facing != 0)
 event_inherited();
 
 combat_state_changed = 0
+
+fxtrailtimer = approach(fxtrailtimer, 0, global.dt)
+if(fxtrail && fxtrailtimer == 0)
+{
+    fxtrailtimer = 4
+
+    create_fxtrail(id)
+}

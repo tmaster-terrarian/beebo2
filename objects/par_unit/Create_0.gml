@@ -12,6 +12,7 @@ hp = 1
 crit_chance = 0
 jumps = 1
 fxtrail = 0
+fxtrailtimer = 0
 can_jump = 1
 firedelay = 0
 invincible = 0

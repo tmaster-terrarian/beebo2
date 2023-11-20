@@ -268,7 +268,7 @@ for(var i = 0; i < array_length(names); i++)
 
     var inputPressed = input[$ names[i]]()
     var preventSkillSelfInterrupt = attack_state != names[i]
-    var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority)
+    var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority || skills[$ attack_state].def.priority < 0)
     var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
 
     if(skill.cooldown <= 0 && inputPressed && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)

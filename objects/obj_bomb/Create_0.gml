@@ -6,11 +6,12 @@ grv = 0.1
 image_speed = 0.15
 
 bulleted = 0
+bulleted_delay = 6
 
 bounces = 0
 bounces_max = 1
 
-throwsound = audio_play_sound(sn_throw_bomb, 0, 0)
+throwsound = audio_play_sound(sn_throw_bomb, 0, 0, 1, 0, damage_boosted ? clamp((damage_boosted/50) - 1, 0.5, 1) : 1)
 
 _oncollide_h = function()
 {
