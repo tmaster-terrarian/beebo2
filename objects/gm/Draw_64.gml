@@ -36,7 +36,16 @@ else
     UILayers[UILayer].draw = 0
     UILayers[UILayer].enabled = 0
 
+    var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.stocks)} {ceil(global.players[0].skills.secondary.stocks)} {ceil(global.players[0].skills.utility.stocks)} {ceil(global.players[0].skills.special.stocks)}")
+
     _draw_rect(_timer.get_width() + 25, SC_H - 16, _timer.get_width() + _stockcounter.get_width() + 24, SC_H - 10, c_black, 0.5)
+
+    var p = ceil(global.players[0].skills.primary.cooldown)
+    var s = ceil(global.players[0].skills.secondary.cooldown)
+    var u = ceil(global.players[0].skills.utility.cooldown)
+    var r = ceil(global.players[0].skills.special.cooldown)
+    var _cldncounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{p ? p : "_"} {s ? s : "_"} {u ? u : "_"} {r ? r : "_"} state:{global.players[0].attack_state}")
+
     _draw_rect(_timer.get_width() + 25, SC_H - 8, _timer.get_width() + _cldncounter.get_width() + 24, SC_H - 2, c_black, 0.5)
 
     draw_set_font(fnt_itemdesc) draw_set_halign(fa_left) draw_set_valign(fa_bottom)
