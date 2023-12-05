@@ -30,29 +30,7 @@ if(global.draw_debug)
 
 if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start) || gamepad_button_check_pressed(1, gp_start))
 {
-    global.pause = !global.pause
-    if(global.pause)
-    {
-        audio_play_sound(sn_pause, 10, 0, 1, 0, 1)
-        audio_sound_pitch(current_bgm, 0)
-        with(all)
-        {
-            __image_speed = image_speed
-            image_speed = 0
-            __speed = speed
-            speed = 0
-        }
-        time_source_pause(time_source_game)
-    }
-    else
-    {
-        audio_play_sound(sn_pause, 10, 0, 1, 0, 2)
-        audio_sound_pitch(current_bgm, 1)
-        with(all)
-        {
-            image_speed = __image_speed
-            speed = __speed
-        }
-        time_source_resume(time_source_game)
-    }
+    togglePause()
 }
+
+UILayers[UILayer].Step()

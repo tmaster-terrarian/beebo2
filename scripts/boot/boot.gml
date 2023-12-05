@@ -2122,4 +2122,190 @@ global.chardefs.rival = new CharacterDef("rival", function(def) {
 	}
 })
 
+// UI SHIZ
+
+function ui_get_element(ui, x, y)
+{
+	for(var i = 0; i < array_length(ui.elements); i++)
+	{
+		var e = ui.elements[i]
+
+		if((x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
+			return e
+	}
+	return noone
+}
+
+function ui_get_element_index(ui, x, y)
+{
+	for(var i = 0; i < array_length(ui.elements); i++)
+	{
+		var e = ui.elements[i]
+
+		if((x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
+			return i
+	}
+	return -1
+}
+
+function UI() constructor
+{
+	self.elements = []
+	self.enabled = 1
+	self.draw = 1
+
+	self.selected = noone
+
+	self.Step = function()
+	{
+		if(!enabled)
+			return
+
+		if(!global.controller)
+			selected = ui_get_element(self, window_mouse_get_x() / global.sc, window_mouse_get_y() / global.sc)
+
+		for(var i = 0; i < array_length(elements); i++)
+		{
+			var e = elements[i]
+			if(e.enabled)
+				e.step()
+			e.pressed = 0
+		}
+
+		if(selected != noone)
+		{
+			if(mouse_check_button_pressed(mb_left))
+			{
+				if(selected.enabled)
+				{
+					audio_play_sound(sn_click2, 0, 0)
+				}
+			}
+			if(mouse_check_button(mb_left))
+			{
+				if(selected.enabled)
+				{
+					selected.on_input()
+				}
+				selected.pressed = 1
+			}
+		}
+
+		if(mouse_check_button_released(mb_left))
+		{
+			if(selected != noone)
+			{
+				if(selected.enabled)
+				{
+					selected.on_confirm()
+					audio_play_sound(sn_click3, 0, 0)
+				}
+				else
+					audio_play_sound(sn_nuh_uh, 0, 0, 1, 0, random_range(0.9, 1.1))
+			}
+			for(var i = 0; i < array_length(elements); i++)
+			{
+				e.pressed = 0
+			}
+		}
+	}
+
+	self.Draw = function()
+	{
+		if(!draw)
+			return
+
+		for(var i = 0; i < array_length(elements); i++)
+		{
+			var e = elements[i]
+			e.draw()
+		}
+	}
+}
+
+function UIElement(x, y, w, h) constructor
+{
+	self.transform = {x, y, w, h}
+	self.enabled = 1
+	self.shaker = 0
+
+	self.sprite = noone
+	self.pressed = 0
+
+	self.on_confirm = function() {}
+	self.on_input = function() {}
+	self.step = function() {}
+	self.draw = function() {}
+}
+
+function UIButton(x, y, w, h) : UIElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
+	self.enabled = 1
+	self.shaker = 0
+
+	self.sprite = spr_ui_button_green
+	self.pressed = 0
+	self.label = "Button"
+	self.font = fnt_itemdesc
+
+	self.on_confirm = function() {}
+	self.on_input = function() {}
+	self.step = function() {}
+	self.draw = function()
+	{
+		var xx = x + irandom_range(-2, 2) * shaker
+		var yy = y + irandom_range(-2, 2) * shaker
+
+		draw_sprite_ext(sprite, pressed, xx, yy + 2 * pressed, w / sprite_get_width(sprite), h / sprite_get_height(sprite), 0, c_white, 1)
+
+		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(font)
+		draw_text(round(xx + w/2), round(yy + h/2) - 2 + 2 * pressed, label)
+	}
+}
+
+function UIButton2(x, y, w, h) : UIElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
+	self.enabled = 1
+	self.shaker = 0
+
+	self.pressed = 0
+	self.label = "Button"
+	self.font = fnt_itemdesc
+
+	self.on_confirm = function() {}
+	self.on_input = function() {}
+	self.step = function() {}
+	self.draw = function()
+	{
+		var xx = x + irandom_range(-2, 2) * shaker
+		var yy = y + irandom_range(-2, 2) * shaker
+
+		_draw_rect(xx, yy, xx + w - 1, yy + h - 1, c_black, 0.5 + pressed * 0.5, 0)
+
+		if(pressed)
+		{
+			var x1 = xx - 0.5 - 1
+			var x2 = xx + w - 1.5 + 1
+			var y1 = yy - 0.5 - 1
+			var y2 = yy + h - 1.5 + 1
+
+			draw_line_width(x1 - 0.5, y1, x2 + 0.5, y1, 1) // top
+			draw_line_width(x1, y1, x1, y2, 1) // left
+			draw_line_width(x2, y1, x2, y2, 1) // right
+			draw_line_width(x1 - 0.5, y2, x2 + 0.5, y2, 1) // bottom
+		}
+
+		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(font)
+		draw_text(round(xx + w/2), round(yy + h/2) - 1, label)
+	}
+}
+
 debug_log("Main", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")
