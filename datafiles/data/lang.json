@@ -8,6 +8,11 @@
         "ui.pause.quit_title": "quit to title",
         "ui.pause.quit_game": "quit to desktop",
 
+        "ui.options.category.gameplay": "gameplay",
+        "ui.options.category.input": "input",
+        "ui.options.category.video": "video",
+        "ui.options.category.audio": "audio",
+
         "ui.options.pixel_scale": "pixel scale",
         "ui.options.sound_volume": "sound Volume",
         "ui.options.music_volume": "music Volume",

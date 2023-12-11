@@ -28,12 +28,12 @@ if(global.pause)
         txt.flash(c_black, 0).draw(SC_W * 0.5, SC_H * 0.25)
     }
 
-    UILayers[UILayer].draw = 1
+    UILayers[UILayer].visible = 1
     UILayers[UILayer].enabled = 1
 }
 else
 {
-    UILayers[UILayer].draw = 0
+    UILayers[UILayer].visible = 0
     UILayers[UILayer].enabled = 0
 
     var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.stocks)} {ceil(global.players[0].skills.secondary.stocks)} {ceil(global.players[0].skills.utility.stocks)} {ceil(global.players[0].skills.special.stocks)}")
@@ -68,13 +68,4 @@ else
     }
 }
 
-switch(UILayer)
-{
-    case 1:
-    {
-        //
-        break;
-    }
-}
-
-UILayers[UILayer].Draw()
+UILayers[UILayer].draw()

@@ -2130,7 +2130,7 @@ function ui_get_element(ui, x, y)
 	{
 		var e = ui.elements[i]
 
-		if((x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
+		if(!is_instanceof(e, UI) && (x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
 			return e
 	}
 	return noone
@@ -2152,72 +2152,104 @@ function UI() constructor
 {
 	self.elements = []
 	self.enabled = 1
-	self.draw = 1
+	self.visible = 1
 
 	self.selected = noone
+	self.selectedIndex = 0
 
-	self.Step = function()
+	self.x = 0
+	self.y = 0
+	self.w = 0
+	self.h = 0
+
+	self.step = function()
 	{
-		if(!enabled)
+		if(!self.enabled || !self.visible)
 			return
 
 		if(!global.controller)
-			selected = ui_get_element(self, window_mouse_get_x() / global.sc, window_mouse_get_y() / global.sc)
-
-		for(var i = 0; i < array_length(elements); i++)
 		{
-			var e = elements[i]
-			if(e.enabled)
-				e.step()
-			e.pressed = 0
+			self.selected = ui_get_element(self, round(window_mouse_get_x() / global.sc), round(window_mouse_get_y() / global.sc))
+		}
+		else
+		{
+			self.selected = self.elements[self.selectedIndex]
 		}
 
-		if(selected != noone)
+		for(var i = 0; i < array_length(self.elements); i++)
+		{
+			var e = self.elements[i]
+			if(e.enabled)
+			{
+				e.step()
+				if(is_instanceof(e, UI))
+				{
+					if(e.selected != noone)
+						self.selected = e.selected
+				}
+			}
+
+			if(!is_instanceof(e, UI) && !is_instanceof(e, UIToggledElement))
+				e.pressed = 0
+		}
+
+		if(self.selected != noone)
 		{
 			if(mouse_check_button_pressed(mb_left))
 			{
-				if(selected.enabled)
+				if(self.selected.enabled)
 				{
 					audio_play_sound(sn_click2, 0, 0)
 				}
+				self.selected.pressed = 1
 			}
 			if(mouse_check_button(mb_left))
 			{
-				if(selected.enabled)
+				if(self.selected.enabled)
 				{
-					selected.on_input()
+					self.selected.on_input()
 				}
-				selected.pressed = 1
+				if(!self.selected.toggle)
+					self.selected.pressed = 1
 			}
 		}
 
 		if(mouse_check_button_released(mb_left))
 		{
-			if(selected != noone)
+			if(self.selected != noone)
 			{
-				if(selected.enabled)
+				if(self.selected.enabled)
 				{
-					selected.on_confirm()
+					self.selected.pressed = 1
+					self.selected.on_confirm()
 					audio_play_sound(sn_click3, 0, 0)
 				}
 				else
 					audio_play_sound(sn_nuh_uh, 0, 0, 1, 0, random_range(0.9, 1.1))
 			}
-			for(var i = 0; i < array_length(elements); i++)
+			for(var i = 0; i < array_length(self.elements); i++)
 			{
-				e.pressed = 0
+				var e = self.elements[i]
+				if(!is_instanceof(e, UI) && e.toggle)
+				{
+					if(self.selected != noone && e != self.selected && self.selected.toggle && self.selected.exclusive)
+						if(e.exclusionMask == self.selected.exclusionMask)
+							e.pressed = 0
+				}
+				else if(!is_instanceof(e, UI))
+					e.pressed = 0
 			}
 		}
 	}
 
-	self.Draw = function()
+	self.draw = function()
 	{
-		if(!draw)
+		if(!self.visible)
 			return
 
-		for(var i = 0; i < array_length(elements); i++)
+		for(var i = 0; i < array_length(self.elements); i++)
 		{
-			var e = elements[i]
+			var e = self.elements[i]
 			e.draw()
 		}
 	}
@@ -2225,7 +2257,10 @@ function UI() constructor
 
 function UIElement(x, y, w, h) constructor
 {
-	self.transform = {x, y, w, h}
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
 	self.enabled = 1
 	self.shaker = 0
 
@@ -2236,9 +2271,11 @@ function UIElement(x, y, w, h) constructor
 	self.on_input = function() {}
 	self.step = function() {}
 	self.draw = function() {}
+
+	self.toggle = 0
 }
 
-function UIButton(x, y, w, h) : UIElement() constructor
+function UIToggledElement(x, y, w, h) constructor
 {
 	self.x = x
 	self.y = y
@@ -2247,55 +2284,65 @@ function UIButton(x, y, w, h) : UIElement() constructor
 	self.enabled = 1
 	self.shaker = 0
 
-	self.sprite = spr_ui_button_green
+	self.sprite = noone
 	self.pressed = 0
-	self.label = "Button"
-	self.font = fnt_itemdesc
+	self.exclusive = 0
+	self.exclusionMask = 0b0000
 
 	self.on_confirm = function() {}
 	self.on_input = function() {}
 	self.step = function() {}
+	self.draw = function() {}
+
+	self.toggle = 1
+}
+
+function UISpriteButton(x, y, w, h) : UIElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
+
+	self.sprite = spr_ui_button_green
+	self.label = "Button"
+	self.font = fnt_itemdesc
+
 	self.draw = function()
 	{
-		var xx = x + irandom_range(-2, 2) * shaker
-		var yy = y + irandom_range(-2, 2) * shaker
+		var xx = self.x + irandom_range(-2, 2) * self.shaker
+		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
-		draw_sprite_ext(sprite, pressed, xx, yy + 2 * pressed, w / sprite_get_width(sprite), h / sprite_get_height(sprite), 0, c_white, 1)
+		draw_sprite_ext(self.sprite, self.pressed, xx, yy + 2 * self.pressed, self.w / sprite_get_width(self.sprite), self.h / sprite_get_height(self.sprite), 0, c_white, 1)
 
-		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(font)
-		draw_text(round(xx + w/2), round(yy + h/2) - 2 + 2 * pressed, label)
+		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(self.font)
+		draw_text(round(xx + self.w/2), round(yy + self.h/2) - 2 + 2 * self.pressed, self.label)
 	}
 }
 
-function UIButton2(x, y, w, h) : UIElement() constructor
+function UIButtonSimple(x, y, w, h) : UIElement() constructor
 {
 	self.x = x
 	self.y = y
 	self.w = w
 	self.h = h
-	self.enabled = 1
-	self.shaker = 0
 
-	self.pressed = 0
 	self.label = "Button"
 	self.font = fnt_itemdesc
 
-	self.on_confirm = function() {}
-	self.on_input = function() {}
-	self.step = function() {}
 	self.draw = function()
 	{
-		var xx = x + irandom_range(-2, 2) * shaker
-		var yy = y + irandom_range(-2, 2) * shaker
+		var xx = self.x + irandom_range(-2, 2) * self.shaker
+		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
-		_draw_rect(xx, yy, xx + w - 1, yy + h - 1, c_black, 0.5 + pressed * 0.5, 0)
+		_draw_rect(xx, yy, xx + self.w - 1, yy + self.h - 1, c_black, 0.5 + self.pressed * 0.5, 0)
 
-		if(pressed)
+		if(self.pressed)
 		{
 			var x1 = xx - 0.5 - 1
-			var x2 = xx + w - 1.5 + 1
+			var x2 = xx + self.w - 1.5 + 1
 			var y1 = yy - 0.5 - 1
-			var y2 = yy + h - 1.5 + 1
+			var y2 = yy + self.h - 1.5 + 1
 
 			draw_line_width(x1 - 0.5, y1, x2 + 0.5, y1, 1) // top
 			draw_line_width(x1, y1, x1, y2, 1) // left
@@ -2303,8 +2350,81 @@ function UIButton2(x, y, w, h) : UIElement() constructor
 			draw_line_width(x1 - 0.5, y2, x2 + 0.5, y2, 1) // bottom
 		}
 
-		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(font)
-		draw_text(round(xx + w/2), round(yy + h/2) - 1, label)
+		draw_set_color(c_white)
+		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_alpha(1) draw_set_font(self.font)
+		draw_text(round(xx + self.w/2), round(yy + self.h/2) - 1, self.label)
+	}
+}
+
+function UITextButton(x, y, w, h) : UIElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
+
+	self.label = "Button"
+	self.font = fnt_itemdesc
+
+	self.draw = function()
+	{
+		var xx = self.x + irandom_range(-2, 2) * self.shaker
+		var yy = self.y + irandom_range(-2, 2) * self.shaker
+
+		draw_set_color(c_white)
+
+		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_alpha(1) draw_set_font(self.font)
+		draw_text(round(xx + self.w/2) + self.pressed, round(yy + self.h/2) - 1, self.label)
+	}
+}
+
+function UICategoryButton(x, y, w, h) : UIToggledElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = h
+
+	self.label = "Button"
+	self.font = fnt_itemdesc
+
+	self.draw = function()
+	{
+		var xx = self.x + irandom_range(-2, 2) * self.shaker
+		var yy = self.y + irandom_range(-2, 2) * self.shaker
+
+		draw_set_color(c_ltgray)
+
+		if(self.pressed)
+		{
+			draw_set_color(c_white)
+		}
+
+		draw_set_halign(fa_left) draw_set_valign(fa_top) draw_set_alpha(1) draw_set_font(self.font)
+		draw_text(round(xx) + pressed, round(yy), self.label)
+	}
+}
+
+function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constructor
+{
+	self.x = x
+	self.y = y
+	self.w = w
+	self.h = 1
+
+	self.color = color
+	self.alpha = alpha
+
+	self.label = "Text"
+	self.font = fnt_itemdesc
+
+	self.draw = function()
+	{
+		var xx = self.x + irandom_range(-2, 2) * self.shaker
+		var yy = self.y + irandom_range(-2, 2) * self.shaker
+
+		draw_set_halign(fa_left) draw_set_valign(fa_top) draw_set_font(self.font)
+		draw_text_ext_color(round(xx), round(yy), self.label, -1, self.w, self.color, self.color, self.color, self.color, self.alpha)
 	}
 }
 

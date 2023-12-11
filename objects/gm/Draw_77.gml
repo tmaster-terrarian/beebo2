@@ -19,4 +19,3 @@ if(global.pause)
         draw_surface_ext(pauseSurface, 0, 0, global.sc * global.zoom, global.sc * global.zoom, 0, c_white, 1);
     }
 }
-

@@ -66,7 +66,7 @@
   "isEcma": false,
   "LibraryEmitters": [],
   "MetaData": {
-    "IDEVersion": "2023.8.0.98",
+    "IDEVersion": "2023.11.0.121",
   },
   "resources": [
     {"id":{"name":"sn_item_proc_missile_fire_03","path":"sounds/sn_item_proc_missile_fire_03/sn_item_proc_missile_fire_03.yy",},},
