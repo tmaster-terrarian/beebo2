@@ -533,9 +533,6 @@ function getdef(_defid, _deftype = 0)
 		case deftype.buff:
 			return global.buffdefs[$ _defid]
 			break;
-		case deftype.upgrade:
-			return global.upgradedefs[$ _defid]
-			break;
 	}
 }
 
@@ -633,9 +630,9 @@ function random_weighted(list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:
 
 function timer_to_timestamp(_t)
 {
-	var _c = floor((abs(_t) / 10000) % 100)
-	var _s = floor((abs(_t) / 1000000) % 60)
-	var _m = floor(((abs(_t) / 1000000) / 60) % 60)
+	var _c = floor((abs(_t) / 10000)) % 100
+	var _s = floor((abs(_t) / 1000000)) % 60
+	var _m = floor(((abs(_t) / 1000000) / 60)) % 60
 	var _h = floor(((abs(_t) / 1000000) / 60) / 60)
 	var h = string(_h) + ":"
 
@@ -644,7 +641,7 @@ function timer_to_timestamp(_t)
 	if(_m < 10) _m = "0" + string(_m)
 	if(_h < 10) h = "0" + string(_h) + ":"
 
-	var str = ((_t < 0) ? "-" : "") + ((_h) ? h : "") + $"{_m}:{_s}:{_c}"
+	var str = ((_t < 0) ? "-" : "") + ((_h) ? h : "") + $"{_m}:{_s}.{_c}"
 
 	return str
 }
@@ -823,11 +820,7 @@ global.itemdefs =
 {
 	unknown : new _itemdef("unknown"),
 	beeswax : itemdef(new _itemdef("beeswax"), {
-		rarity : item_rarity.common,
-		calc : function(_s)
-		{
-			return 0.1 * _s
-		}
+		rarity : item_rarity.common
 	}),
 	eviction_notice : itemdef(new _itemdef("eviction_notice"), {
 		proc_type : proctype.onhit,
