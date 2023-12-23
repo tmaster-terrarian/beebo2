@@ -47,6 +47,7 @@
     {"name":"ui","order":15,"path":"folders/Sprites/ui.yy",},
     {"name":"Tile Sets","order":2,"path":"folders/Tile Sets.yy",},
     {"name":"Timelines","order":8,"path":"folders/Timelines.yy",},
+    {"name":"tilesets","order":16,"path":"folders/Sprites/tilesets.yy",},
   ],
   "ResourceOrderSettings": [
     {"name":"sn_item_proc_missile_fire_03","order":21,"path":"sounds/sn_item_proc_missile_fire_03/sn_item_proc_missile_fire_03.yy",},
@@ -142,6 +143,7 @@
     {"name":"__scribble_get_state","order":14,"path":"scripts/__scribble_get_state/__scribble_get_state.yy",},
     {"name":"obj_wall","order":7,"path":"objects/obj_wall/obj_wall.yy",},
     {"name":"__scribble_font_add_all_from_project","order":6,"path":"scripts/__scribble_font_add_all_from_project/__scribble_font_add_all_from_project.yy",},
+    {"name":"rm_testroom","order":2,"path":"rooms/rm_testroom/rm_testroom.yy",},
     {"name":"spr_item_heal_on_level","order":9,"path":"sprites/spr_item_heal_on_level/spr_item_heal_on_level.yy",},
     {"name":"obj_platform","order":6,"path":"objects/obj_platform/obj_platform.yy",},
     {"name":"obj_empty","order":2,"path":"objects/obj_empty/obj_empty.yy",},

@@ -58,6 +58,7 @@
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"ui","folderPath":"folders/Sprites/ui.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Tile Sets","folderPath":"folders/Tile Sets.yy",},
     {"resourceType":"GMFolder","resourceVersion":"1.0","name":"Timelines","folderPath":"folders/Timelines.yy",},
+    {"resourceType":"GMFolder","resourceVersion":"1.0","name":"tilesets","folderPath":"folders/Sprites/tilesets.yy",},
   ],
   "IncludedFiles": [
     {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"lang.json","CopyToMask":-1,"filePath":"datafiles/data",},
@@ -178,6 +179,7 @@
     {"id":{"name":"__scribble_get_state","path":"scripts/__scribble_get_state/__scribble_get_state.yy",},},
     {"id":{"name":"obj_wall","path":"objects/obj_wall/obj_wall.yy",},},
     {"id":{"name":"__scribble_font_add_all_from_project","path":"scripts/__scribble_font_add_all_from_project/__scribble_font_add_all_from_project.yy",},},
+    {"id":{"name":"rm_testroom","path":"rooms/rm_testroom/rm_testroom.yy",},},
     {"id":{"name":"spr_item_heal_on_level","path":"sprites/spr_item_heal_on_level/spr_item_heal_on_level.yy",},},
     {"id":{"name":"obj_platform","path":"objects/obj_platform/obj_platform.yy",},},
     {"id":{"name":"obj_empty","path":"objects/obj_empty/obj_empty.yy",},},
@@ -245,6 +247,7 @@
     {"id":{"name":"__scribble_get_external_sound_map","path":"scripts/__scribble_get_external_sound_map/__scribble_get_external_sound_map.yy",},},
     {"id":{"name":"spr_8x8","path":"sprites/spr_8x8/spr_8x8.yy",},},
     {"id":{"name":"spr_anime_duck","path":"sprites/spr_anime_duck/spr_anime_duck.yy",},},
+    {"id":{"name":"spr_ts_metaltest","path":"sprites/spr_ts_metaltest/spr_ts_metaltest.yy",},},
     {"id":{"name":"scribble_anim_rainbow","path":"scripts/scribble_anim_rainbow/scribble_anim_rainbow.yy",},},
     {"id":{"name":"spr_player_crawl","path":"sprites/spr_player_crawl/spr_player_crawl.yy",},},
     {"id":{"name":"sn_click3","path":"sounds/sn_click3/sn_click3.yy",},},
@@ -260,6 +263,7 @@
     {"id":{"name":"obj_rocket","path":"objects/obj_rocket/obj_rocket.yy",},},
     {"id":{"name":"__scribble_get_font_data_map","path":"scripts/__scribble_get_font_data_map/__scribble_get_font_data_map.yy",},},
     {"id":{"name":"scribble_font_scale","path":"scripts/scribble_font_scale/scribble_font_scale.yy",},},
+    {"id":{"name":"ts_metaltest","path":"tilesets/ts_metaltest/ts_metaltest.yy",},},
     {"id":{"name":"fx_death_fog","path":"objects/fx_death_fog/fx_death_fog.yy",},},
     {"id":{"name":"__scribble_get_cache_state","path":"scripts/__scribble_get_cache_state/__scribble_get_cache_state.yy",},},
     {"id":{"name":"__scribble_config_colours","path":"scripts/__scribble_config_colours/__scribble_config_colours.yy",},},
@@ -337,6 +341,7 @@
   "RoomOrderNodes": [
     {"roomId":{"name":"rm_boot","path":"rooms/rm_boot/rm_boot.yy",},},
     {"roomId":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"roomId":{"name":"rm_testroom","path":"rooms/rm_testroom/rm_testroom.yy",},},
   ],
   "templateType": null,
   "TextureGroups": [
