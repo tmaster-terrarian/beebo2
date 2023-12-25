@@ -242,6 +242,7 @@
     {"name":"spr_bombguy_bomb","order":2,"path":"sprites/spr_bombguy_bomb/spr_bombguy_bomb.yy",},
     {"name":"obj_bomb","order":1,"path":"objects/obj_bomb/obj_bomb.yy",},
     {"name":"fnt_basic","order":1,"path":"fonts/fnt_basic/fnt_basic.yy",},
+    {"name":"fx_particle_emitter","order":10,"path":"objects/fx_particle_emitter/fx_particle_emitter.yy",},
     {"name":"scribble_font_rename","order":12,"path":"scripts/scribble_font_rename/scribble_font_rename.yy",},
     {"name":"scribble_super_glyph_delete","order":4,"path":"scripts/scribble_super_glyph_delete/scribble_super_glyph_delete.yy",},
     {"name":"string_height_scribble","order":2,"path":"scripts/string_height_scribble/string_height_scribble.yy",},

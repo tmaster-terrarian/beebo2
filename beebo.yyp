@@ -295,6 +295,7 @@
     {"id":{"name":"spr_bombguy_bomb","path":"sprites/spr_bombguy_bomb/spr_bombguy_bomb.yy",},},
     {"id":{"name":"obj_bomb","path":"objects/obj_bomb/obj_bomb.yy",},},
     {"id":{"name":"fnt_basic","path":"fonts/fnt_basic/fnt_basic.yy",},},
+    {"id":{"name":"fx_particle_emitter","path":"objects/fx_particle_emitter/fx_particle_emitter.yy",},},
     {"id":{"name":"scribble_font_rename","path":"scripts/scribble_font_rename/scribble_font_rename.yy",},},
     {"id":{"name":"scribble_super_glyph_delete","path":"scripts/scribble_super_glyph_delete/scribble_super_glyph_delete.yy",},},
     {"id":{"name":"string_height_scribble","path":"scripts/string_height_scribble/string_height_scribble.yy",},},
