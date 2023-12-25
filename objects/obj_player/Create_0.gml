@@ -52,6 +52,8 @@ fire_angle = 0
 team = Team.player
 player_id = 0
 
+// array_push(global.players, self)
+
 _sp =
 {
     m_default: mask_player,
@@ -88,9 +90,6 @@ input =
     utility: function() {return keyboard_check(vk_lshift)},
     special: function() {return keyboard_check(ord("R"))}
 }
-
-gamepad_set_axis_deadzone(0, 0.25)
-gamepad_set_axis_deadzone(1, 0.25)
 
 _oncollide_h = function()
 {

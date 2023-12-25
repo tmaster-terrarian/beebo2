@@ -77,7 +77,7 @@ for (i = 0; i < ponytail_points_count - 1; i++) // slimepunk magic
     pointB = ponytail_points[i + 1]
     vector = [(pointB[0] - pointA[0]), (pointB[1] - pointA[1])]
     if (!collision_point(pointB[0], pointB[1], par_solid, 1, 0))
-        vector[1] += grv * 2 - (0.36 * clamp(abs(hsp), 0, 1))
+        vector[1] += grv * 2 - (0.09 * clamp(abs(hsp), 0, 1))
     vector[1] += random_range(-0.01, 0)
     magnitude = point_distance(0, 0, vector[0], vector[1])
     normal_vec = [vector[0] / magnitude, vector[1] / magnitude]

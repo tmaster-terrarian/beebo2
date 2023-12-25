@@ -28,10 +28,10 @@
 - modifiers
     - [ ] picker screen
         - [ ] decide whether it will be an individual object or a part of gm:
-            individual
+            - individual
                 - make it communicate well with other objects, keep confusion to a minimum
                 - create and destroy instances effectively
-            as a part of the gm
+            - as a part of the gm
                 - reduce confusion with other parts of the gm's code
     - [ ] make some more besides the first 2
         - lol, lmao
@@ -114,7 +114,7 @@
         - [x] boss waves
             - just no bosses yet
     - [x] enemies level up based on waves
-    - [-] gun upgrade system
+    - [/] gun upgrade system
         upgrade tree with points to spend
         AND/OR
         > interesting gimmick-based modules (only one can be carried at a time) <

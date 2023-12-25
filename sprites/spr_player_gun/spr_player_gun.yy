@@ -26,7 +26,7 @@
   "origin": 9,
   "parent": {
     "name": "gun",
-    "path": "folders/Sprites/player/gun.yy",
+    "path": "folders/Sprites/player/beebo/gun.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {

@@ -53,8 +53,8 @@
   },
   "origin": 7,
   "parent": {
-    "name": "player",
-    "path": "folders/Sprites/player.yy",
+    "name": "beebo",
+    "path": "folders/Sprites/player/beebo.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {

@@ -21,6 +21,8 @@
         "ui.options.language": "language",
         "ui.options.back": "back",
 
+        "damage.immune": "IMMUNE",
+
         "item.beeswax.name": "Beeswax",
         "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]bullet accuracy[/c].",
         "item.eviction_notice.name": "Eviction Notice",
@@ -32,15 +34,15 @@
         "item.emergency_field_kit.name": "Emergency Field Kit",
         "item.emergency_field_kit.description": "Gain an [kw_health]extra life[/c].",
         "item.emergency_field_kit_consumed.name": "Emergency Field Kit (Consumed)",
-        "item.emergency_field_kit_consumed.description": "A used item with no power.",
-        "item.bloody_dagger.name": "Bloody Dagger",
+        "item.emergency_field_kit_consumed.description": "Saved your life.",
+        "item.bloody_dagger.name": "Old Knife",
         "item.bloody_dagger.description": "Attacks from behind deal [kw_damage]bonus damage[/c] [kw_proctype]on hit[/c].",
         "item.lucky_clover.name": "Lucky Clover",
         "item.lucky_clover.description": "[kw_number]+10%[/c] chance for [kw_proctype]attacks[/c] to [kw_damage]critically hit[/c].",
         "item.heal_on_level.name": "Torn Platemail",
         "item.heal_on_level.description": "Heal [kw_number]10%[/c] of [kw_health]max health[/c] on level up.",
         "item.hyperthreader.name": "Hyperthreader",
-        "item.hyperthreader.description": "",
+        "item.hyperthreader.description": "[kw_health]idk what it does yet[/c]",
         "item.hyperthreader.lore": "",
 
         "modifier.unknown.name": "Unknown",

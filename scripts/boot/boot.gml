@@ -28,6 +28,11 @@ global.bgm_volume = ini_read_real("settings", "music_volume", 0.8)
 
 ini_close()
 
+gamepad_set_axis_deadzone(0, 0.25)
+gamepad_set_axis_deadzone(1, 0.25)
+gamepad_set_axis_deadzone(2, 0.25)
+gamepad_set_axis_deadzone(3, 0.25)
+
 // game is too fucking LOUD
 audio_master_gain(0.5 * global.snd_volume);
 
@@ -61,7 +66,8 @@ enum damage_notif_type
 	crit,
 	heal,
 	revive,
-	playerhurt
+	playerhurt,
+	bleed
 }
 
 enum healtype
@@ -108,6 +114,8 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 	self.force_crit = force_crit
 	self.reduceable = reduceable
 
+	self.excludedItems = []
+
 	// builder methods
 	self.useAttackerItems = function(value = 1)
 	{
@@ -124,6 +132,12 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 		self.reducable = value
 		return self
 	}
+	self.exclude = function(args)
+	{
+		for(var i = 0; i < argument_count; i++)
+			array_push(self.excludedItems, argument[i])
+		return self
+	}
 }
 
 function damage_event(ctx)
@@ -136,9 +150,15 @@ function damage_event(ctx)
 
 	var attacker_has_items = (instance_exists(ctx.attacker) && variable_instance_exists(ctx.attacker, "items"))
 
-	if(instance_exists(ctx.target) && !ctx.target.invincible)
+	if(instance_exists(ctx.target))
 	{
 		var _dir = random_range(-1, 1)
+
+		if(ctx.target.invincible)
+		{
+			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: string_loc("damage.immune"), dir: 0})
+			return
+		}
 
 		if(instance_exists(ctx.attacker))
 		{
@@ -146,7 +166,7 @@ function damage_event(ctx)
 
 			ctx.attacker.invokeOnCombatEnter()
 
-			var infightCheck = ((ctx.target.team != Team.player) && ctx.target.team == ctx.attacker.team)
+			var infightCheck = ((ctx.target.team != Team.player) && ctx.target.team == ctx.attacker.team) // check for same team, unless the team is player, to prevent stuff similar to the funny beetle guard tantrums in ror2
 
 			if((ctx.target.team != ctx.attacker.team || infightCheck) && !instance_exists(ctx.target.target)) // the target's target becomes the attacker
 			{
@@ -171,7 +191,7 @@ function damage_event(ctx)
 				{
 					var _item = ctx.attacker.items[i]
 					var _def = getdef(_item.item_id, deftype.item)
-					if(_def.proc_type == proctype.onhit)
+					if(_def.proc_type == proctype.onhit && !array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
 						_def.proc(ctx, _item.stacks)
 						_item.triggered = 1
@@ -235,14 +255,14 @@ function damage_event(ctx)
 				{
 					var _item = ctx.attacker.items[i]
 					var _def = getdef(_item.item_id, deftype.item)
-					if(_def.proc_type == proctype.onkill)
+					if(_def.proc_type == proctype.onkill && !array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
 						_def.proc(ctx, _item.stacks)
 						_item.triggered = 1
 					}
 				}
 
-				if(object_get_parent(ctx.attacker.object_index) == obj_player)
+				if(ctx.attacker.team == Team.player)
 				{
 					ctx.attacker.xp += ctx.target.xpReward
 					ctx.attacker.money += ctx.target.moneyReward
@@ -274,10 +294,53 @@ function heal_event(target, value, _healtype = healtype.generic)
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: value, dir: -target.facing})
 }
 
-function GlobalEvent() constructor
-{
-	listeners = []
+// could this be the ultimate form of framerate independence?
+global.fixedStep = {
+	_functions: [],
+	t: 0,
+
+	addFunction: function(func, thisObject = self) {
+		var _id = floor(get_timer() / 1000)
+		var f = {
+			_thisObject: thisObject,
+			__func: func,
+			_func: function() { with(_thisObject) other.__func() },
+			uniqueId: _id
+		}
+		array_push(self._functions, f)
+		return f
+	},
+
+	step: function() {
+		for(var i = 0; i < array_length(self._functions); i++)
+		{
+			self._functions[i]._func()
+		}
+		self.t++
+	}
 }
+
+#macro FTICK global.fixedStep.t
+
+function addFixedStep(func)
+{
+	return global.fixedStep.addFunction(func, self)
+}
+
+function deleteFixedStep(func)
+{
+	global.______grahhhhhh = func.uniqueId // I LOVE SCOPE SO MUCH AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	var ind = array_find_index(global.fixedStep._functions, function(e, i) {
+		return (e.uniqueId == global.______grahhhhhh)
+	})
+
+	if(ind != -1)
+	{
+		array_delete(global.fixedStep._functions, ind, 1)
+	}
+}
+
+global.fixedStepTimeSource = time_source_create(time_source_game, 1/60, time_source_units_seconds, global.fixedStep.step, [], -1)
 
 // global variables
 global.itemdata =
@@ -303,7 +366,8 @@ global.itemdata =
 		#F3235E,
 		#9CE562,
 		#D508E5,
-		#7b003b
+		#7b003b,
+		#73252f
 	]
 }
 
@@ -446,6 +510,11 @@ function json2file(_filename, _json = {}, _iteration = 0)
 }
 // end of 3rd party functions
 
+function interpSine(x)
+{
+	return cos((x+1)*pi)/2+0.5
+}
+
 // thanks for being so awesome YellowAfterLife
 function cycle(value, _min, _max) {
 	var result, delta;
@@ -475,7 +544,19 @@ function instance_get_struct(ins)
 
 function create_fxtrail(obj, life = 15)
 {
-	return instance_create_depth(obj.x, obj.y, obj.depth + 2, fx_afterimage, {sprite_index: obj.sprite_index, image_index: obj.image_index, image_xscale: obj.image_xscale, image_yscale: obj.image_yscale, image_blend: obj.image_blend, image_angle: obj.image_angle, image_alpha: 0.5, life})
+	return instance_create_depth(
+		obj.x, obj.y, obj.depth + 2, fx_afterimage,
+		{
+			sprite_index: obj.sprite_index,
+			image_index: obj.image_index,
+			image_xscale: obj.image_xscale,
+			image_yscale: obj.image_yscale,
+			image_blend: obj.image_blend,
+			image_angle: obj.image_angle,
+			image_alpha: 0.5,
+			life
+		}
+	)
 }
 
 function screen_shake_set(_strength, _frames)
@@ -798,74 +879,40 @@ function itemdef(__struct, _struct = {})
 	return __struct
 }
 
-// experimental idea
-
-// function Registry()
-// {
-//     static Items = {
-//         unknown: new _itemdef("unknown")
-//     }
-
-//     static Add = function(category, def) {
-//         Registry[$ string(category)][$ def.name] = def
-//     }
-// }
-// Registry()
-
-// var beeswaxItemDef = new _itemdef("beeswax")
-// beeswaxItemDef.rarity = item_rarity.common
-// Registry.Add("Items", beeswaxItemDef)
-
 global.itemdefs =
 {
 	unknown : new _itemdef("unknown"),
 	beeswax : itemdef(new _itemdef("beeswax"), {
 		rarity : item_rarity.common
 	}),
-	eviction_notice : itemdef(new _itemdef("eviction_notice"), {
-		proc_type : proctype.onhit,
-		rarity : item_rarity.rare,
-		proc : function(_a, _t, _d, _p, _s) //attacker, target, damage, proc coefficient, item stacks
-		{
-			if(_a.hp/_a.hp_max >= 0.9) && sign(_p)
-			{
-				var offx = 0
-				var offy = 0
-				if(_a == obj_player)
-				{
-					offy = -12
-				}
+	// your time will come again soon my friend
+	// eviction_notice : itemdef(new _itemdef("eviction_notice"), {
+	// 	proc_type : proctype.onhit,
+	// 	rarity : item_rarity.rare,
+	// 	proc : function(context, stacks)
+	// 	{
+	// 		if(context.attacker.hp/context.attacker.hp_max >= 0.9) && sign(context.proc)
+	// 		{
+	// 			var offx = 0
+	// 			var offy = (context.attacker.bbox_top + context.attacker.bbox_bottom) / 2
 
-				var p = instance_create_depth(_a.x + offx, _a.y + offy, _a.depth + 2, obj_paperwork)
-				p.damage = _a.base_damage * (4 + _s) * _p
-				p.team = _a.team
-				p.dir = point_direction(_a.x + offx, _a.y + offy, _t.x, _t.y)
-				p.pmax = point_distance(_a.x + offx, _a.y + offy, _t.x, _t.y)
-				p.target = _t
-				p.parent = _a
-			}
-		}
-	}),
+	// 			var p = instance_create_depth(context.attacker.x + offx, context.attacker.y + offy, context.attacker.depth + 2, obj_paperwork)
+	// 			p.damage = context.attacker.base_damage * (4 + stacks) * context.proc
+	// 			p.team = context.attacker.team
+	// 			p.dir = point_direction(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
+	// 			p.pmax = point_distance(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
+	// 			p.target = context.target
+	// 			p.parent = context.attacker
+	// 		}
+	// 	}
+	// }),
 	serrated_stinger : itemdef(new _itemdef("serrated_stinger"), {
 		proc_type : proctype.onhit,
 		rarity : item_rarity.common,
 		proc : function(context, stacks)
 		{
 			if(random(1) <= (0.1 * stacks * context.proc))
-				buff_instance_create("bleed", context, 1).damage = context.attacker.base_damage
-		}
-	}),
-	amorphous_plush : itemdef(new _itemdef("amorphous_plush"), {
-		rarity : item_rarity.rare,
-		step : function(target, stacks)
-		{
-			if(instance_exists(target) && (target.t % 600) == 30) && (target.object_index != obj_catfriend) && (instance_number(obj_catfriend) < 1)
-			{
-				var o = instance_create_depth(target.x + random_range(-8, 8), target.y, 0, obj_catfriend, { team : target.team, parent : target})
-				o.stats.hp_max += (0.1 * o.stats.hp_max * (stacks - 1))
-				o.stats.spd += (0.1 * o.stats.spd * (stacks - 1))
-				o.stats.damage += (0.2 * o.stats.damage * (stacks - 1))
-			}
+				buff_instance_create("bleed", context.exclude("serrated_stinger"), 1).damage = context.attacker.base_damage
 		}
 	}),
 	emergency_field_kit : itemdef(new _itemdef("emergency_field_kit"), {
@@ -915,12 +962,12 @@ function item_get_stacks(item_id, target)
 	return 0
 }
 
-function item_add_stacks(item_id, target, stacks = 1, notify = 1)
+function item_add_stacks(item_id, target, stacks = 1, notify = 0)
 {
-	// if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
-	// {
-	// 	array_push(oCamera.item_pickup_queue, item_id)
-	// }
+	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
+	{
+		array_push(gm.item_pickup_queue, item_id)
+	}
 
 	for(var i = 0; i < array_length(target.items); i++)
 	{
@@ -938,12 +985,12 @@ function item_add_stacks(item_id, target, stacks = 1, notify = 1)
 	}
 }
 
-function item_set_stacks(item_id, target, stacks, notify = 1)
+function item_set_stacks(item_id, target, stacks, notify = 0)
 {
-	// if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
-	// {
-	// 	array_push(oCamera.item_pickup_queue, item_id)
-	// }
+	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
+	{
+		array_push(gm.item_pickup_queue, item_id)
+	}
 
 	for(var i = 0; i < array_length(target.items); i++)
 	{
@@ -1077,13 +1124,22 @@ function _buffdef(name) constructor
 		if(self.timed)
 		{
 			PAUSECHECK
-			instance.timer -= (global.dt / 60) // duration is in seconds
 			if(instance.timer <= 0)
 			{
 				self.on_expire(instance)
+				return
 			}
+			else if(self.ticksPerSecond > 0)
+			{
+				if((instance.timer % (1 / self.ticksPerSecond)) == 1/60)
+				{
+					self.tick(instance)
+				}
+			}
+			instance.timer -= (1 / 60) // duration is in seconds
 		}
 	}
+
 	self.step = function(instance) {}
 	self.tick = function(instance) {}
 
@@ -1157,14 +1213,10 @@ function buff_instance(buff_id, context, stacks) constructor
 	self.buff_id = buff_id
 	self.context = context
 	self.stacks = stacks
+	self.timer = -1
 
 	var def = getdef(buff_id, deftype.buff)
-	self.timer = def.duration
-
-	// var totalTicks = max(def.duration * def.ticksPerSecond, 1)
-	self.timesource = time_source_create(time_source_game, 1/def.ticksPerSecond, time_source_units_seconds, def.tick, [self], -1)
-	if(def.ticksPerSecond > 0 && def.timed)
-		time_source_start(self.timesource)
+	def.apply(self)
 }
 
 // applies a buff instance with id [buff_id] to [target]
@@ -1172,19 +1224,14 @@ function buff_instance(buff_id, context, stacks) constructor
 function buff_instance_create(buff_id, context, stacks = 1)
 {
 	var buff = new buff_instance(buff_id, context, stacks)
-	getdef(buff_id, deftype.buff).apply(buff)
 	var b = buff_get_instance(buff_id, context.target)
-	if(b)
+	if(b != -1)
 	{
 		var def = getdef(buff_id, deftype.buff)
 
 		b.context = buff.context // overrides attacker, target, etc. (essentially a refresh)
 		switch(buff_id) // timer stuff
 		{
-			case "collapse":
-			{
-				break;
-			}
 			case "bleed":
 			{
 				if(buff.timer > b.timer)
@@ -1201,9 +1248,6 @@ function buff_instance_create(buff_id, context, stacks = 1)
 		if(def.stackable)
 			buff_instance_add_stacks(b, stacks)
 
-		time_source_destroy(buff.timesource)
-		delete buff
-
 		return b
 	}
 	else
@@ -1218,7 +1262,6 @@ function buff_instance_remove(instance)
 	{
 		if(instance.context.target.buffs[i].buff_id == instance.buff_id)
 		{
-			time_source_destroy(instance.timesource)
 			array_delete(instance.context.target.buffs, i, 1)
 			return;
 		}
@@ -1341,6 +1384,7 @@ function buff_set_timer(buff_id, target, timer)
 }
 
 // gun modules
+// (scrapped content)
 function _upgradedef(_name) constructor {
 	name = _name
 	displayname = string_loc($"upgrade.{name}.name")
@@ -1480,7 +1524,7 @@ global.spawn_cards =
 		new spawn_card("obj_e_bombguy", 1, 40)
 	],
 	[ // boss
-		new spawn_card("obj_test", 1, 600)
+		new spawn_card("obj_e_strikes_backer", 1, 600)
 	]
 ]
 
@@ -1551,8 +1595,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 					choice = rr
 					self.credits -= rr.cost
 
-					if(object_exists(rr.index))
-						instance_create_depth(obj_camera.tx, 152, 50, rr.index)
+					instance_create_depth(obj_camera.tx, 152, 50, rr.index, {boss: true})
 
 					break
 				}

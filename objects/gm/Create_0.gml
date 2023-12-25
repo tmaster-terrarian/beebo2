@@ -263,3 +263,19 @@ UILayers[1] = optionsUI
 
 // pause surface
 pauseSurface = -1
+
+// drawing
+item_pickup_queue = []
+
+time_source_start(global.fixedStepTimeSource)
+
+addFixedStep(function() {
+    with(par_unit)
+    {
+        for(var i = 0; i < array_length(buffs); i++)
+        {
+            getdef(buffs[i].buff_id, deftype.buff).step(buffs[i])
+            getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
+        }
+    }
+}, self)

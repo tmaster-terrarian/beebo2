@@ -110,11 +110,6 @@ with(par_unit)
         items[i].triggered = 0
         getdef(items[i].item_id, deftype.item).step(id, items[i].stacks)
     }
-    for(var i = 0; i < array_length(buffs); i++)
-    {
-        getdef(buffs[i].buff_id, deftype.buff).step(buffs[i])
-        getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
-    }
 
     var hpFac = 1
     hp_max = base_hp_max * hpFac
@@ -166,4 +161,17 @@ if(gamepad_button_check_any_pressed())
 if(keyboard_check_pressed(vk_anykey) || mouse_check_button_pressed(mb_any))
 {
     global.controller = false
+}
+
+if(!global.pause)
+{
+    if(array_length(item_pickup_queue) > 0 && !instance_exists(fx_pickuptext))
+    {
+        var item_id = array_shift(item_pickup_queue)
+
+        var _i = instance_create_depth(0, 0, 0, fx_pickuptext)
+        _i.name = getdef(item_id, deftype.item).displayname
+        _i.shortdesc = getdef(item_id, deftype.item).description
+        _i.item_id = item_id
+    }
 }

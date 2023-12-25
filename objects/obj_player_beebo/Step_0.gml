@@ -4,7 +4,7 @@ PAUSECHECK
 
 ponytail_visible = 1
 gun_behind = 0
-if(running)
+if(running && sprite_index != _sp.crawl)
 {
     ponytail_visible = 1
     switch(floor(image_index))

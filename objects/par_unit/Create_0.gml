@@ -19,6 +19,8 @@ invincible = 0
 ded = 0
 attack_speed = 1
 flash = 0
+xp = 0
+money = 0
 
 bonus_stocks = {
     primary: 0,

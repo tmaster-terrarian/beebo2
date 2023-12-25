@@ -31,7 +31,7 @@
   "origin": 7,
   "parent": {
     "name": "anime rival",
-    "path": "folders/Sprites/anime rival.yy",
+    "path": "folders/Sprites/player/anime rival.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {
