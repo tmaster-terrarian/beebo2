@@ -15,12 +15,12 @@ _sp =
     idle_lookup: spr_player_lookup,
     crawl: spr_anime_crawl,
     duck: spr_anime_duck,
-    dead: spr_player_dead,
+    dead: spr_anime_dead,
     jump: spr_anime_jump,
     run: spr_anime_run,
     wallslide: spr_anime_wallslide,
-    ledgegrab: spr_player_ledgegrab,
-    ledgeclimb: spr_player_ledgeclimb
+    ledgegrab: spr_anime_ledgegrab,
+    ledgeclimb: spr_anime_ledgeclimb
 }
 sprite_index = _sp.idle
 

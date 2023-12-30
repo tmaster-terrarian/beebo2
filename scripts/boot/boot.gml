@@ -5,7 +5,7 @@ file_delete("latest.log")
 display_set_gui_size(320, 180)
 
 // read and apply screenSize and draw_debug flags
-debug_log("Main", "getting settings")
+Log("Startup/INFO", "Reading player settings")
 
 ini_open("save.ini");
 global.sc = clamp(floor(ini_read_real("settings", "res", 4)), 2, 6);
@@ -101,6 +101,8 @@ enum TimeUnits
 	hours
 }
 
+global.__eventContextId = 0
+
 // classes
 function DamageEventContext(attacker, target, proc_type, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
 {
@@ -116,6 +118,9 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 
 	self.excludedItems = []
 
+	self.uniqueId = global.__eventContextId
+	global.__eventContextId++
+
 	// builder methods
 	self.useAttackerItems = function(value = 1)
 	{
@@ -127,17 +132,24 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 		self.force_crit = value
 		return self
 	}
-	self.reduceable = function(value = 1)
+	self.isReduceable = function(value = 1)
 	{
-		self.reducable = value
+		self.reduceable = value
 		return self
 	}
 	self.exclude = function(args)
 	{
 		for(var i = 0; i < argument_count; i++)
-			array_push(self.excludedItems, argument[i])
+			array_push(self.excludedItems, string(argument[i]))
 		return self
 	}
+
+	self.toString = function()
+	{
+		return $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.reduceable}, itemBlacklist: {self.excludedItems} \}"
+	}
+
+	// LogInfo("Main", "DamageEventContext created: " + string(self))
 }
 
 function damage_event(ctx)
@@ -510,9 +522,28 @@ function json2file(_filename, _json = {}, _iteration = 0)
 }
 // end of 3rd party functions
 
-function interpSine(x)
+function interpSine(x) // funky curve from 0-1
 {
 	return cos((x+1)*pi)/2+0.5
+}
+
+function struct_clone(_struct = {})
+{
+	static total_items = 0
+	total_items++
+
+	var __struct = {}
+
+	// hhhhhh i hate scope issues so much
+	var names = variable_struct_get_names(_struct)
+	var size = variable_struct_names_count(_struct);
+
+	for (var i = 0; i < size; i++) {
+		var name = names[i];
+		var element = variable_struct_get(_struct, name);
+		variable_struct_set(__struct, name, element)
+	}
+	return __struct
 }
 
 // thanks for being so awesome YellowAfterLife
@@ -727,14 +758,30 @@ function timer_to_timestamp(_t)
 	return str
 }
 
-function debug_log(src, str)
+function Log(src, str)
 {
-	show_debug_message($"[{timer_to_timestamp(get_timer())}] [{src}]: {str}")
+	var t = timer_to_timestamp(get_timer())
+	show_debug_message($"[{t}] [{src}]: {str}")
 
 	var file = file_text_open_append("latest.log")
-	file_text_write_string(file, $"[{timer_to_timestamp(get_timer())}] [{src}]: {str}")
+	file_text_write_string(file, $"[{t}] [{src}]: {str}")
 	file_text_writeln(file)
 	file_text_close(file)
+
+	return {time: t, name: src, message: str}
+}
+
+function LogInfo(src, str)
+{
+	var t = timer_to_timestamp(get_timer())
+	show_debug_message($"[{t}] [{src}/INFO]: {str}")
+
+	var file = file_text_open_append("latest.log")
+	file_text_write_string(file, $"[{t}] [{src}/INFO]: {str}")
+	file_text_writeln(file)
+	file_text_close(file)
+
+	return {time: t, name: src, type: "info", message: str}
 }
 
 function get_nearest_notme(_x, _y, inst)
@@ -801,10 +848,10 @@ function locale()
 	static reload = function()
 	{
 		var _starttime = get_timer()
-		debug_log("system", "reloading language data")
+		Log("Main/INFO", "reloading language data")
 
 		locale.init()
-		debug_log("system", $"loaded languages: {struct_get_names(global.lang)}")
+		Log("Main/INFO", $"loaded languages: {struct_get_names(global.lang)}")
 
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
@@ -812,31 +859,23 @@ function locale()
 			_item.description = string_loc($"item.{_name}.description")
 			_item.lore = string_loc($"item.{_name}.lore")
 		})
-		debug_log("system", "reloaded item language data")
+		Log("Main/INFO", "reloaded item language data")
 
 		struct_foreach(global.modifierdefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"modifier.{_name}.name")
 			_item.description = string_loc($"modifier.{_name}.description")
 		})
-		debug_log("system", "reloaded modifier language data")
+		Log("Main/INFO", "reloaded modifier language data")
 
 		struct_foreach(global.buffdefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"buff.{_name}.name")
 			_item.description = string_loc($"buff.{_name}.description") // likely going to be left underutilized :(
 		})
-		debug_log("system", "reloaded buff language data")
+		Log("Main/INFO", "reloaded buff language data")
 
-		struct_foreach(global.upgradedefs as (_name, _item)
-		{
-			_item.displayname = string_loc($"upgrade.{_name}.name")
-			_item.description = string_loc($"upgrade.{_name}.description")
-			_item.lore = string_loc($"upgrade.{_name}.lore")
-		})
-		debug_log("system", "reloaded gun upgrade language data")
-
-		debug_log("system", $"language data reload completed, elapsed time: [{timer_to_timestamp(get_timer() - _starttime)}]")
+		Log("Main/INFO", $"language data reload completed, elapsed time: [{timer_to_timestamp(get_timer() - _starttime)}]")
 	}
 }
 locale()
@@ -844,7 +883,7 @@ locale()
 global.lang = { en: {}, es: {} }
 
 locale.init()
-debug_log("Main/INFO", $"loaded languages: {struct_get_names(global.lang)}")
+Log("Startup/INFO", $"loaded languages: {struct_get_names(global.lang)}")
 
 // itemdefs.gml
 function _itemdef(name) constructor {
@@ -941,7 +980,7 @@ struct_foreach(global.itemdefs as (_name, _item)
 	global.itemdefs_by_rarity[_item.rarity][$ _name] = _item
 })
 
-debug_log("Main/INFO", $"successfully created {itemdef.total_items} items")
+Log("Startup/INFO", $"successfully created {itemdef.total_items} items")
 
 function item_instance(__id, _stacks = 1) constructor
 {
@@ -1050,7 +1089,7 @@ global.modifierdefs =
 	})
 }
 
-debug_log("Main/INFO", $"successfully created {modifierdef.total_modifiers} modifiers")
+Log("Startup/INFO", $"successfully created {modifierdef.total_modifiers} modifiers")
 
 function modifier(_modifier_id, _stacks = 1) constructor
 {
@@ -1149,7 +1188,7 @@ function _buffdef(name) constructor
 		buff_instance_remove(instance)
 	}
 	self.on_remove = function(instance) {
-		debug_log("Main/INFO", $"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
+		Log("Main/INFO", $"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
 	}
 }
 
@@ -1206,7 +1245,7 @@ global.buffdefs =
 	})
 }
 
-debug_log("Main/INFO", $"successfully created {buffdef.total_buffs} buffs")
+Log("Startup/INFO", $"successfully created {buffdef.total_buffs} buffs")
 
 function buff_instance(buff_id, context, stacks) constructor
 {
@@ -1718,7 +1757,6 @@ function FixedTimeline(owner, keyframes) constructor
 
 	self.timesource = time_source_create(time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
 }
-FixedTimeline(noone, [Keyframe(0, function() {})])
 
 function Keyframe(time, action) // time is delay AFTER LAST KEYFRAME
 {
@@ -1848,315 +1886,13 @@ function CharacterDef(name, func = noone) constructor
 		func(self)
 }
 
-// SKILL DEFINITIONS
-
-var beeboPrimarySkill = new Skill("beebo.rapidfire", function(def) {
-	def.baseMaxStocks = 1
-	def.baseStockCooldown = 0
-	def.beginCooldownOnEnd = 0
-	def.fullRestockOnAssign = 1
-	def.isCombatSkill = 1
-	def.mustKeyPress = 0
-	def.rechargeStock = 1
-	def.requiredStock = 0
-	def.stockToConsume = 0
-	def.slot = "primary"
-	def.priority = 0
-	def.buffer = 0
-})
-
-var beeboSecondarySkill = new Skill("beebo.bomb_throw", function(def) {
-	def.baseMaxStocks = 1
-	def.baseStockCooldown = 3.5
-	def.beginCooldownOnEnd = 0
-	def.fullRestockOnAssign = 1
-	def.isCombatSkill = 1
-	def.mustKeyPress = 0
-	def.rechargeStock = 1
-	def.requiredStock = 1
-	def.stockToConsume = 1
-	def.slot = "secondary"
-	def.priority = 1
-	def.buffer = 1
-})
-
-var beeboUtilitySkill = new Skill("beebo.quick_evade", function(def) {
-	def.baseMaxStocks = 1
-	def.baseStockCooldown = 5
-	def.beginCooldownOnEnd = 0
-	def.fullRestockOnAssign = 1
-	def.isCombatSkill = 0
-	def.mustKeyPress = 0
-	def.rechargeStock = 1
-	def.requiredStock = 1
-	def.stockToConsume = 1
-	def.slot = "utility"
-	def.priority = 2
-	def.buffer = 0
-})
-
-var beeboSpecialSkill = new Skill("beebo.hotswap", function(def) {
-	def.baseMaxStocks = 1
-	def.baseStockCooldown = 6
-	def.beginCooldownOnEnd = 0
-	def.fullRestockOnAssign = 1
-	def.isCombatSkill = 1
-	def.mustKeyPress = 0
-	def.rechargeStock = 1
-	def.requiredStock = 1
-	def.stockToConsume = 1
-	def.slot = "special"
-	def.priority = 1
-	def.buffer = 1
-})
-
-var beeboPrimarySkillState = new State(function(def) {
-	def.baseDuration = 5/60
-	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration / obj.attack_speed
-
-		with(obj)
-		{
-			screen_shake_set(1, 5)
-			recoil = 3
-
-			var v = spread
-			var _obj = instance_create_depth(x + lengthdir_x(14, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(14, fire_angle) + gun_pos.y - 1, depth - 3, obj_bullet)
-
-			with (_obj)
-			{
-				parent = other
-				team = other.team
-				audio_play_sound(sn_player_shoot, 1, false);
-
-				_speed = 12;
-				direction = other.fire_angle + random_range(-v, v);
-				image_angle = direction;
-
-				damage = other.damage
-			}
-			with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
-			{
-				image_yscale = other.facing
-				angle = other.fire_angle
-				dir = other.facing
-				hsp = -other.facing * random_range(1, 1.5)
-				vsp = -1 + random_range(-0.2, 0.1)
-			}
-
-			heat = approach(heat, heat_max, heat_rate * global.dt)
-			var n = irandom_range(0, (heat_max/ceil(heat))/round(global.dt))
-			if(n == 0)
-			{
-				var dist = random_range(0.1, 1) * 12
-				with(instance_create_depth(x + lengthdir_x(dist, fire_angle) + gun_pos.x * sign(facing), y - 2 + lengthdir_y(dist, fire_angle) + gun_pos.y, depth - 1, fx_dust))
-				{
-					vy = random_range(-1.5, -1) + other.vsp
-					vx += other.hsp
-				}
-			}
-			cool_delay = ins.duration + 30
-		}
-	}
-}, beeboPrimarySkill)
-beeboPrimarySkill.activationState = beeboPrimarySkillState
-
-var beeboSecondarySkillState = new State(function(def) {
-	def.baseDuration = 0.33
-	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration / obj.attack_speed
-
-		with(obj)
-		{
-			screen_shake_set(2, 10)
-			recoil = 6
-
-			var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {damage_boosted : ((heat > 20) ? heat : 0)})
-
-			with(_obj)
-			{
-				parent = other
-				team = other.team
-				audio_play_sound(sn_throw, 0, 0, 1, 0, 1)
-
-				hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
-				vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
-
-				damage = other.damage * (2 + 3 * (other.heat/other.heat_max))
-
-				bulleted_delay = 20
-			}
-			repeat(6)
-			{
-				var dist = random_range(0.1, 1) * 12
-				with(instance_create_depth(x + lengthdir_x(dist, fire_angle) + gun_pos.x * sign(facing), y - 2 + lengthdir_y(dist, fire_angle) + gun_pos.y, depth - 1, fx_dust))
-				{
-					vy = random_range(-1.5, -1) + other.vsp
-					vx += other.hsp
-					vx *= 1.5
-					fric *= 0.2
-				}
-				audio_play_sound(sn_steam, 0, false, heat/heat_max)
-			}
-			heat = 0
-		}
-	}
-}, beeboSecondarySkill)
-beeboSecondarySkill.activationState = beeboSecondarySkillState
-
-var beeboUtilitySkillState = new State(function(def) {
-	def.baseDuration = 5/60
-
-	def.onEnter = function(ins, obj) {
-		ins.duration = ins.baseDuration
-
-		with(obj)
-		{
-			hsp = (1.5 + (spd * 2) + (((spd / stats.spd) * 1) * on_ground) + (((spd / stats.spd - 2) * 0.1) * !on_ground)) * sign(facing)
-			vsp = -1 * !on_ground
-
-			sprite_index = spr_player_dash
-			mask_index = mask_player
-			image_index = 0
-
-			timer0 = 0
-
-			repeat(8)
-			{
-				with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y - random(10), depth - 2, fx_dust))
-				{
-					vx = random_range(-3, -1) * sign(other.facing)
-					vy = random_range(-0.5, 0.5)
-				}
-			}
-
-			__utilityHit = []
-
-			if(!variable_struct_exists(states, "SKILL_quick_evade"))
-			{
-				states.SKILL_quick_evade = function() {with(other) {
-					can_jump = 1
-					can_walljump = 0
-					ghost = 0
-					duck = 0
-					fxtrail = 1
-					hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.25 * spd/stats.spd * global.dt)
-					if(!on_ground)
-						vsp = approach(vsp, 20, grv/2 * global.dt)
-
-					if(on_ground && fxtrailtimer <= 1)
-					{
-						with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y, depth - 2, fx_dust))
-						{
-							vx = random_range(-3, -1) * sign(other.facing)
-							vy = random_range(-1.5, 0)
-						}
-					}
-
-					var e = instance_place(x, y, par_unit)
-					if(e && e.team != team && !array_contains(__utilityHit, e))
-					{
-						array_push(__utilityHit, e)
-						damage_event(new DamageEventContext(id, e, proctype.onhit, base_damage * 0.5, 1, 1, 0))
-					}
-
-					if(abs(hsp) <= spd + 1.5)
-					{
-						state = "normal"
-						__utilityHit = []
-						fxtrail = 0
-					}
-				}}
-			}
-			state = "SKILL_quick_evade"
-		}
-	}
-	self.update = function(ins, obj) {
-		ins.age = approach(ins.age, ins.duration, global.dt / 60)
-		if(ins.age >= ins.duration || obj.state != "SKILL_quick_evade")
-		{
-			obj.__utilityHit = []
-			with(ins) onExit(self, obj)
-			return;
-		}
-	}
-	self.onExit = function(ins, obj) {
-		ins.age = 0
-		obj.attack_state = noone
-	}
-}, beeboUtilitySkill)
-beeboUtilitySkill.activationState = beeboUtilitySkillState
+initSkills()
 
 global.chardefs = {
 	base: new CharacterDef("base")
 }
 
-global.chardefs.beebo = new CharacterDef("beebo", function(def) {
-	def.stats = {
-		hp_max: 100,
-		regen_rate: 1,
-		curse: 1,
-		spd: 2,
-		jumpspd: -3.7,
-		firerate: 5,
-		bombrate: 80,
-		spread: 4,
-		damage: 12,
-		ground_accel: 0.12,
-		ground_fric: 0.08,
-		air_accel: 0.07,
-		air_fric: 0.02,
-		jumps_max: 1,
-		grv: 0.2,
-		attack_speed: 1,
-		heat_max: 100,
-		heat_rate: 1,
-		cool_rate: 1
-	}
-	def.level_stats = {
-		hp_max: 30,
-		damage: 2.4
-	}
-
-	def.skills = {
-		primary:   new SkillInstance(global.skilldefs[$ "beebo.rapidfire"]),
-		secondary: new SkillInstance(global.skilldefs[$ "beebo.bomb_throw"]),
-		utility:   new SkillInstance(global.skilldefs[$ "beebo.quick_evade"]),
-		special:   new SkillInstance(global.skilldefs[$ "beebo.hotswap"])
-	}
-
-	def.attack_states = {
-		primary:   variable_clone(def.skills.primary.def.activationState),
-		secondary: variable_clone(def.skills.secondary.def.activationState),
-		utility:   variable_clone(def.skills.utility.def.activationState),
-		special:   variable_clone(def.skills.special.def.activationState)
-	}
-})
-
-global.chardefs.rival = new CharacterDef("rival", function(def) {
-	def.stats = {
-		hp_max: 100,
-		regen_rate: 1,
-		curse: 1,
-		spd: 2,
-		jumpspd: -3.7,
-		firerate: 5,
-		bombrate: 80,
-		spread: 4,
-		damage: 12,
-		ground_accel: 0.12,
-		ground_fric: 0.08,
-		air_accel: 0.07,
-		air_fric: 0.02,
-		jumps_max: 1,
-		grv: 0.2,
-		attack_speed: 1
-	}
-	def.level_stats = {
-		hp_max: 30,
-		damage: 2.4
-	}
-})
+initChars()
 
 // UI SHIZ
 
@@ -2464,4 +2200,4 @@ function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constr
 	}
 }
 
-debug_log("Main", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")
+Log("Startup/INFO", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")
