@@ -50,11 +50,11 @@ recoil = 0
 fire_angle = 0
 
 team = Team.player
+
 gp_id = global.perPlayerInput[player_id].playerIndex
+gamepad = (gp_id >= 0) // true if this player is using a gamepad
 
 global.players[player_id] = self
-
-gamepad = (gp_id >= 0)
 
 _sp =
 {
@@ -88,13 +88,18 @@ input =
 {
     left: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislh) < 0) || global.perPlayerInput[other._p.player_id].buttons.left.check()},
     right: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislh) > 0) || global.perPlayerInput[other._p.player_id].buttons.right.check()},
-    up: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) < 0) || global.perPlayerInput[other._p.player_id].buttons.up.check()},
-    down: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) > 0) || global.perPlayerInput[other._p.player_id].buttons.down.check()},
+    up: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) < -0.5) || global.perPlayerInput[other._p.player_id].buttons.up.check()},
+    down: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) > 0.5) || global.perPlayerInput[other._p.player_id].buttons.down.check()},
     jump: function() {return global.perPlayerInput[other._p.player_id].buttons.jump.checkPressed()},
+    unjump: function() {return global.perPlayerInput[other._p.player_id].buttons.jump.checkReleased()},
     primary: function() {return global.perPlayerInput[other._p.player_id].buttons.skill1.check()},
     secondary: function() {return global.perPlayerInput[other._p.player_id].buttons.skill2.check()},
     utility: function() {return global.perPlayerInput[other._p.player_id].buttons.skill3.check()},
-    special: function() {return global.perPlayerInput[other._p.player_id].buttons.skill4.check()}
+    special: function() {return global.perPlayerInput[other._p.player_id].buttons.skill4.check()},
+    primaryPressed: function() {return global.perPlayerInput[other._p.player_id].buttons.skill1.checkPressed()},
+    secondaryPressed: function() {return global.perPlayerInput[other._p.player_id].buttons.skill2.checkPressed()},
+    utilityPressed: function() {return global.perPlayerInput[other._p.player_id].buttons.skill3.checkPressed()},
+    specialPressed: function() {return global.perPlayerInput[other._p.player_id].buttons.skill4.checkPressed()}
 }
 
 _oncollide_h = function()
@@ -160,11 +165,10 @@ _oncollide_v = function()
 
 _squish = function()
 {
-    x = xstart
-    y = ystart
+    x = lastSafeX
+    y = lastSafeY
     state = "normal"
     timer0 = 0
-    ghost = 0
 }
 
 draw_hud = 1
@@ -233,10 +237,15 @@ states =
         {
             if (hsp < 0)
             {
+                if(hsp < -spd * 0.8)
+                    skidding = 1
+                else
+                    skidding = 0
                 hsp = approach(hsp, 0, fric * global.dt)
             }
             else if (on_ground && vsp >= 0)
             {
+                skidding = 0
                 if (duck == 0 && !landTimer)
                 {
                     sprite_index = _sp.run
@@ -266,10 +275,16 @@ states =
         {
             if (hsp > 0)
             {
+                if(hsp > spd * 0.8)
+                    skidding = 1
+                else
+                    skidding = 0
                 hsp = approach(hsp, 0, fric * global.dt)
+                skidding = 1
             }
             else if (on_ground && vsp >= 0)
             {
+                skidding = 0
                 if (duck == 0 && !landTimer)
                 {
                     sprite_index = _sp.run
@@ -297,6 +312,7 @@ states =
         }
         else
         {
+            skidding = 0
             running = 0
             hsp = approach(hsp, lasthsp, fric * 2 * global.dt)
             if (abs(hsp) < spd)
@@ -413,7 +429,6 @@ states =
     }},
     wallslide: function()
     {with(other){
-        jumps = jumps_max
         can_walljump = 1
         if (vsp < 0)
             vsp = approach(vsp, vsp_max, 0.5 * global.dt)
@@ -577,7 +592,7 @@ states =
         can_walljump = 0
         ghost = 0
         sprite_index = _sp.dead
-        image_index = on_ground
+        image_index = on_ground + (on_ground && rand)
 
         if(on_ground)
             hsp = approach(hsp, 0, fric * 2 * global.dt)
@@ -607,3 +622,5 @@ for(var a = 0; a < ponytail_points_count; a++)
 }
 
 hair_visible = 1
+
+skidding = 0

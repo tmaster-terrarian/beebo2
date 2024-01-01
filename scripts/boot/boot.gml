@@ -28,10 +28,10 @@ global.bgm_volume = ini_read_real("settings", "music_volume", 0.8)
 
 ini_close()
 
-gamepad_set_axis_deadzone(0, 0.25)
-gamepad_set_axis_deadzone(1, 0.25)
-gamepad_set_axis_deadzone(2, 0.25)
-gamepad_set_axis_deadzone(3, 0.25)
+gamepad_set_axis_deadzone(0, 0.3)
+gamepad_set_axis_deadzone(1, 0.3)
+gamepad_set_axis_deadzone(2, 0.3)
+gamepad_set_axis_deadzone(3, 0.3)
 
 // game is too fucking LOUD
 audio_master_gain(0.5 * global.snd_volume);
@@ -260,6 +260,14 @@ function damage_event(ctx)
 		// activate attacker's on kill items and target's on death items if target died
 		if(ctx.target.hp <= 0)
 		{
+			if(instance_exists(ctx.attacker))
+			{
+				if(ctx.attacker.object_index == obj_player_benb)
+				{
+					var s = choose(sn_aaaaugh, sn_aaaaugh, sn_aaaaugh, sn_aaaugh_2, sn_aaaugh_2)
+					audio_play_sound(s, 1, 0, 1.5, 0, random_range(0.9, 1.1))
+				}
+			}
 			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
 			{
 				if(ctx.proc_type == proctype.onkill)
@@ -1813,6 +1821,7 @@ function _baseSkill() constructor
 	self.slot = "primary"
 	self.priority = 0
 	self.buffer = 0 // unused currently, will be used for buffering inputs
+	self.spamCoeff = 1
 }
 
 global.skilldefs = {

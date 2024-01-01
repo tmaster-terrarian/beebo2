@@ -31,7 +31,7 @@ if(bbox_top < 0)
         _oncollide_v()
 }
 
-if(position_meeting(bbox_left, bbox_bottom+1, par_solid) && position_meeting(bbox_right, bbox_bottom+1, par_solid))
+if(position_meeting(bbox_left, bbox_bottom + 1, par_solid) && position_meeting(bbox_right, bbox_bottom + 1, par_solid))
 {
     lastSafeX = x;
     lastSafeY = y;

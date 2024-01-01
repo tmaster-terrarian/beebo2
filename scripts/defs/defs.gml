@@ -243,6 +243,100 @@ function initSkills()
     
     #endregion
 
+    #region BENBOMEME
+    var benbPrimarySkill = new Skill("benb.punch", function(def) {
+        def.baseMaxStocks = 1
+        def.baseStockCooldown = 0
+        def.beginCooldownOnEnd = 0
+        def.fullRestockOnAssign = 1
+        def.isCombatSkill = 1
+        def.mustKeyPress = 0
+        def.rechargeStock = 1
+        def.requiredStock = 0
+        def.stockToConsume = 0
+        def.slot = "primary"
+        def.priority = -1
+        def.buffer = 0
+        def.spamCoeff = 0.22
+    })
+
+    var benbPrimarySkillState = new State(function(def) {
+        def.baseDuration = 20/60
+        def.onEnter = function(ins, obj) {
+            ins.duration = ins.baseDuration / obj.attack_speed
+
+            with(obj)
+            {
+                screen_shake_set(1, 4)
+
+                var f = instance_nearest(x, y, obj_playerfist)
+                if(f)
+                {
+                    if(point_distance(x, y, f.x, f.y) < 12)
+                        instance_destroy(f)
+                }
+
+                facing = sign(facing)
+                state = "punch"
+                image_speed = 0.4
+                image_index = 0
+                var canTurn = 0
+                var no = 1
+                if (duck == 0)
+                {
+                    if (sprite_index != _sp.punch_1)
+                    {
+                        sprite_index = _sp.punch_1
+                    }
+                    else
+                    {
+                        sprite_index = _sp.punch_2
+                    }
+                }
+                else
+                {
+                    sprite_index = _sp.duckPunch
+                }
+                with (instance_create_depth(x, y, depth + 2, obj_playerfist))
+                {
+                    parent = other
+                    team = other.team
+                    knockdown = -1
+                    knockback = 1
+
+                    facing = other.facing
+
+                    damage = other.damage
+                }
+                image_index = 0
+                if (sprite_index == _sp.punch_1 || sprite_index == _sp.punch_2)
+                {
+                    canTurn = 1
+                }
+                if canTurn
+                {
+                    if (abs(hsp) < 1)
+                    {
+                        if input_dir == 1
+                        {
+                            facing = 1
+                            if on_ground
+                                hsp = approach(hsp, facing * 1, 1)
+                        }
+                        if input_dir == -1
+                        {
+                            facing = -1
+                            if on_ground
+                                hsp = approach(hsp, facing * 1, 1)
+                        }
+                    }
+                }
+            }
+        }
+    }, benbPrimarySkill)
+    benbPrimarySkill.activationState = benbPrimarySkillState
+    #endregion
+
     LogInfo("Startup", "Initialized character skills and skill states")
 }
 
@@ -315,6 +409,44 @@ function initChars()
         }
     })
 
+    global.chardefs.benb = new CharacterDef("benb", function(def) {
+        def.stats = {
+            hp_max: 100,
+            regen_rate: 1,
+            curse: 1,
+            spd: 2,
+            jumpspd: -3.7,
+            firerate: 5,
+            bombrate: 80,
+            spread: 4,
+            damage: 14,
+            ground_accel: 0.15,
+            ground_fric: 0.12,
+            air_accel: 0.07,
+            air_fric: 0.02,
+            jumps_max: 2,
+            grv: 0.2,
+            attack_speed: 1
+        }
+        def.level_stats = {
+            hp_max: 30,
+            damage: 2.4
+        }
+
+        def.skills = {
+            primary:   new SkillInstance(global.skilldefs[$ "benb.punch"]),
+		    secondary: new SkillInstance(global.skilldefs[$ "base"]),
+		    utility: new SkillInstance(global.skilldefs[$ "base"]),
+		    special: new SkillInstance(global.skilldefs[$ "base"])
+        }
+
+        def.attack_states = {
+            primary:   variable_clone(def.skills.primary.def.activationState),
+            secondary: variable_clone(def.skills.secondary.def.activationState),
+            utility:   variable_clone(def.skills.utility.def.activationState),
+            special:   variable_clone(def.skills.special.def.activationState)
+        }
+    })
+
     LogInfo("Startup", "Initialized character definitions")
 }
-

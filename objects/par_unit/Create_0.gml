@@ -22,6 +22,8 @@ flash = 0
 xp = 0
 money = 0
 
+fucked = 0
+
 bonus_stocks = {
     primary: 0,
     secondary: 0,

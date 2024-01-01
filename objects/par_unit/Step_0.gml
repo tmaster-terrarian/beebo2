@@ -7,11 +7,16 @@ if(hp <= 0) && !ded
     instance_destroy()
 }
 
+if(fucked > 0)
+	fucked = approach(fucked, 0, global.dt / 6)
+else
+	fucker = noone
+
 if(y > room_height + 48)
     hp = 0
 
 if(!on_ground)
-    vsp = approach(vsp, 20, grv)
+    vsp = approach(vsp, 20, grv * global.dt)
 
 var names = struct_get_names(skills)
 for(var i = 0; i < array_length(names); i++)

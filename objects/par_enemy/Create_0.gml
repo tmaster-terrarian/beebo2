@@ -5,6 +5,8 @@ if(team == Team.enemy)
     items = global.enemyItems
 }
 
+depth = 60
+
 target = get_nearest_notme(x, y, _target)
 retargetTimer = 300
 autoaggro = 1

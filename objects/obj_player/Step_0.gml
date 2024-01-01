@@ -132,7 +132,7 @@ if (input.jump() && can_jump)
                     {
                         sprite_index = spr_fx_dust2
                         vx = random_range(-0.5, 0.5)
-                        vz = random_range(-0.2, 0)
+                        vy = random_range(-0.2, 0)
                     }
                 }
                 jumps--
@@ -218,15 +218,20 @@ if (input.jump() && can_jump)
     }
 }
 
+if(input.unjump() && vsp < 0)
+{
+    vsp /= 2
+}
+
 if _position_meeting(x, y + 1, par_solid)
 {
     var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
-    if(running && (ceil(image_index) == 5 || ceil(image_index) == 1))
+    if(running && (ceil(image_index) == 5 || ceil(image_index) == 1) && !skidding)
     {
         if (!audio_is_playing(footsound))
             audio_play_sound(footsound, 8, false)
     }
-    if(running && run && abs(hsp) >= spd && ceil(image_index) % 2 == 0)
+    if(running && run && abs(hsp) >= spd && ceil(image_index) % 3 == 0)
     {
         with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
         {
@@ -238,11 +243,47 @@ if _position_meeting(x, y + 1, par_solid)
     }
 }
 
+if(skidding && on_ground)
+{
+    sprite_index = _sp.run
+    image_index = 0
+    if(ceil(t) % 3 == 0)
+    {
+        with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
+        {
+            sprite_index = spr_fx_dust2;
+            image_index = irandom(1)
+            vx = random_range(-0.1, 0.1);
+            vy = random_range(-0.5, -0.1);
+            vz = 0;
+        }
+    }
+}
+
+// skill processing
 var names = struct_get_names(skills)
 for(var i = 0; i < array_length(names); i++)
 {
     var skill = skills[$ names[i]]
     var def = skill.def
+
+    var inputPressed = input[$ names[i] + "Pressed"]()
+
+    if(inputPressed && (attack_state == names[i] && attack_states[$ attack_state].age >= (attack_states[$ attack_state].duration * def.spamCoeff)))
+    {
+        if(!def.beginCooldownOnEnd)
+            skill.cooldown = def.baseStockCooldown
+        skill.stocks -= def.stockToConsume
+
+        if(attack_state != noone)
+        {
+            attack_states[$ attack_state].onExit(attack_states[$ attack_state], self)
+            attack_state = noone
+        }
+
+        attack_state = names[i]
+        attack_states[$ attack_state].onEnter(attack_states[$ attack_state], self)
+    }
 
     if(skill.cooldown > 0)
         skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
@@ -260,12 +301,12 @@ for(var i = 0; i < array_length(names); i++)
     var skill = skills[$ names[i]]
     var def = skill.def
 
-    var inputPressed = input[$ names[i]]()
+    var inputHeld = input[$ names[i]]()
     var preventSkillSelfInterrupt = attack_state != names[i]
     var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority || skills[$ attack_state].def.priority < 0)
     var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
 
-    if(skill.cooldown <= 0 && inputPressed && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
+    if(skill.cooldown <= 0 && inputHeld && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
     {
         if(!def.beginCooldownOnEnd)
             skill.cooldown = def.baseStockCooldown
@@ -294,7 +335,11 @@ if(hp <= 0) && !ded
 {
     ded = 1
     state = "dead"
+    sprite_index = _sp.dead
+    image_index = 0
     timer0 = 0
+
+    rand = random(1) < 1/1000
 
     if(abs(hsp) < 2)
         hsp = 2

@@ -128,8 +128,19 @@ else
 
 if(has_gun)
 {
-    fire_angle = point_direction(x, y - 8, mouse_x, mouse_y);
-    fire_angle = round(fire_angle / 10) * 10;
+    if(gamepad)
+    {
+        var __aimx = gamepad_axis_value(gp_id, gp_axisrh)
+        var __aimy = gamepad_axis_value(gp_id, gp_axisrv)
+        var _aimx = gamepad_axis_value(gp_id, gp_axislh)
+        var _aimy = gamepad_axis_value(gp_id, gp_axislv)
+        aimx = (abs(__aimx) == 0 && abs(__aimy) == 0) ? _aimx : __aimx
+        aimy = (abs(__aimx) == 0 && abs(__aimy) == 0) ? _aimy : __aimy
+
+        fire_angle = point_direction(0, 0, aimx, aimy)
+    }
+    else
+        fire_angle = point_direction(x, y - 8, mouse_x, mouse_y)
 
     recoil = approach(recoil, 0, 1 * global.dt)
     bombdelay = approach(bombdelay, 0, 1 * global.dt)
@@ -142,10 +153,24 @@ if(has_gun)
             fire_angle = 0
     }
 
-    gun_flip = (fire_angle <= 270 && fire_angle > 90) ? -1 : 1
+    if(gamepad && (abs(aimx) > 0 || abs(aimy) > 0))
+    {
+        gun_flip = (fire_angle <= 270 && fire_angle > 90) ? -1 : 1
+        if(state == "normal")
+            facing = gun_flip
+    }
+    else if(gamepad)
+    {
+        gun_flip = facing
 
-    if(state == "normal")
-        facing = gun_flip
+        fire_angle = (facing > 0) ? 0 : 180
+    }
+    else
+    {
+        gun_flip = (fire_angle <= 270 && fire_angle > 90) ? -1 : 1
+        if(state == "normal")
+            facing = gun_flip
+    }
 
     if(attack_state != "primary" && cool_delay == 0)
     {

@@ -46,7 +46,7 @@ function __scribble_config_colours()
         rc_special:		#D508E5,
 
 		kw_health:		#00cc43,
-		kw_damage:		#ee0077,
+		kw_damage:		#ff004d,
 		kw_projectile:	#e5c313,
 		kw_number:		#e8d782,
 		kw_proctype:	#a6f1d1,

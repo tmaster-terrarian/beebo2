@@ -4,7 +4,33 @@ var drawgun = function(_v)
     {
         if(flash > 0)
             shader_set(sh_flash)
-        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) + lengthdir_x(-recoil, fire_angle), y + gun_pos.y + lengthdir_y(-recoil, fire_angle), 1, 1 * gun_flip, fire_angle, merge_color(c_white, c_red, (heat/heat_max)*0.5), 1)
+
+        if(gamepad)
+        {
+            var d = fire_angle
+            var m = point_distance(0, 0, aimx, aimy)
+
+            dist = point_distance(0, 0, lengthdir_x(aimx, fire_angle), lengthdir_y(aimy, fire_angle))
+
+            var nx = lengthdir_x(point_distance(0, 0, aimx, aimy), point_direction(0, 0, aimx, aimy)) * 24
+            var ny = lengthdir_y(point_distance(0, 0, aimx, aimy), point_direction(0, 0, aimx, aimy)) * 24
+
+            draw_set_alpha(0.7)
+
+            draw_point_color(x + gun_pos.x * sign(facing) + nx, y + gun_pos.y + ny - 2, c_red)
+            draw_point_color(x + gun_pos.x * sign(facing) + nx * 1.5, y + gun_pos.y + ny * 1.5 - 2, c_red)
+            draw_point_color(x + gun_pos.x * sign(facing) + nx * 2, y + gun_pos.y + ny * 2 - 2, c_red)
+            draw_point_color(x + gun_pos.x * sign(facing) + nx * 2.5, y + gun_pos.y + ny * 2.5 - 2, c_red)
+            draw_point_color(x + gun_pos.x * sign(facing) + nx * 3, y + gun_pos.y + ny * 3 - 2, c_red)
+            draw_point_color(x + gun_pos.x * sign(facing) + nx * 3.5, y + gun_pos.y + ny * 3.5 - 2, c_red)
+
+            draw_set_alpha(1)
+
+            if(abs(aimx) > 0 || abs(aimy) > 0)
+                draw_sprite_ext(spr_player_gun_reticle2, 0, x + gun_pos.x * sign(facing) + (nx * 4), y + gun_pos.y + (ny * 4) - 2, gun_flip, 1, 0, c_white, 1)
+        }
+
+        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) + lengthdir_x(-recoil, round(fire_angle / 10) * 10), y + gun_pos.y + lengthdir_y(-recoil, round(fire_angle / 10) * 10), 1, 1 * gun_flip, round(fire_angle / 10) * 10, merge_color(c_white, c_red, (heat/heat_max)*0.5), 1)
 
         shader_reset()
     }
