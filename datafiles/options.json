@@ -1,0 +1,244 @@
+{
+    "inputSettings": [
+        {
+            "gpIndex": -1,
+            "buttons": {
+                "left": {
+                    "mouse": false,
+                    "keyCode": 65,
+                    "gp": 14
+                },
+                "right": {
+                    "mouse": false,
+                    "keyCode": 68,
+                    "gp": 15
+                },
+                "up": {
+                    "mouse": false,
+                    "keyCode": 87,
+                    "gp": 12
+                },
+                "down": {
+                    "mouse": false,
+                    "keyCode": 83,
+                    "gp": 13
+                },
+                "interact": {
+                    "mouse": false,
+                    "keyCode": 69,
+                    "gp": 2
+                },
+                "activate": {
+                    "mouse": false,
+                    "keyCode": 81,
+                    "gp": 3
+                },
+                "jump": {
+                    "mouse": false,
+                    "keyCode": 32,
+                    "gp": 0
+                },
+                "skill1": {
+                    "mouse": true,
+                    "keyCode": 1,
+                    "gp": 7
+                },
+                "skill2": {
+                    "mouse": true,
+                    "keyCode": 2,
+                    "gp": 6
+                },
+                "skill3": {
+                    "mouse": false,
+                    "keyCode": 16,
+                    "gp": 4
+                },
+                "skill4": {
+                    "mouse": false,
+                    "keyCode": 82,
+                    "gp": 5
+                }
+            }
+        },
+        {
+            "gpIndex": 0,
+            "buttons": {
+                "left": {
+                    "mouse": false,
+                    "keyCode": 65,
+                    "gp": 14
+                },
+                "right": {
+                    "mouse": false,
+                    "keyCode": 68,
+                    "gp": 15
+                },
+                "up": {
+                    "mouse": false,
+                    "keyCode": 87,
+                    "gp": 12
+                },
+                "down": {
+                    "mouse": false,
+                    "keyCode": 83,
+                    "gp": 13
+                },
+                "interact": {
+                    "mouse": false,
+                    "keyCode": 69,
+                    "gp": 2
+                },
+                "activate": {
+                    "mouse": false,
+                    "keyCode": 81,
+                    "gp": 3
+                },
+                "jump": {
+                    "mouse": false,
+                    "keyCode": 32,
+                    "gp": 0
+                },
+                "skill1": {
+                    "mouse": true,
+                    "keyCode": 1,
+                    "gp": 7
+                },
+                "skill2": {
+                    "mouse": true,
+                    "keyCode": 2,
+                    "gp": 6
+                },
+                "skill3": {
+                    "mouse": false,
+                    "keyCode": 16,
+                    "gp": 4
+                },
+                "skill4": {
+                    "mouse": false,
+                    "keyCode": 82,
+                    "gp": 5
+                }
+            }
+        },
+        {
+            "gpIndex": 1,
+            "buttons": {
+                "left": {
+                    "mouse": false,
+                    "keyCode": 65,
+                    "gp": 14
+                },
+                "right": {
+                    "mouse": false,
+                    "keyCode": 68,
+                    "gp": 15
+                },
+                "up": {
+                    "mouse": false,
+                    "keyCode": 87,
+                    "gp": 12
+                },
+                "down": {
+                    "mouse": false,
+                    "keyCode": 83,
+                    "gp": 13
+                },
+                "interact": {
+                    "mouse": false,
+                    "keyCode": 69,
+                    "gp": 2
+                },
+                "activate": {
+                    "mouse": false,
+                    "keyCode": 81,
+                    "gp": 3
+                },
+                "jump": {
+                    "mouse": false,
+                    "keyCode": 32,
+                    "gp": 0
+                },
+                "skill1": {
+                    "mouse": true,
+                    "keyCode": 1,
+                    "gp": 7
+                },
+                "skill2": {
+                    "mouse": true,
+                    "keyCode": 2,
+                    "gp": 6
+                },
+                "skill3": {
+                    "mouse": false,
+                    "keyCode": 16,
+                    "gp": 4
+                },
+                "skill4": {
+                    "mouse": false,
+                    "keyCode": 82,
+                    "gp": 5
+                }
+            }
+        },
+        {
+            "gpIndex": 2,
+            "buttons": {
+                "left": {
+                    "mouse": false,
+                    "keyCode": 65,
+                    "gp": 14
+                },
+                "right": {
+                    "mouse": false,
+                    "keyCode": 68,
+                    "gp": 15
+                },
+                "up": {
+                    "mouse": false,
+                    "keyCode": 87,
+                    "gp": 12
+                },
+                "down": {
+                    "mouse": false,
+                    "keyCode": 83,
+                    "gp": 13
+                },
+                "interact": {
+                    "mouse": false,
+                    "keyCode": 69,
+                    "gp": 2
+                },
+                "activate": {
+                    "mouse": false,
+                    "keyCode": 81,
+                    "gp": 3
+                },
+                "jump": {
+                    "mouse": false,
+                    "keyCode": 32,
+                    "gp": 0
+                },
+                "skill1": {
+                    "mouse": true,
+                    "keyCode": 1,
+                    "gp": 7
+                },
+                "skill2": {
+                    "mouse": true,
+                    "keyCode": 2,
+                    "gp": 6
+                },
+                "skill3": {
+                    "mouse": false,
+                    "keyCode": 16,
+                    "gp": 4
+                },
+                "skill4": {
+                    "mouse": false,
+                    "keyCode": 82,
+                    "gp": 5
+                }
+            }
+        }
+    ]
+}

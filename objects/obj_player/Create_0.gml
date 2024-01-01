@@ -50,9 +50,11 @@ recoil = 0
 fire_angle = 0
 
 team = Team.player
-player_id = 0
+gp_id = global.perPlayerInput[player_id].playerIndex
 
-// array_push(global.players, self)
+global.players[player_id] = self
+
+gamepad = (gp_id >= 0)
 
 _sp =
 {
@@ -80,25 +82,24 @@ gun_flip = 1
 draw_gun = 1
 has_gun = 1
 
+_p = self
+
 input =
 {
-    left: function() {return keyboard_check(ord("A"))}, right: function() {return keyboard_check(ord("D"))},
-    up: function() {return keyboard_check(ord("W"))}, down: function() {return keyboard_check(ord("S"))},
-    jump: function() {return keyboard_check_pressed(vk_space)},
-    primary: function() {return mouse_check_button(mb_left)},
-    secondary: function() {return mouse_check_button(mb_right)},
-    utility: function() {return keyboard_check(vk_lshift)},
-    special: function() {return keyboard_check(ord("R"))}
+    left: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislh) < 0) || global.perPlayerInput[other._p.player_id].buttons.left.check()},
+    right: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislh) > 0) || global.perPlayerInput[other._p.player_id].buttons.right.check()},
+    up: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) < 0) || global.perPlayerInput[other._p.player_id].buttons.up.check()},
+    down: function() {return ((other._p.gp_id >= 0) && gamepad_axis_value(other._p.gp_id, gp_axislv) > 0) || global.perPlayerInput[other._p.player_id].buttons.down.check()},
+    jump: function() {return global.perPlayerInput[other._p.player_id].buttons.jump.checkPressed()},
+    primary: function() {return global.perPlayerInput[other._p.player_id].buttons.skill1.check()},
+    secondary: function() {return global.perPlayerInput[other._p.player_id].buttons.skill2.check()},
+    utility: function() {return global.perPlayerInput[other._p.player_id].buttons.skill3.check()},
+    special: function() {return global.perPlayerInput[other._p.player_id].buttons.skill4.check()}
 }
 
 _oncollide_h = function()
 {
-    var input_dir = sign
-    (
-        gamepad_axis_value(player_id, gp_axislh)
-        + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
-        + (input.right() - input.left())
-    )
+    var input_dir = input.right() - input.left()
 
     if(state == "dead")
     {
@@ -134,13 +135,6 @@ _oncollide_h = function()
 
 _oncollide_v = function()
 {
-    var input_dir = sign
-    (
-        gamepad_axis_value(player_id, gp_axislh)
-        + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
-        + (input.right() - input.left())
-    )
-
     if (state == "normal")
     {
         landTimer = 8
@@ -175,9 +169,10 @@ _squish = function()
 
 draw_hud = 1
 
-state = "intro"
+state = "normal"
 states =
 {
+    _p : other,
     braindead : function()
     {with(other){
         fxtrail = 0
@@ -186,6 +181,45 @@ states =
         hsp = 0
         vsp = 0
     }},
+    intro : function()
+    {with(other){
+        if(timer0 == 0)
+        {
+            instance_create_depth(-8, 112, 0, fx_exploder, {image_xscale: 7, image_yscale: 6, lifetime: 60, interval: 6})
+        }
+        with(obj_player)
+        {
+            state = "braindead"
+            duck = 0
+            fxtrail = 0
+            can_jump = 0
+            can_walljump = 0
+            ghost = 0
+            hsp = 0
+            vsp = 0
+            has_gun = 0
+            image_alpha = 0
+        }
+        state = "intro"
+        if(timer0 < 60)
+            timer0 = approach(timer0, 60, global.dt)
+        if(timer0 == 60)
+        {
+            with(obj_player)
+            {
+                timer0 = 0
+                state = "normal"
+                image_alpha = 1
+                has_gun = 1
+                hsp = 2 + random(1.5)
+                vsp = -2 - random(1)
+            }
+            audio_play_sound(sn_walljump, 2, 0)
+            audio_play_sound(sn_walljump, 2, 0)
+            audio_play_sound(sn_walljump, 2, 0)
+        }
+    }},
+
     normal : function()
     {with(other){
         can_walljump = 1
@@ -272,7 +306,7 @@ states =
             }
             if (abs(hsp) < 1.5 && on_ground && !landTimer)
             {
-                up = (input.up() || gamepad_button_check(player_id, gp_padu))
+                up = input.up()
                 sprite_index = _sp.idle
                 if duck
                 {
@@ -291,7 +325,7 @@ states =
                 }
             }
         }
-        if ((input.down() || gamepad_axis_value(player_id, gp_axislv) > 0 || gamepad_button_check(player_id, gp_padd)) && on_ground)
+        if (input.down() && on_ground)
             duck = approach(duck, 3, 1 * global.dt)
         else if (!(place_meeting(x, y - 6, par_solid)))
         {
@@ -549,36 +583,6 @@ states =
             hsp = approach(hsp, 0, fric * 2 * global.dt)
         else
             vsp = approach(vsp, 20, grv * global.dt)
-    }},
-    intro : function()
-    {with(other){
-        if(timer0 == 0)
-        {
-            instance_create_depth(-8, 112, 0, fx_exploder, {image_xscale: 7, image_yscale: 6, lifetime: 60, interval: 6})
-        }
-        duck = 0
-        fxtrail = 0
-        can_jump = 0
-        can_walljump = 0
-        ghost = 0
-        hsp = 0
-        vsp = 0
-        has_gun = 0
-        image_alpha = 0
-        if(timer0 < 60)
-            timer0 = approach(timer0, 60, global.dt)
-        if(timer0 == 60)
-        {
-            timer0 = 0
-            state = "normal"
-            image_alpha = 1
-            has_gun = 1
-            hsp = 3
-            vsp = -2
-            audio_play_sound(sn_walljump, 2, 0)
-            audio_play_sound(sn_walljump, 2, 0)
-            audio_play_sound(sn_walljump, 2, 0)
-        }
     }}
 }
 

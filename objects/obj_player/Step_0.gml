@@ -6,13 +6,7 @@ running = (sprite_index == _sp.run)
 if(state != "ledgeclimb")
     ledgegrabTimer = approach(ledgegrabTimer, 0, 1 * global.dt)
 
-input_dir = 0
-input_dir = sign
-(
-    gamepad_axis_value(player_id, gp_axislh)
-    + (gamepad_button_check(player_id, gp_padr) - gamepad_button_check(player_id, gp_padl))
-    + (input.right() - input.left())
-) * hascontrol
+input_dir = (input.right() - input.left()) * hascontrol
 
 if(on_ground && state != "ledgegrab")
 {
@@ -55,7 +49,7 @@ PAUSECHECK //prevent any further code from running if the game is paused (hopefu
 
 states[$ state]() //MAGIC
 
-if (input.jump() || gamepad_button_check_pressed(player_id, gp_face1)) && can_jump
+if (input.jump() && can_jump)
 {
     if(on_ground) || (jump_buffer && vsp > 0) || (jumps - 1 && state != "ledgegrab")
     {

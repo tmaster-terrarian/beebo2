@@ -25,8 +25,8 @@
   "nineSlice": null,
   "origin": 9,
   "parent": {
-    "name": "beebo",
-    "path": "folders/Sprites/player/beebo.yy",
+    "name": "player",
+    "path": "folders/Sprites/player.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {

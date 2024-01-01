@@ -12,7 +12,7 @@ if(running)
 }
 if(sprite_index == _sp.jump)
 {
-    px1 = x - 4 * facing
+    px1 = x - 1 - 4 * facing
     py1 = y - 13
 }
 if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
@@ -34,19 +34,19 @@ if(sprite_index == _sp.ledgeclimb)
     {
         case 0: case 1:
         {
-            px1 = x - 1 - 12 * facing
+            px1 = x - 1 - 13 * facing
             py1 = y - 2
             break;
         }
         case 2: case 3:
         {
-            px1 = x - 1 - 9 * facing
+            px1 = x - 1 - 10 * facing
             py1 = y - 3
             break;
         }
         case 4:
         {
-            px1 = x - 1 - 6 * facing
+            px1 = x - 1 - 7 * facing
             py1 = y - 4
             break;
         }
@@ -121,19 +121,19 @@ if(sprite_index == _sp.ledgeclimb)
     {
         case 0: case 1:
         {
-            px2 = x - 1 - 6 * facing
+            px2 = x - 1 - 7 * facing
             py2 = y - 2
             break;
         }
         case 2: case 3:
         {
-            px2 = x - 1 - 3 * facing
+            px2 = x - 1 - 4 * facing
             py2 = y - 3
             break;
         }
         case 4:
         {
-            px2 = x - 1
+            px2 = x - 1 - 1 * facing
             py2 = y - 4
             break;
         }

@@ -827,6 +827,8 @@ function string_is_real(str)
 	return !((string_digits(str) == "") || (string_replace(string_replace(str, ".", ""), "-", "") != string_digits(str)))
 }
 
+loadInputSettings()
+
 // localization
 function string_loc(key) // example key: item.beeswax.name
 {
@@ -1005,7 +1007,7 @@ function item_add_stacks(item_id, target, stacks = 1, notify = 0)
 {
 	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
 	{
-		array_push(gm.item_pickup_queue, item_id)
+		array_push(gm.item_pickup_queue, {item_id, target})
 	}
 
 	for(var i = 0; i < array_length(target.items); i++)
@@ -1028,7 +1030,7 @@ function item_set_stacks(item_id, target, stacks, notify = 0)
 {
 	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
 	{
-		array_push(gm.item_pickup_queue, item_id)
+		array_push(gm.item_pickup_queue, {item_id, target})
 	}
 
 	for(var i = 0; i < array_length(target.items); i++)

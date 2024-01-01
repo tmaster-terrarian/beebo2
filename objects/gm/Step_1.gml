@@ -167,11 +167,12 @@ if(!global.pause)
 {
     if(array_length(item_pickup_queue) > 0 && !instance_exists(fx_pickuptext))
     {
-        var item_id = array_shift(item_pickup_queue)
+        var item = array_shift(item_pickup_queue)
 
         var _i = instance_create_depth(0, 0, 0, fx_pickuptext)
-        _i.name = getdef(item_id, deftype.item).displayname
-        _i.shortdesc = getdef(item_id, deftype.item).description
-        _i.item_id = item_id
+        _i.name = getdef(item.item_id, deftype.item).displayname
+        _i.shortdesc = getdef(item.item_id, deftype.item).description
+        _i.item_id = item.item_id
+        _i.target = item.target
     }
 }

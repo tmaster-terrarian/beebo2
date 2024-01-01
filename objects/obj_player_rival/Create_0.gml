@@ -1,6 +1,6 @@
 event_inherited();
-stats = variable_clone(global.chardefs.rival.stats)
-level_stats = variable_clone(global.chardefs.rival.level_stats)
+stats = global.chardefs.rival.stats
+level_stats = global.chardefs.rival.level_stats
 _apply_stats()
 
 skills = variable_clone(global.chardefs.rival.skills)
@@ -12,7 +12,7 @@ _sp =
     m_duck: mask_player_duck,
     m_ledgegrab: mask_player_ledgegrab,
     idle: spr_anime,
-    idle_lookup: spr_player_lookup,
+    idle_lookup: spr_anime_lookup,
     crawl: spr_anime_crawl,
     duck: spr_anime_duck,
     dead: spr_anime_dead,
@@ -23,12 +23,6 @@ _sp =
     ledgeclimb: spr_anime_ledgeclimb
 }
 sprite_index = _sp.idle
-
-player_id = 1
-
-_dbkey = vk_lalt
-
-global.players[1] = object_index
 
 state = "normal"
 
@@ -54,3 +48,5 @@ for(var a = 0; a < hair2_points_count; a++)
     hair2_points[a] = [0, 0]
     hair2_segment_len[a] = 1
 }
+
+_dbkey = vk_lalt
