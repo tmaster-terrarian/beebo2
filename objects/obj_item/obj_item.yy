@@ -32,13 +32,13 @@
   "physicsShapePoints": [],
   "physicsStartAwake": true,
   "properties": [
-    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"item_id","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":2,},
+    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"item_id","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"\"\"","varType":4,},
     {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"stacks","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"1","varType":0,},
   ],
   "solid": false,
   "spriteId": {
-    "name": "spr_buff_missing",
-    "path": "sprites/spr_buff_missing/spr_buff_missing.yy",
+    "name": "spr_item_missing",
+    "path": "sprites/spr_item_missing/spr_item_missing.yy",
   },
   "spriteMaskId": {
     "name": "mask_item",

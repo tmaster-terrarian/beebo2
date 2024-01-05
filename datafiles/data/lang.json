@@ -22,47 +22,69 @@
         "ui.options.back": "back",
 
         "damage.immune": "IMMUNE",
+        "damage.revived": "REVIVED",
 
         "item.beeswax.name": "Beeswax",
-        "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]bullet accuracy[/c].",
+        "item.beeswax.pickup": "Increase [kw_projectile]accuracy[/c].",
+        "item.beeswax.description": "Increase the [kw_proctype]accuracy[/c] of [kw_projectile]certain projectiles[/c] by [kw_number]10%[/c] [kw_perstack](+10% per stack)[/c].",
+        "item.beeswax.lore": "",
+
         "item.eviction_notice.name": "Eviction Notice",
-        "item.eviction_notice.description": "Throw [kw_damage]razor-sharp[/c] [kw_projectile]legal papers[/c] [kw_proctype]on hit[/c] when above [kw_number]90%[/c] [kw_health]health[/c].",
+        "item.eviction_notice.pickup": "Throw [kw_damage]razor-sharp[/c] [kw_projectile]legal papers[/c] [kw_proctype]on hit[/c] when above [kw_number]80%[/c] [kw_health]health[/c].",
+        "item.eviction_notice.description": "Upon hitting a target, if [kw_health]health[/c] is equal to or above [kw_number]80%[/c] of [kw_health]maximum health[/c], create a paperwork projectile that deals [kw_number]400%[/c] [kw_perstack](+100% per stack)[/c] [kw_damage]base damage[/c].",
+        "item.eviction_notice.lore": "",
+
         "item.serrated_stinger.name": "Serrated Stinger",
-        "item.serrated_stinger.description": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c].",
-        "item.amorphous_plush.name": "Amorphous Plush",
-        "item.amorphous_plush.description": "A protective feline follows you.",
+        "item.serrated_stinger.pickup": "Attacks have a chance to inflict [kw_damage]bleeding[/c].",
+        "item.serrated_stinger.description": "[kw_number]10%[/c] [kw_perstack](+10% per stack)[/c] chance to inflict targets with [kw_damage]bleeding[/c] on hit.",
+        "item.serrated_stinger.lore": "",
+
         "item.emergency_field_kit.name": "Emergency Field Kit",
+        "item.emergency_field_kit.pickup": "Gain an [kw_health]extra life[/c].",
         "item.emergency_field_kit.description": "Gain an [kw_health]extra life[/c].",
+        "item.emergency_field_kit.lore": "This is the lore text",
+
         "item.emergency_field_kit_consumed.name": "Emergency Field Kit (Consumed)",
-        "item.emergency_field_kit_consumed.description": "Saved your life.",
+        "item.emergency_field_kit_consumed.pickup": "Saved your life.",
+        "item.emergency_field_kit_consumed.description": "This is the description text",
+        "item.emergency_field_kit_consumed.lore": "This is the lore text",
+
         "item.bloody_dagger.name": "Old Knife",
-        "item.bloody_dagger.description": "Attacks from behind deal [kw_damage]bonus damage[/c] [kw_proctype]on hit[/c].",
+        "item.bloody_dagger.pickup": "Attacks from behind deal [kw_damage]bonus damage[/c].",
+        "item.bloody_dagger.description": "Do [kw_number]20%[/c] [kw_perstack](+20% per stack)[/c] [kw_damage]bonus damage[/c] to targets facing away from you.",
+        "item.bloody_dagger.lore": "",
+
         "item.lucky_clover.name": "Lucky Clover",
-        "item.lucky_clover.description": "[kw_number]+10%[/c] chance for [kw_proctype]attacks[/c] to [kw_damage]critically hit[/c].",
+        "item.lucky_clover.pickup": "Gain a chance to [kw_damage]critically hit[/c].",
+        "item.lucky_clover.description": "[kw_number]+10%[/c] [kw_perstack](+10% per stack)[/c] [kw_damage]critical strike chance[/c].",
+        "item.lucky_clover.lore": "This is the lore text",
+
         "item.heal_on_level.name": "Torn Platemail",
-        "item.heal_on_level.description": "Heal [kw_number]10%[/c] of [kw_health]max health[/c] on level up.",
+        "item.heal_on_level.pickup": "Heal on level up.",
+        "item.heal_on_level.description": "Heal [kw_number]25%[/c] [kw_perstack](+25% per stack)[/c] of new [kw_health]max health[/c] post-level up.",
+        "item.heal_on_level.lore": "This is the lore text",
+
         "item.hyperthreader.name": "Hyperthreader",
-        "item.hyperthreader.description": "[kw_health]idk what it does yet[/c]",
+        "item.hyperthreader.pickup": "ULTRA OVERCLOCK",
+        "item.hyperthreader.description": "Increase movement speed by [kw_number]50%[/c] [kw_perstack](+25% per stack)[/c] and jump height by [kw_number]2[/c] units.",
         "item.hyperthreader.lore": "",
 
-        "modifier.unknown.name": "Unknown",
-        "modifier.unknown.description": "unknown",
-        "modifier.reckless.name": "Reckless",
-        "modifier.reckless.description": "Deal [kw_damage]double damage[/c]...\n[kw_downside]but halve your health[/c].",
+        "modifier.cut_hp.name": "Reckless",
+        "modifier.cut_hp.summary": "Deal [kw_damage]double damage[/c]...\n[kw_downside]but halve your health[/c].",
+        "modifier.cut_hp.description": "[kw_health]Maximum health[/c] is multiplied by [kw_number]50%[/c] [kw_perstack](x50% per stack)[/c], [kw_damage]damage[/c] is multiplied by [kw_number]200%[/c] [kw_perstack](x200% per stack)[/c].",
+
         "modifier.evolution.name": "Evolution",
-        "modifier.evolution.description": "[kw_downside]Everything[/c] gets [kw_number]3 stacks[/c] of a [kw_downside]random item[/c]."
+        "modifier.evolution.summary": "[kw_downside]Everything[/c] gets [kw_number]3 stacks[/c] of a [kw_downside]random item[/c]."
     },
     "es":
     {
         "ui.warning": "CUIDADO",
 
         "item.beeswax.name": "Cera de Abejas",
-        "item.beeswax.description": "[kw_number]+10%[/c] [kw_projectile]precision de bala[/c].",
+        "item.beeswax.pickup": "[kw_number]+10%[/c] [kw_projectile]precision[/c].",
         "item.eviction_notice.name": "Aviso de Desalojo",
-        "item.eviction_notice.description": "Tira [kw_projectile]documentos legales[/c] [kw_damage]afilados[/c] cuando te pegan con mas del [kw_number]90%[/c] de [kw_health]vida[/c].",
+        "item.eviction_notice.pickup": "Tira [kw_projectile]documentos legales[/c] [kw_damage]afilados[/c] cuando te pegan con mas del [kw_number]90%[/c] de [kw_health]vida[/c].",
         "item.serrated_stinger.name": "Aguijon Serrado",
-        "item.serrated_stinger.description": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c].",
-        "item.amorphous_plush.name": "Peluche Amorfo",
-        "item.amorphous_plush.description": "Un felino protectivo te sigue."
+        "item.serrated_stinger.pickup": "[kw_number]+10%[/c] chance to inflict [kw_damage]bleeding[/c] [kw_proctype]on hit[/c]."
     }
 }

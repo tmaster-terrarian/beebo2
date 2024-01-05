@@ -14,11 +14,15 @@ if(!global.pause && global.runEnabled)
 
     if(wavetimer > 0)
         wavetimer = max(wavetimer - global.dt, 0)
+    if(wave5delay > 0)
+        wave5delay = max(wave5delay - global.dt, 0)
 
     if(wavetimer == 0)
     {
         wavetimer = -1
-        global.wave++
+        if(!doNotIncreaseWave)
+            global.wave++
+        doNotIncreaseWave = 0
 
         var waveType = 0
         switch((global.wave - 1) % 5)
@@ -34,22 +38,34 @@ if(!global.pause && global.runEnabled)
                 break;
             }
         }
-        if(waveType != 1)
+        mainDirector.waveType = waveType
+        if(waveType == 0)
         {
-            mainDirector.waveType = waveType
             mainDirector.Enable()
         }
-        else // make shop appear
+        else // TODO: Replace this line with shop creation
         {
+            mainDirector.waveType = waveType
             mainDirector.Disable()
-            wavetimer = 900 // TODO: Replace this line with shop creation
+            wave5delay = 900
+
+            var pcount = array_length(global.players)
+            for(var i = 0; i < pcount; i++)
+            {
+                instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 140, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
+            }
         }
+    }
+
+    if(wave5delay == 0 && wavetimer == -1)
+    {
+        wave5delay = -1
+        mainDirector.Enable()
     }
 
     var waveFac = 1.5 * global.wave
     var diffFac = 0.0506 * global.difficultySetting
     global.difficultyCoeff = (1 + diffFac * waveFac) * power(1.02, global.wave) // ror2 is so cool man
-
     global.enemyLevel = min(1 + round((global.difficultyCoeff - 1)/0.33), 9999)
 
     global.enemyCount = 0
@@ -61,10 +77,11 @@ if(!global.pause && global.runEnabled)
         }
     }
 
-    mainDirector.Step()
+    if(mainDirector.enabled)
+        mainDirector.Step()
 
-    // if the director is totally pooped and we are not on a shop wave, proceed to next wave
-    if((mainDirector.credits < 8 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1 && (global.wave - 1) % 5 != 4)
+    // if the director is totally pooped, proceed to next wave
+    if((mainDirector.credits < 8 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1)
     {
         if(global.enemyCount == 0)
         {
@@ -90,12 +107,7 @@ if(!global.pause && global.runEnabled)
 
 with(par_unit)
 {
-    if(team == Team.enemy)
-    {
-        if(global.enemyLevel != level)
-            _apply_level(global.enemyLevel)
-    }
-    else if(object_get_parent(object_index) == obj_player)
+    if(object_get_parent(object_index) == obj_player)
     {
         if(xp > xpTarget)
         {
@@ -104,63 +116,109 @@ with(par_unit)
             _apply_level(level + 1)
         }
     }
+    else
+    {
+        if(level < global.enemyLevel)
+            _apply_level(global.enemyLevel)
+    }
 
     for(var i = 0; i < array_length(items); i++)
     {
-        items[i].triggered = 0
         getdef(items[i].item_id, deftype.item).step(id, items[i].stacks)
+        items[i].triggered = 0
     }
 
+
+    var curseFac = 1
+    curse = stats.curse * curseFac
+
+
     var hpFac = 1
-    hp_max = base_hp_max * hpFac
 
-    var regenFac = 1 + 0.2 * (level - 1)
-    regen_rate = stats.regen_rate * regenFac
+    hpFac += 0.25 * item_get_stacks("boost_health", self)
 
-    var spdFac = 1
+    hpFac *= 1 + elite * 3
+
+    hp_max = (base_hp_max * hpFac) / curse
+
+
+    var shieldFac = 0
+    max_shield = hp_max * shieldFac
+
+
+    total_hp_max = hp_max + max_shield
+    total_hp = hp + shield
+
+
+    var regenFac = 1 + level_stats.regen_rate * (level - 1)
+    regen_rate = (stats.regen_rate * regenFac) / curse
+
+
+    var spdInc = 1
+
+    if(item_get_stacks("hyperthreader", self))
+        spdInc += 0.5 + (item_get_stacks("hyperthreader", self) - 1) * 0.25
+
+    var spdDec = 1
+
+    var spdFac = spdInc/spdDec
+
     spd = stats.spd * spdFac
-    ground_accel = stats.ground_accel * (spd / stats.spd)
-    ground_fric = stats.ground_fric * (spd / stats.spd)
-    air_accel = stats.air_accel * (spd / stats.spd)
-    air_fric = stats.air_fric * (spd / stats.spd)
+
+    var spdMul = max(spd / stats.spd, 1)
+    ground_accel = stats.ground_accel * spdMul
+    ground_fric = stats.ground_fric   * spdMul
+    air_accel = stats.air_accel       * spdMul
+    air_fric = stats.air_fric         * spdMul
+
+
+    var jumpSpdFac = 1
+
+    jumpSpdFac += item_get_stacks("hyperthreader", self) * 0.1
+
+    jumpspd = stats.jumpspd * jumpSpdFac
+
 
     base_damage = (stats.damage + level_stats.damage * (level - 1))
 
+
     var dmgFac = 1
+
+    dmgFac += 0.25 * item_get_stacks("boost_damage", self)
+
+    dmgFac *= 1 + elite
+
     damage = base_damage * dmgFac
 
+
     var newCrit = 0
-    crit_chance = clamp(newCrit, 0, 1)
-    if(crit_chance == 0) crit_chance += 0.01
+
+    newCrit += 0.1 * item_get_stacks("lucky_clover", self)
+
+    crit_chance = clamp(newCrit, 0.01 * (object_get_parent(object_index) == obj_player), 1)
+
+
+    var critModFac = 1
+
+    crit_modifier = 1 * critModFac
+
 
     var spreadFac = 1
-    if(spreadFac < 0) spreadFac = 0
 
+    spreadFac -= item_get_stacks("beeswax", self) * 0.1
+
+    if(spreadFac < 0) spreadFac = 0
     spread = stats.spread * spreadFac
 
-    var firerateFac = 1
-    attack_speed = stats.attack_speed * firerateFac
-    firerate = stats.firerate * stats.attack_speed
-    if(gun_upgrade != "")
-    {
-        firerate = getdef(gun_upgrade, 3).firerate * firerateFac
-    }
+
+    var atkSpdFac = 1
+    attack_speed = stats.attack_speed * atkSpdFac
+
+    firerate = stats.firerate * attack_speed
+
 
     var bombrateFac = 1
     bombrate = stats.bombrate * bombrateFac
-    if(gun_upgrade != "")
-    {
-        bombrate = getdef(gun_upgrade, 3).bombrate * bombrateFac
-    }
-}
-
-if(gamepad_button_check_any_pressed())
-{
-    global.controller = true
-}
-if(keyboard_check_pressed(vk_anykey) || mouse_check_button_pressed(mb_any))
-{
-    global.controller = false
 }
 
 if(!global.pause)
@@ -171,7 +229,7 @@ if(!global.pause)
 
         var _i = instance_create_depth(0, 0, 0, fx_pickuptext)
         _i.name = getdef(item.item_id, deftype.item).displayname
-        _i.shortdesc = getdef(item.item_id, deftype.item).description
+        _i.shortdesc = getdef(item.item_id, deftype.item).pickup
         _i.item_id = item.item_id
         _i.target = item.target
     }

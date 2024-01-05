@@ -9,6 +9,7 @@ regen = 1
 accel = 0
 fric = 0
 hp = 1
+hp_change = 1
 crit_chance = 0
 jumps = 1
 fxtrail = 0
@@ -21,8 +22,26 @@ attack_speed = 1
 flash = 0
 xp = 0
 money = 0
+mass = 10
+_image_xscale = 1
+max_shield = 0
+shield = 0
+drawhp = 0
+__lastframe = image_index
+__lastspr = sprite_index
+oneshotprotection = 0
+crit_modifier = 1
+total_hp = hp
 
 fucked = 0
+
+elite = 0
+
+can_use_skills = 1
+
+target = noone
+
+hp_change_delay = 0
 
 bonus_stocks = {
     primary: 0,
@@ -47,11 +66,22 @@ invokeOnCombatEnter = function()
 onCombatEnter = function() {}
 onCombatExit = function() {}
 
+_onCombatExit = function()
+{
+    shield_regen = 1
+    onCombatExit()
+}
+
+onFrameChange = function() {}
+
 _apply_stats = function()
 {
     hp_max = stats.hp_max
     base_hp_max = hp_max
+    total_hp_max = hp_max
     hp = hp_max
+    total_hp = hp
+    hp_change = hp
     regen_rate = stats.regen_rate
     curse = stats.curse
     damage = stats.damage
@@ -69,6 +99,7 @@ _apply_stats = function()
     jumps = jumps_max
     grv = stats.grv
     attack_speed = stats.attack_speed
+    mass = ((bbox_bottom - bbox_top) + (bbox_right - bbox_left)) / 2
 
     bonus_stocks = {
         primary: 0,
@@ -88,7 +119,7 @@ _apply_level = function(_newlevel)
         hp = _oldhp / _oldhp_max * base_hp_max
 
     if(item_get_stacks("heal_on_level", self))
-        heal_event(self, base_hp_max * 0.1 * item_get_stacks("heal_on_level", self))
+        heal_event(self, base_hp_max * 0.25 + 0.2 * (item_get_stacks("heal_on_level", self) - 1))
 
     hp = min(hp, base_hp_max)
 
@@ -118,6 +149,11 @@ fire_angle = 0
 gun_pos = {x:0,y:0}
 
 items = []
+if(team == Team.enemy)
+{
+    items = variable_clone(global.enemyItems)
+}
+
 buffs = []
 
 skill_queue = []

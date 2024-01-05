@@ -1,7 +1,29 @@
+// sworded
+if(draw_sword)
+{
+    if(flash > 0)
+        shader_set(sh_flash)
+
+    var sx = swordpos.x * facing * stretch
+    var sy = swordpos.y * squash
+
+    var ax = lengthdir_x(point_distance(0, 0, sx, sy), point_direction(0, 0, sx, sy) + image_angle)
+    var ay = lengthdir_y(point_distance(0, 0, sx, sy), point_direction(0, 0, sx, sy) + image_angle)
+
+    draw_sprite_outlined_ext(spr_anime_sword, sword_nohand, x + ax, y + ay, sword_xscale, sword_yscale * squash, _sword_angle + image_angle, c_white, c_black, 1, 1, 0)
+
+    if(flash > 0)
+        shader_reset()
+}
+
+if(flash > 0)
+    shader_set(sh_flash)
+
+// hairs
 var px1 = x - 5 * facing
 if(facing < 0)
 var px1 = x - 1 - 5 * facing
-var py1 = y - 13
+var py1 = y - 13 * squash
 if(running)
 {
     var f = floor(image_index)
@@ -85,10 +107,11 @@ if(ponytail_visible)
     }
 }
 
+// hairs 2
 var px2 = x + 3 * facing
 if(facing < 0)
 var px2 = x - 1 + 3 * facing
-var py2 = y - 13
+var py2 = y - 13 * squash
 if(running)
 {
     var f = floor(image_index)
@@ -172,4 +195,17 @@ if(ponytail_visible)
     }
 }
 
-draw_self();
+var sx = image_xscale
+var sy = image_yscale
+image_xscale *= stretch
+image_yscale *= squash
+
+draw_self()
+
+image_xscale = sx
+image_yscale = sy
+
+if(flash > 0)
+    shader_reset()
+
+drawMyShit()

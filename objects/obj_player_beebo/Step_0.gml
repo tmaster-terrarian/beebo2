@@ -137,6 +137,10 @@ if(has_gun)
         aimx = (abs(__aimx) == 0 && abs(__aimy) == 0) ? _aimx : __aimx
         aimy = (abs(__aimx) == 0 && abs(__aimy) == 0) ? _aimy : __aimy
 
+        var len = sqrt(aimx * aimx + aimy * aimy)
+        aimx /= (len > 0) ? len : 1.0
+        aimy /= (len > 0) ? len : 1.0
+
         fire_angle = point_direction(0, 0, aimx, aimy)
     }
     else
@@ -183,8 +187,46 @@ if(has_gun)
                 vy = random_range(-1.5, -1) + other.vsp
                 vx += other.hsp
             }
-            audio_play_sound(sn_steam, 1, false, heat/heat_max)
+            audio_play_sound(sn_steam, 1, 0, heat/heat_max)
         }
     }
     cool_delay = approach(cool_delay, 0, global.dt)
+
+    if (gun_spr == spr_player_gun_reload)
+    {
+        var _skill = attack_states[$ "primary"]
+        if(cool_delay - 20 < _skill.duration)
+            gun_spr_ind += 0.2
+        if(gun_spr_ind == 1)
+        {
+            audio_play_sound(sn_gun_open, 1, 0)
+        }
+        if(gun_spr_ind == 2)
+        {
+            audio_play_sound(sn_steam, 1, 0)
+            for (i = 0; i < 3; i++)
+            { 
+                with(instance_create_depth(x + gun_pos.x + random_range(-1, 1), y + gun_pos.y + random_range(-1, 1), depth - 1, fx_dust))
+                {
+                    vy = random_range(-1.5, -0.75)
+                    vx = random_range(1.5, 2) * other.gun_flip + other.hsp
+                }
+            }
+        }
+        if(gun_spr_ind == 5)
+        {
+            if(firebomb)
+            {
+                firebomb = 0
+                gun_spr = spr_player_gun
+                gun_spr_ind = 0
+            }
+            else audio_play_sound(snReload, 0, 0)
+        }
+        if(gun_spr_ind >= image_number - 1)
+        {
+            gun_spr = spr_player_gun
+            gun_spr_ind = 0
+        }
+    }
 }

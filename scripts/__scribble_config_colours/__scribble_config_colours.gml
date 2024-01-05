@@ -51,6 +51,7 @@ function __scribble_config_colours()
 		kw_number:		#e8d782,
 		kw_proctype:	#a6f1d1,
 		kw_downside:	#ff0055,
+		kw_perstack:	#8b9899,
     };
 
     return _colours;

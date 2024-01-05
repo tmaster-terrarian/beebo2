@@ -1,6 +1,10 @@
 var _boot_starttime = get_timer()
 file_delete("latest.log")
 
+randomize()
+global.run_seed = random_get_seed()
+Log("Startup/INFO", $"Run seed: {global.run_seed}")
+
 // pixelate gui
 display_set_gui_size(320, 180)
 
@@ -67,13 +71,15 @@ enum damage_notif_type
 	heal,
 	revive,
 	playerhurt,
-	bleed
+	bleed,
+	immune
 }
 
 enum healtype
 {
 	generic,
-	regen
+	regen,
+	hidden
 }
 
 enum deftype
@@ -115,6 +121,10 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 	self.use_attacker_items = use_attacker_items
 	self.force_crit = force_crit
 	self.reduceable = reduceable
+	self.damage_type = damage_notif_type.generic
+	self.crit = 0
+
+	self.blocked = 0
 
 	self.excludedItems = []
 
@@ -143,22 +153,28 @@ function DamageEventContext(attacker, target, proc_type, damage, proc, use_attac
 			array_push(self.excludedItems, string(argument[i]))
 		return self
 	}
+	self.damageType = function(_type)
+	{
+		self.damage_type = _type
+		return self
+	}
 
 	self.toString = function()
 	{
 		return $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.reduceable}, itemBlacklist: {self.excludedItems} \}"
 	}
 
+	self.chain = []
+	self.nonlethal = 0
+
 	// LogInfo("Main", "DamageEventContext created: " + string(self))
 }
 
 function damage_event(ctx)
 {
-	if(ctx.damage <= 0)
-		return;
+	var _damage_type = ctx.damage_type
 
-	var _damage_type = damage_notif_type.generic
-	var crit = 0
+	var damage = ctx.damage
 
 	var attacker_has_items = (instance_exists(ctx.attacker) && variable_instance_exists(ctx.attacker, "items"))
 
@@ -166,15 +182,22 @@ function damage_event(ctx)
 	{
 		var _dir = random_range(-1, 1)
 
+		if(ctx.target.oneshotprotection > 0)
+		{
+			return
+		}
+
 		if(ctx.target.invincible)
 		{
-			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: string_loc("damage.immune"), dir: 0})
+			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.immune, value: string_loc("damage.immune"), dir: 0})
+			ctx.target.flash = 2
+			ctx.blocked = 1
 			return
 		}
 
 		if(instance_exists(ctx.attacker))
 		{
-			_dir = random_range(0.25, 1) * sign(ctx.target.x - ctx.attacker.x)
+			_dir = random_range(-0.25, 1) * sign(ctx.target.x - ctx.attacker.x)
 
 			ctx.attacker.invokeOnCombatEnter()
 
@@ -188,74 +211,71 @@ function damage_event(ctx)
 
 			if(ctx.force_crit == 0)
 			{
-				crit = 0
+				ctx.crit = 0
 			}
 			if(random(1) < ctx.attacker.crit_chance) || ctx.force_crit
 			{
-				crit = 1
+				ctx.crit = 1
 				_damage_type = damage_notif_type.crit
 			}
 
-			if(ctx.use_attacker_items && attacker_has_items)
+			if(!ctx.blocked)
 			{
-				if(ctx.proc_type == proctype.onhit)
-				for(var i = 0; i < array_length(ctx.attacker.items); i++)
+				var bloody_dagger_bonus = ((ctx.target.facing == 1 && ctx.target.x > ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
+				damage *= 1 + bloody_dagger_bonus
+
+				if(ctx.crit)
+					damage *= 2 * ctx.attacker.crit_modifier
+
+				if(ctx.reduceable)
 				{
-					var _item = ctx.attacker.items[i]
-					var _def = getdef(_item.item_id, deftype.item)
-					if(_def.proc_type == proctype.onhit && !array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
-					{
-						_def.proc(ctx, _item.stacks)
-						_item.triggered = 1
-					}
+					// do armor here pls
 				}
 
-				// this is where the real shit happens
-				var bloody_dagger_bonus = ((ctx.target.facing == 1 && ctx.target.x >= ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
+				if(object_get_parent(ctx.target.object_index) == obj_player && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
+				{
+					damage = ctx.target.total_hp_max * 0.9
+					ctx.target.oneshotprotection = 6
+				}
 
-				var dmg_fac = 1 + bloody_dagger_bonus // + etc
+				var _shield = ctx.target.shield
+				ctx.target.shield = max(0, ctx.target.shield - damage)
+				damage -= _shield
 
-				ctx.damage *= dmg_fac
-			}
+				ctx.target.hp -= damage
 
-			if(ctx.attacker.team == Team.player)
-			{
-				if(crit)
-					audio_play_sound(sn_hit_crit, 5, false)
-				else
-					audio_play_sound(sn_hit, 5, false)
+				if(ctx.nonlethal && ctx.target.hp < 1)
+					ctx.target.hp = 1
+
+				if(ctx.attacker.team == Team.player)
+				{
+					if(ctx.crit)
+						audio_play_sound(sn_hit_crit, 5, false)
+					else
+						audio_play_sound(sn_hit, 5, false)
+				}
 			}
 		}
-		else 
+		else
 		{
 			if(ctx.force_crit > -1)
 			{
-				crit = ctx.force_crit
+				ctx.crit = ctx.force_crit
 				if(ctx.force_crit)
 					_damage_type = damage_notif_type.crit
 			}
 		}
 
-		ctx.damage *= (1 + crit)
-
-		var dmg = ctx.damage
-		if(ctx.reduceable)
-		{
-			var fac = 1
-
-			// reduce damage based on various items the target carries
-
-			dmg *= fac
-		}
-		ctx.target.hp -= dmg
+		ctx.target.drawhp = 1
+		ctx.target.hp_change_delay = 5 * max(ctx.proc, 0.2)
 
 		if(object_get_parent(ctx.target.object_index) == obj_player)
 		{
 			audio_play_sound(sn_player_hit, 5, false)
-			_damage_type = damage_notif_type.playerhurt
 		}
 
-		instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(dmg), dir: _dir})
+		// damage number
+		instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(damage), dir: _dir})
 
 		// activate attacker's on kill items and target's on death items if target died
 		if(ctx.target.hp <= 0)
@@ -270,27 +290,31 @@ function damage_event(ctx)
 			}
 			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
 			{
-				if(ctx.proc_type == proctype.onkill)
+				if(ctx.proc > 0)
 				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
 					var _item = ctx.attacker.items[i]
 					var _def = getdef(_item.item_id, deftype.item)
-					if(_def.proc_type == proctype.onkill && !array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
+					if(!array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
-						_def.proc(ctx, _item.stacks)
+						_def.onKill(ctx, _item.stacks)
 						_item.triggered = 1
 					}
 				}
 
 				if(ctx.attacker.team == Team.player)
 				{
-					ctx.attacker.xp += ctx.target.xpReward
-					ctx.attacker.money += ctx.target.moneyReward
+					for(var i = 0; i < array_length(global.players); i++)
+						global.players[i].xp += ctx.target.xpReward
+					global.money += ctx.target.moneyReward
 				}
 			}
 			if(item_get_stacks("emergency_field_kit", ctx.target) > 0)
 			{
+				ctx.target.state = "normal"
+				ctx.target.timer0 = 0
 				ctx.target.hp = ctx.target.hp_max
+				ctx.target.can_use_skills = 1
 				item_add_stacks("emergency_field_kit", ctx.target, -1, 0)
 				item_add_stacks("emergency_field_kit_consumed", ctx.target, 1, 0)
 			}
@@ -298,6 +322,18 @@ function damage_event(ctx)
 		else
 		{
 			ctx.target.flash = 3
+		}
+		if(instance_exists(ctx.attacker))
+		{
+			for(var i = 0; i < array_length(ctx.attacker.items); i++)
+			{
+				var _item = ctx.attacker.items[i]
+				var _def = getdef(_item.item_id, deftype.item)
+				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
+				{
+					_def.onHit(ctx, _item.stacks)
+				}
+			}
 		}
 	}
 }
@@ -310,13 +346,14 @@ function heal_event(target, value, _healtype = healtype.generic)
 	var heal_fac = 1
 	target.hp += value * heal_fac
 
-	if(_healtype != healtype.regen)
+	if(_healtype != healtype.regen && _healtype != healtype.hidden)
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: value, dir: -target.facing})
 }
 
 // could this be the ultimate form of framerate independence?
 global.fixedStep = {
 	_functions: [],
+	_queueFunctions: [],
 	t: 0,
 
 	addFunction: function(func, thisObject = self) {
@@ -331,16 +368,41 @@ global.fixedStep = {
 		return f
 	},
 
+	addQueueFunction: function(func, delaySeconds, thisObject = self) {
+		var _id = floor(get_timer() / 1000)
+		var f = {
+			_thisObject: thisObject,
+			__func: func,
+			_func: function() { with(_thisObject) other.__func(); deleteQueueFunction(other)},
+			myT: delaySeconds * 60,
+			uniqueId: _id
+		}
+		array_push(self._functions, f)
+		return f
+	},
+
 	step: function() {
 		for(var i = 0; i < array_length(self._functions); i++)
 		{
 			self._functions[i]._func()
 		}
+		for(var q = 0; q < array_length(self._queueFunctions); q++)
+		{
+			if(q >= array_length(self._queueFunctions))
+				break
+
+			var f = self._queueFunctions[q]
+			if(floor(f.myT) == self.t)
+			{
+				f._func()
+				q--
+			}
+		}
 		self.t++
 	}
 }
 
-#macro FTICK global.fixedStep.t
+#macro FIXED_TICK global.fixedStep.t
 
 function addFixedStep(func)
 {
@@ -357,6 +419,19 @@ function deleteFixedStep(func)
 	if(ind != -1)
 	{
 		array_delete(global.fixedStep._functions, ind, 1)
+	}
+}
+
+function deleteQueueFunction(func)
+{
+	global.______grahhhhhh = func.uniqueId
+	var ind = array_find_index(global.fixedStep._queueFunctions, function(e, i) {
+		return (e.uniqueId == global.______grahhhhhh)
+	})
+
+	if(ind != -1)
+	{
+		array_delete(global.fixedStep._queueFunctions, ind, 1)
 	}
 }
 
@@ -387,7 +462,8 @@ global.itemdata =
 		#9CE562,
 		#D508E5,
 		#7b003b,
-		#73252f
+		#73252f,
+		#f1b00e
 	]
 }
 
@@ -406,14 +482,18 @@ global.introsequence = false
 global.gamestarted = false
 global.pausetimer = false
 global.gunlesspercent = false
-global.players = [obj_player, obj_player]
+global.players = []
 global.playerCount = 1
 global.enemyCount = 0
 global.fx_bias = 0
 global.usesplitscreen = 0
 
-global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM", 0, -1)
-global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890KM", 1, -1)
+global.friendlyfire = 1
+
+global.money = 0
+
+global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM$:", 0, 0)
+global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890-KM", 1, -1)
 
 // constants
 #macro SC_W 320
@@ -535,6 +615,11 @@ function interpSine(x) // funky curve from 0-1
 	return cos((x+1)*pi)/2+0.5
 }
 
+function canHurt(obj1, obj2)
+{
+	return (obj1.team != obj2.team || global.friendlyfire)
+}
+
 function struct_clone(_struct = {})
 {
 	static total_items = 0
@@ -565,8 +650,17 @@ function cycle(value, _min, _max) {
 function angleRotate(angle, target, speed) {
 	var diff;
 	diff = cycle(target - angle, -180, 180);
-	if (diff < -speed) return angle - speed;
-	if (diff > speed) return angle + speed;
+	if(diff < -speed) return angle - speed;
+	if(diff > speed) return angle + speed;
+	return target;
+}
+function angleLerp(angle, target, t, speed = -1) {
+	var diff = cycle(target - angle, -180, 180);
+	speed = (target - angle) * t
+	if(diff < -speed)
+		return angle - speed;
+	if(diff > speed)
+		return angle + speed;
 	return target;
 }
 
@@ -590,9 +684,26 @@ function create_fxtrail(obj, life = 15)
 			image_index: obj.image_index,
 			image_xscale: obj.image_xscale,
 			image_yscale: obj.image_yscale,
-			image_blend: obj.image_blend,
 			image_angle: obj.image_angle,
+			image_blend: obj.image_blend,
 			image_alpha: 0.5,
+			life
+		}
+	)
+}
+
+function create_fxtrail_ext(spr, ind, x, y, xscale, yscale, angle, color, alpha = 0.5, life = 15)
+{
+	return instance_create_depth(
+		x, y, depth + 2, fx_afterimage,
+		{
+			sprite_index: spr,
+			image_index: ind,
+			image_xscale: xscale,
+			image_yscale: yscale,
+			image_angle: angle,
+			image_blend: color,
+			image_alpha: alpha,
 			life
 		}
 	)
@@ -624,13 +735,11 @@ function item_id_get_random(_by_rarity, _table = global.itemdata.item_tables.any
 {
 	if(_by_rarity)
 	{
-		var _array = struct_get_names(global.itemdefs_by_rarity[random_weighted(_table)])
-		return _array[irandom(array_length(_array) - 1)]
+		return struct_get_random(global.itemdefs_by_rarity[random_weighted(_table)])
 	}
 	else
 	{
-		var _array = struct_get_names(global.itemdefs)
-		return _array[irandom(array_length(_array) - 1)]
+		return struct_get_random(global.itemdefs)
 	}
 }
 
@@ -750,10 +859,11 @@ function random_weighted(list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:
 
 function timer_to_timestamp(_t)
 {
-	var _c = floor((abs(_t) / 10000)) % 100
-	var _s = floor((abs(_t) / 1000000)) % 60
-	var _m = floor(((abs(_t) / 1000000) / 60)) % 60
-	var _h = floor(((abs(_t) / 1000000) / 60) / 60)
+	var __t = abs(_t) / 10000
+	var _c = floor(__t) % 100
+	var _s = floor(__t / 100) % 60
+	var _m = floor((__t / 100) / 60) % 60
+	var _h = floor(((__t / 100) / 60) / 60) // % 60
 	var h = string(_h) + ":"
 
 	if(_c < 10) _c = "0" + string(_c)
@@ -761,7 +871,8 @@ function timer_to_timestamp(_t)
 	if(_m < 10) _m = "0" + string(_m)
 	if(_h < 10) h = "0" + string(_h) + ":"
 
-	var str = ((_t < 0) ? "-" : "") + ((_h) ? h : "") + $"{_m}:{_s}.{_c}"
+	var str = ((_h) ? h : "") + $"{_m}:{_s}.{_c}"
+	str = ((_t < 0) ? "-" : "") + str
 
 	return str
 }
@@ -835,7 +946,51 @@ function string_is_real(str)
 	return !((string_digits(str) == "") || (string_replace(string_replace(str, ".", ""), "-", "") != string_digits(str)))
 }
 
+function instance_distance(ins1, ins2 = -1)
+{
+	if(ins2 != -1)
+		return point_distance(ins1.x, ins1.y, ins2.x, ins2.y)
+	return point_distance(x, y, ins1.x, ins1.y)
+}
+
+function instance_closest_bbox_edge_x(ins1, ins2 = noone) {
+	if(ins2 != noone)
+	{
+		var diffx = ins2.x - ins1.x
+
+		return (diffx > 0) ? ins2.bbox_right : ins2.bbox_left
+	}
+	else
+	{
+		var diffx = ins1.x - x
+
+		return (diffx > 0) ? ins1.bbox_right : ins1.bbox_left
+	}
+}
+function instance_closest_bbox_edge_y(ins1, ins2 = noone) {
+	if(ins2 != noone)
+	{
+		var diffy = ins2.y - ins1.y
+
+		return (diffy > 0) ? ins2.bbox_bottom : ins2.bbox_top
+	}
+	else
+	{
+		var diffx = ins1.x - x
+
+		return (diffy > 0) ? ins1.bbox_bottom : ins1.bbox_top
+	}
+}
+
+global.optionsStruct = {}
 loadInputSettings()
+
+// WOOO SEED LOADING YEA
+if(global.optionsStruct.forcedRunSeed != -1)
+{
+	global.run_seed = global.optionsStruct.forcedRunSeed
+	random_set_seed(global.optionsStruct.forcedRunSeed)
+}
 
 // localization
 function string_loc(key) // example key: item.beeswax.name
@@ -866,22 +1021,23 @@ function locale()
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
 			_item.displayname = string_loc($"item.{_name}.name")
+			_item.pickup = string_loc($"item.{_name}.pickup")
 			_item.description = string_loc($"item.{_name}.description")
 			_item.lore = string_loc($"item.{_name}.lore")
 		})
 		Log("Main/INFO", "reloaded item language data")
 
-		struct_foreach(global.modifierdefs as (_name, _item)
+		struct_foreach(global.modifierdefs as (_name, _modifier)
 		{
-			_item.displayname = string_loc($"modifier.{_name}.name")
-			_item.description = string_loc($"modifier.{_name}.description")
+			_modifier.displayname = string_loc($"modifier.{_name}.name")
+			_modifier.description = string_loc($"modifier.{_name}.description")
 		})
 		Log("Main/INFO", "reloaded modifier language data")
 
-		struct_foreach(global.buffdefs as (_name, _item)
+		struct_foreach(global.buffdefs as (_name, _buff)
 		{
-			_item.displayname = string_loc($"buff.{_name}.name")
-			_item.description = string_loc($"buff.{_name}.description") // likely going to be left underutilized :(
+			_buff.displayname = string_loc($"buff.{_name}.name")
+			_buff.description = string_loc($"buff.{_name}.description") // likely going to be left underutilized :(
 		})
 		Log("Main/INFO", "reloaded buff language data")
 
@@ -899,6 +1055,7 @@ Log("Startup/INFO", $"loaded languages: {struct_get_names(global.lang)}")
 function _itemdef(name) constructor {
 	self.name = name
 	displayname = string_loc($"item.{name}.name")
+	pickup = string_loc($"item.{name}.pickup")
 	description = string_loc($"item.{name}.description")
 	lore = string_loc($"item.{name}.lore")
 	proc_type = proctype.none
@@ -908,12 +1065,16 @@ function _itemdef(name) constructor {
 	draw = function(stacks) {}
 	step = function(target, stacks) {}
 	proc = function(context, stacks) {}
+	onHit = function(context, stacks) {}
+	onKill = function(context, stacks) {}
 }
 
-function itemdef(__struct, _struct = {})
+function itemdef(_name, _struct = {})
 {
 	static total_items = 0
 	total_items++
+
+	var __newstruct = new _itemdef(_name)
 
 	// hhhhhh i hate scope issues so much
 	var names = variable_struct_get_names(_struct)
@@ -922,65 +1083,76 @@ function itemdef(__struct, _struct = {})
 	for (var i = 0; i < size; i++) {
 		var name = names[i];
 		var element = variable_struct_get(_struct, name);
-		variable_struct_set(__struct, name, element)
+		variable_struct_set(__newstruct, name, element)
 	}
 	delete _struct
-	return __struct
+	return __newstruct
 }
 
 global.itemdefs =
 {
-	unknown : new _itemdef("unknown"),
-	beeswax : itemdef(new _itemdef("beeswax"), {
+	unknown : itemdef("unknown"),
+	beeswax : itemdef("beeswax", {
 		rarity : item_rarity.common
 	}),
-	// your time will come again soon my friend
-	// eviction_notice : itemdef(new _itemdef("eviction_notice"), {
-	// 	proc_type : proctype.onhit,
-	// 	rarity : item_rarity.rare,
-	// 	proc : function(context, stacks)
-	// 	{
-	// 		if(context.attacker.hp/context.attacker.hp_max >= 0.9) && sign(context.proc)
-	// 		{
-	// 			var offx = 0
-	// 			var offy = (context.attacker.bbox_top + context.attacker.bbox_bottom) / 2
-
-	// 			var p = instance_create_depth(context.attacker.x + offx, context.attacker.y + offy, context.attacker.depth + 2, obj_paperwork)
-	// 			p.damage = context.attacker.base_damage * (4 + stacks) * context.proc
-	// 			p.team = context.attacker.team
-	// 			p.dir = point_direction(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
-	// 			p.pmax = point_distance(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
-	// 			p.target = context.target
-	// 			p.parent = context.attacker
-	// 		}
-	// 	}
-	// }),
-	serrated_stinger : itemdef(new _itemdef("serrated_stinger"), {
+	eviction_notice : itemdef("eviction_notice", {
 		proc_type : proctype.onhit,
-		rarity : item_rarity.common,
-		proc : function(context, stacks)
+		rarity : item_rarity.legendary,
+		onHit : function(context, stacks)
 		{
-			if(random(1) <= (0.1 * stacks * context.proc))
-				buff_instance_create("bleed", context.exclude("serrated_stinger"), 1).damage = context.attacker.base_damage
+			if(context.attacker.hp/context.attacker.hp_max >= 0.8)
+			{
+				var offx = 0
+				var offy = (context.attacker.bbox_top - context.attacker.bbox_bottom) / 2
+
+				var p = instance_create_depth(context.attacker.x + offx, context.attacker.y + offy, context.attacker.depth + 2, obj_paperwork)
+				p.team = context.attacker.team
+				p.dir = point_direction(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
+				p.pmax = point_distance(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
+				p.target = context.target
+				p.parent = context.attacker
+
+				p.context = new DamageEventContext(context.attacker, context.target, proctype.none, context.attacker.base_damage * (4 + stacks), 0).forceCrit(context.crit).useAttackerItems(1).isReduceable(1).exclude("eviction_notice")
+			}
 		}
 	}),
-	emergency_field_kit : itemdef(new _itemdef("emergency_field_kit"), {
+	serrated_stinger : itemdef("serrated_stinger", {
+		proc_type : proctype.onhit,
+		rarity : item_rarity.common,
+		onHit : function(context, stacks)
+		{
+			if(random(1) <= (0.1 * stacks * context.proc))
+			{
+				var ctx = new DamageEventContext(context.attacker, context.target, proctype.none, context.attacker.base_damage, 0).useAttackerItems(1).isReduceable(1)
+				ctx.damage = ctx.attacker.base_damage
+				var b = buff_instance_create("bleed", ctx.exclude("serrated_stinger").damageType(damage_notif_type.bleed), 1)
+				b.damage = context.attacker.base_damage
+			}
+		}
+	}),
+	emergency_field_kit : itemdef("emergency_field_kit", {
 		rarity : item_rarity.legendary
 	}),
-	emergency_field_kit_consumed : itemdef(new _itemdef("emergency_field_kit_consumed"), {
+	emergency_field_kit_consumed : itemdef("emergency_field_kit_consumed", {
 		rarity : item_rarity.none
 	}),
-	bloody_dagger : itemdef(new _itemdef("bloody_dagger"), {
+	bloody_dagger : itemdef("bloody_dagger", {
 		rarity : item_rarity.common
 	}),
-	lucky_clover : itemdef(new _itemdef("lucky_clover"), {
+	lucky_clover : itemdef("lucky_clover", {
 		rarity : item_rarity.common
 	}),
-	heal_on_level : itemdef(new _itemdef("heal_on_level"), {
-		rarity : item_rarity.common
+	heal_on_level : itemdef("heal_on_level", {
+		rarity : item_rarity.rare
 	}),
-	hyperthreader : itemdef(new _itemdef("hyperthreader"), {
+	hyperthreader : itemdef("hyperthreader", {
 		rarity : item_rarity.legendary
+	}),
+	buff_damage : itemdef("buff_damage", {
+		rarity : item_rarity.none
+	}),
+	buff_hp : itemdef("buff_hp", {
+		rarity : item_rarity.none
 	})
 }
 
@@ -1058,19 +1230,22 @@ function item_set_stacks(item_id, target, stacks, notify = 0)
 }
 
 // modifiers
-function _modifierdef(name) constructor
+function _modifierdef(_name) constructor
 {
-	self.name = name
+	self.name = _name
 	displayname = string_loc($"modifier.{name}.name")
+	summary = string_loc($"modifier.{name}.summary")
 	description = string_loc($"modifier.{name}.description")
 
 	on_pickup = function() {}
 }
 
-function modifierdef(__newstruct, _struct = {})
+function modifierdef(_name, _struct = {})
 {
 	static total_modifiers = 0
 	total_modifiers++
+
+	var __newstruct = new _modifierdef(_name)
 
 	var names = variable_struct_get_names(_struct)
 	var size = variable_struct_names_count(_struct);
@@ -1086,15 +1261,21 @@ function modifierdef(__newstruct, _struct = {})
 
 global.modifierdefs =
 {
-	unknown : new _modifierdef("unknown"),
-	reckless : modifierdef(new _modifierdef("reckless")),
-	evolution : modifierdef(new _modifierdef("evolution"), {
+	unknown : modifierdef("unknown"),
+	cut_hp : modifierdef("cut_hp"),
+	evolution : modifierdef("evolution", {
 		on_pickup : function()
 		{
-			var _item = item_id_get_random(1, global.itemdata.item_tables.chest_small)
-			if(instance_exists(obj_player))
-				item_add_stacks(_item, obj_player, 3)
-			item_add_stacks(_item, statmanager, 3, 0)
+			var item = item_id_get_random(1, global.itemdata.item_tables.chest_small)
+			var stacks = 1
+			var r = getdef(item, deftype.item).rarity
+			if(r == item_rarity.common)
+				stacks = 5
+			if(r == item_rarity.rare)
+				stacks = 3
+			for(var i = 0; i < array_length(global.players); i++)
+				item_add_stacks(item, global.players[i], stacks)
+			item_add_stacks(item, statmanager, stacks)
 		}
 	})
 }
@@ -1202,10 +1383,12 @@ function _buffdef(name) constructor
 	}
 }
 
-function buffdef(__newstruct, _struct = {})
+function buffdef(_name, _struct = {})
 {
 	static total_buffs = 0
 	total_buffs++
+
+	var __newstruct = new _buffdef(_name)
 
 	var names = variable_struct_get_names(_struct)
 	var size = variable_struct_names_count(_struct);
@@ -1221,8 +1404,8 @@ function buffdef(__newstruct, _struct = {})
 
 global.buffdefs =
 {
-	unknown: new _buffdef("unknown"),
-	bleed: buffdef(new _buffdef("bleed"), {
+	unknown: buffdef("unknown"),
+	bleed: buffdef("bleed", {
 		timed: 1,
 		duration: 3,
 		ticksPerSecond: 4,
@@ -1230,14 +1413,14 @@ global.buffdefs =
 		apply: function(instance)
 		{
 			instance.timer = self.duration * instance.context.proc
+			instance.context.damage = instance.context.attacker.base_damage * 0.2
 		},
 		tick: function(instance)
 		{
-			instance.context.damage = instance.context.attacker.base_damage * 2.4
 			damage_event(instance.context)
 		}
 	}),
-	collapse: buffdef(new _buffdef("collapse"), {
+	collapse: buffdef("collapse", {
 		timed: 1,
 		duration: 3,
 		ticksPerSecond: 0,
@@ -1245,10 +1428,10 @@ global.buffdefs =
 		apply: function(instance)
 		{
 			instance.timer = self.duration
+			instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
 		},
 		on_expire: function(instance)
 		{
-			instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
 			damage_event(instance.context)
 			buff_instance_remove(instance)
 		}
@@ -1556,23 +1739,25 @@ function _rundata() constructor
 global.rundata = new _rundata()
 
 // SPAWNING AND DIFFICULTY
-function spawn_card(index, weight, cost, spawnsOnGround = 1) constructor
+function spawn_card(index, weight, cost, spawnOffsetY = 0, spawnsOnGround = 1) constructor
 {
 	self.index = index
 	self.weight = weight
 	self.cost = cost
+	self.spawnOffsetY = spawnOffsetY
 	self.spawnsOnGround = spawnsOnGround
 }
 
 global.spawn_cards =
 [
-	[ // normal
-		new spawn_card("obj_strikes_back", 1, 8)
+	[ // normal/small (beetle level)
+		new spawn_card("obj_e_strikes_back", 1, 8),
+		new spawn_card("obj_e_wall", 1, 18, -16)
 	],
-	[ // strong
+	[ // strong (elder lemurian type beat)
 		new spawn_card("obj_e_bombguy", 1, 40)
 	],
-	[ // boss
+	[ // boss (stone titan shit yknow)
 		new spawn_card("obj_e_strikes_backer", 1, 600)
 	]
 ]
@@ -1635,18 +1820,30 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 		if(self.waveType == 1) // boss wave
 		{
 			var choice, r
-			for(var c = 0; c < 100; c++) // doing this instead of a while loop in the case where nothing can spawn
+			for(var i = 0; i < 3; i++)
 			{
-				r = irandom(array_length(global.spawn_cards[2]) - 1)
-				var rr = global.spawn_cards[2][r]
-				if(rr.cost <= self.credits)
+				for(var c = 0; c < 100; c++) // doing this instead of a while loop in the case where nothing can spawn
 				{
+					r = irandom(array_length(global.spawn_cards[i]) - 1)
+					var rr = global.spawn_cards[i][r]
+					if(rr.cost > self.credits)
+						continue
+
 					choice = rr
-					self.credits -= rr.cost
+					while(rr.cost <= self.credits)
+					{
+						var elite = (rr.cost * 6 <= self.credits)
+						var cost = rr.cost * (1 + elite * 4)
+						self.credits -= cost
 
-					instance_create_depth(obj_camera.tx, 152, 50, rr.index, {boss: true})
+						var xpReward = global.difficultyCoeff * cost * self.expMult
+						var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-					break
+						var ins = instance_create_depth(obj_camera.tx + irandom_range(-32, 32), ((card.spawnsOnGround) ? 152 + card.spawnOffsetY : obj_camera.ty + random_range(-24, 48)), 50, rr.index, {boss: true, xpReward, moneyReward, elite})
+						item_add_stacks("boost_damage", ins, 1)
+						item_add_stacks("boost_health", ins, 1)
+					}
+					return
 				}
 			}
 		}
@@ -1656,6 +1853,8 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 	{
 		self.enabled = 0
 		self.waveType = 0
+		self.lastSpawnCard = noone
+		self.lastSpawnPos = {x: obj_camera.tx, y: obj_camera.ty}
 	}
 
 	self.Step = function() // the spawn loop
@@ -1668,37 +1867,49 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 		// aiming for 800!
 		self.BuildCreditScore()
-		self.spawnTimer = max(0, self.spawnTimer - global.dt)
 
-		if(self.spawnTimer > 0) return;
-
-		var card = self.lastSpawnCard
-		if(self.lastSpawnSucceeded == 0) // if the last spawn failed, obtain a new card
+		if(self.spawnTimer > 0)
 		{
-			var _catagory = random_weighted([{v: 2, w: 1}, {v: 1, w: 1}, {v: 0, w: 1}])
-			self.lastSpawnCard = global.spawn_cards[_catagory][irandom(array_length(global.spawn_cards[_catagory]) - 1)]
-			card = self.lastSpawnCard
-			self.lastSpawnPos = {x: obj_camera.tx + random_range(-80, 80), y: ((card.spawnsOnGround) ? 152 : obj_camera.ty + random_range(-24, 48))}
-		}
-
-		var _spawnIndex = asset_get_index(card.index)
-		if(self.spawnCounter < self.maxSpawns && card.cost <= self.credits && (card.cost >= self.credits / 6 && card.cost < 10000) && object_exists(_spawnIndex) && global.enemyCount < 30)
-		{
-			self.credits -= card.cost
-			var xpReward = global.difficultyCoeff * card.cost * self.expMult
-			var moneyReward = round(2 * global.difficultyCoeff * card.cost * self.expMult)
-
-			instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
-
-			self.spawnCounter++
-			self.lastSpawnSucceeded = 1
-			self.spawnTimer = random_range(self.interval.minval, self.interval.maxval)
+			self.spawnTimer = max(0, self.spawnTimer - global.dt * 1/60)
 		}
 		else
 		{
-			self.spawnCounter = 0
-			self.lastSpawnSucceeded = 0
-			self.spawnTimer = random_range(self.waveInterval.minval, self.waveInterval.maxval)
+			var card = self.lastSpawnCard
+			if(self.lastSpawnSucceeded == 0) // if the last spawn failed, obtain a new card
+			{
+				var _catagory = irandom_range(0, 2)
+				var rrr = irandom(array_length(global.spawn_cards[_catagory]) - 1)
+
+				self.lastSpawnCard = global.spawn_cards[_catagory][rrr]
+				card = self.lastSpawnCard
+				self.lastSpawnPos = {x: obj_camera.tx + random_range(-64, 64), y: ((card.spawnsOnGround) ? 152 + card.spawnOffsetY : obj_camera.ty + random_range(-24, 48))}
+			}
+
+			var _spawnIndex = asset_get_index(card.index)
+			if(self.spawnCounter < self.maxSpawns && (card.cost <= self.credits) && (card.cost >= self.credits / 6 && card.cost < 10000) && object_exists(_spawnIndex) && global.enemyCount < 30)
+			{
+				var elite = (card.cost * 6 <= self.credits)
+				var cost = card.cost * (1 + elite * 4)
+				self.credits -= cost
+				var xpReward = global.difficultyCoeff * cost * self.expMult
+				var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
+
+				var obj = instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
+				obj.elite = elite
+
+				self.lastSpawnPos.x += random_range(-24, 24)
+				self.lastSpawnPos.y = min(140, self.lastSpawnPos.y + (card.spawnsOnGround ? random_range(-24, 24) : 0))
+
+				self.spawnCounter++
+				self.lastSpawnSucceeded = 1
+				self.spawnTimer = random_range(self.interval.minval, self.interval.maxval)
+			}
+			else
+			{
+				self.spawnCounter = 0
+				self.lastSpawnSucceeded = 0
+				self.spawnTimer = random_range(self.waveInterval.minval, self.waveInterval.maxval)
+			}
 		}
 	}
 
@@ -1856,8 +2067,8 @@ function CharacterDef(name, func = noone) constructor
 
 	self.stats =
 	{
-		hp_max : 180,
-		regen_rate : 1,
+		hp_max : 100,
+		regen_rate : 0,
 		curse : 1,
 		spd : 2,
 		jumpspd : -3.7,
@@ -1876,7 +2087,8 @@ function CharacterDef(name, func = noone) constructor
 	self.level_stats =
 	{
 		hp_max: 30,
-		damage: 2.4
+		damage: 2.4,
+        regen_rate: 0
 	}
 
 	self.skills = {

@@ -30,12 +30,16 @@ bgm_fade = function(index, fadetime, loop = 1, gain = 1, offset = 0, pitch = 1)
 }
 
 global.wave = 0
-global.runEnabled = 0
+global.runEnabled = 1
 
 wavetimer = 600
 killzoneTimer = MINUTE
 
-mainDirector = new Director(0, 0.1, 0.75, new range(3, 4), new range(0.24, 0.5), 10)
+doNotIncreaseWave = 0
+
+mainDirector = new Director(0, 0.1, 0.75, new range(3, 4), new range(0.5, 0.5), 10)
+
+wave5delay = 0
 
 global.lastsecond = current_second
 
@@ -65,6 +69,26 @@ togglePause = function()
         UILayer = 0
     }
 }
+
+// pause surface
+pauseSurface = -1
+
+// drawing
+item_pickup_queue = []
+_money = global.money
+
+time_source_start(global.fixedStepTimeSource)
+
+addFixedStep(function() {
+    with(par_unit)
+    {
+        for(var i = 0; i < array_length(buffs); i++)
+        {
+            getdef(buffs[i].buff_id, deftype.buff).step(buffs[i])
+            getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
+        }
+    }
+}, self)
 
 #region UI INIT
 
@@ -98,6 +122,11 @@ var button3 = new UIButtonSimple(SC_W/2 - 26, SC_H/2 - 8, 51, 11)
 button3.label = string_loc("ui.pause.quit_title")
 
 var button4 = new UIButtonSimple(SC_W/2 - 26, SC_H/2 + 4, 51, 11)
+button4.on_confirm = function()
+{
+    // save your shit
+    game_end()
+}
 button4.label = string_loc("ui.pause.quit_game")
 
 pauseUI.elements[0] = button1
@@ -260,22 +289,3 @@ with(optionsUI)
 UILayers[1] = optionsUI
 
 #endregion
-
-// pause surface
-pauseSurface = -1
-
-// drawing
-item_pickup_queue = []
-
-time_source_start(global.fixedStepTimeSource)
-
-addFixedStep(function() {
-    with(par_unit)
-    {
-        for(var i = 0; i < array_length(buffs); i++)
-        {
-            getdef(buffs[i].buff_id, deftype.buff).step(buffs[i])
-            getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
-        }
-    }
-}, self)

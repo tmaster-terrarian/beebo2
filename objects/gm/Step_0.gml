@@ -28,6 +28,10 @@ if(global.draw_debug)
     }
 }
 
+_money += (global.money - _money) * 0.2
+if(abs(global.money - _money) < 0.01)
+    _money = global.money
+
 if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start) || gamepad_button_check_pressed(1, gp_start))
 {
     togglePause()

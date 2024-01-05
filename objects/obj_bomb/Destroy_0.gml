@@ -29,7 +29,7 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
 
     with(par_unit)
     {
-        if(place_meeting(x, y, other) && team != other.team)
+        if(place_meeting(x, y, other) && canHurt(self, other))
         {
             damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
         }

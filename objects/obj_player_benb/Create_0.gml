@@ -23,11 +23,14 @@ _sp =
     ledgeclimb: spr_anime_ledgeclimb,
     duckPunch: spr_benb_duckPunch,
     punch_1: spr_benb_punch_1,
-    punch_2: spr_benb_punch_2
+    punch_2: spr_benb_punch_2,
+    dkick: spr_benb_dkick
 }
 sprite_index = _sp.idle
 
 state = "normal"
+
+__fakepunch = noone
 
 var c1 = make_color_rgb(255, 0, 77)
 ponytail_colors = [c1,c1,c1,c1,c1,c1,c1,c1,c1]
@@ -49,7 +52,7 @@ _jumps = jumps
 states.punch = function()
 { with(other) {
     skidding = 0
-    image_speed = 0.3
+    image_index += 0.3 * global.dt
     can_jump = 0
     can_attack = 0
     if (sprite_index == _sp.jump)
@@ -68,8 +71,8 @@ states.punch = function()
         }
     }
     if on_ground
-        hsp = approach(hsp, 0, fric)
+        hsp = approach(hsp, 0, fric * global.dt)
     else
-        vsp = approach(vsp, vsp_max, grv)
+        vsp = approach(vsp, vsp_max, grv * global.dt)
     timer0++
 }}

@@ -1,12 +1,23 @@
-_size = 0.75
+_size = 1
 _dmg = damage
-_fps = 0.5
+_fps = 0.25
 
-screen_shake_set(2, 20)
+if(bulleted)
+{
+    _size *= 1.3
+    _fps = 0.167
+
+    screen_shake_set(6, 60)
+}
+else
+{
+    screen_shake_set(4, 40)
+}
 
 audio_play_sound(sn_bomb_explosion, 0, 0)
+audio_stop_sound(throwsound)
 
-with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, parent, _team, team, killtimer: 16 / _fps}))
+with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, parent, team, killtimer: 16 / _fps}))
 {
     sprite_index = spr_fx_explosion
     image_index = other.bulleted
@@ -16,9 +27,9 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
 
     with(par_unit)
     {
-        if(place_meeting(x, y, other) && team != other.team)
+        if(place_meeting(x, y, other) && canHurt(self, other))
         {
-            damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg, other.proc, other._team == other.team))
+            damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg, other.proc, 1, -1))
         }
     }
 }

@@ -17,7 +17,7 @@ _sp =
     duck: spr_anime_duck,
     dead: spr_anime_dead,
     jump: spr_anime_jump,
-    run: spr_anime_run,
+    run: spr_anime_run_sword,
     wallslide: spr_anime_wallslide,
     ledgegrab: spr_anime_ledgegrab,
     ledgeclimb: spr_anime_ledgeclimb
@@ -50,3 +50,17 @@ for(var a = 0; a < hair2_points_count; a++)
 }
 
 _dbkey = vk_lalt
+
+draw_sword = 0
+sword_angle = 0
+_sword_angle = 0
+sword_angle_locked = 0
+sword_nohand = 0
+sword_xscale = -1
+sword_yscale = 1
+swordpos = {x: 0, y: -8}
+
+swfxtrail = 0
+swfxtrailtimer = 0
+
+combo = 1

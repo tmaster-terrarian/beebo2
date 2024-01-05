@@ -6,7 +6,7 @@
   "bbox_left": 0,
   "bbox_right": 0,
   "bbox_top": 0,
-  "bboxMode": 0,
+  "bboxMode": 1,
   "collisionKind": 5,
   "collisionTolerance": 0,
   "DynamicTexturePage": false,
@@ -23,7 +23,7 @@
     {"resourceType":"GMImageLayer","resourceVersion":"1.0","name":"b1c7417e-9fbc-4199-a537-3f6255946c83","blendMode":0,"displayName":"default","isLocked":false,"opacity":100.0,"visible":true,},
   ],
   "nineSlice": null,
-  "origin": 0,
+  "origin": 4,
   "parent": {
     "name": "Sprites",
     "path": "folders/Sprites.yy",

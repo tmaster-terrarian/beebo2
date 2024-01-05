@@ -17,4 +17,10 @@ draw_sprite_flat_ext(
     sin(t / 30) * 0.25 + 0.5
 )
 
+if(flash)
+	shader_set(sh_flash)
+
 draw_sprite(sprite_index, 0, x, y + round(sin(t / 40) * 2 - 2))
+
+if(flash)
+	shader_reset()

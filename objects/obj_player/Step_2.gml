@@ -8,8 +8,13 @@ if(keyboard_check(_dbkey))
 
 event_inherited();
 
-if(regen) heal_event(id, regen_rate/60, healtype.regen)
+if(regen && hp > 0) heal_event(id, regen_rate/60 * global.dt, healtype.regen)
 if(hp > hp_max) hp = hp_max
+
+if(oneshotprotection > 0)
+{
+    oneshotprotection = approach(oneshotprotection, 0, global.dt)
+}
 
 //bound position to room
 if(bbox_left < 0 || bbox_right > room_width)

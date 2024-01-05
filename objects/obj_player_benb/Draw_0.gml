@@ -1,8 +1,11 @@
+if(flash > 0)
+    shader_set(sh_flash)
+
 // scarffff
 var px = x - 4 * facing
 if(facing < 0)
 var px = x - 1 - 4 * facing
-var py = y - 9
+var py = y - 9 * squash
 if(running)
 {
     var f = floor(image_index)
@@ -20,6 +23,10 @@ if(sprite_index == _sp.ledgegrab)
 {
     px = x - 1
     py = y - 1
+}
+if(sprite_index == _sp.punch_1 || sprite_index == _sp.punch_2)
+{
+    px += facing * min(image_index + 1, 3) - (image_index == 3) - (facing == 1)
 }
 if(sprite_index == _sp.ledgeclimb)
 {
@@ -78,9 +85,18 @@ if(ponytail_visible)
         draw_line_width_colour(ponytail_points[i, 0], ponytail_points[i, 1], ponytail_points[i + 1, 0], ponytail_points[i + 1, 1], 1, ponytail_colors[i], ponytail_colors[i])
     }
 }
-if(flash > 0)
-    shader_set(sh_flash)
+
+var sx = image_xscale
+var sy = image_yscale
+image_xscale *= stretch
+image_yscale *= squash
 
 draw_self()
 
-shader_reset()
+image_xscale = sx
+image_yscale = sy
+
+if(flash > 0)
+    shader_reset()
+
+drawMyShit()

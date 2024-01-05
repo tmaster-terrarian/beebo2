@@ -15,7 +15,7 @@ var drawgun = function(_v)
             var nx = lengthdir_x(point_distance(0, 0, aimx, aimy), point_direction(0, 0, aimx, aimy)) * 24
             var ny = lengthdir_y(point_distance(0, 0, aimx, aimy), point_direction(0, 0, aimx, aimy)) * 24
 
-            draw_set_alpha(0.7)
+            draw_set_alpha(0.75)
 
             draw_point_color(x + gun_pos.x * sign(facing) + nx, y + gun_pos.y + ny - 2, c_red)
             draw_point_color(x + gun_pos.x * sign(facing) + nx * 1.5, y + gun_pos.y + ny * 1.5 - 2, c_red)
@@ -30,7 +30,7 @@ var drawgun = function(_v)
                 draw_sprite_ext(spr_player_gun_reticle2, 0, x + gun_pos.x * sign(facing) + (nx * 4), y + gun_pos.y + (ny * 4) - 2, gun_flip, 1, 0, c_white, 1)
         }
 
-        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) + lengthdir_x(-recoil, round(fire_angle / 10) * 10), y + gun_pos.y + lengthdir_y(-recoil, round(fire_angle / 10) * 10), 1, 1 * gun_flip, round(fire_angle / 10) * 10, merge_color(c_white, c_red, (heat/heat_max)*0.5), 1)
+        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) * stretch + lengthdir_x(-recoil, round(fire_angle / 10) * 10), y + gun_pos.y * squash + lengthdir_y(-recoil, round(fire_angle / 10) * 10), 1 * stretch, 1 * gun_flip * squash, round(fire_angle / 10) * 10, merge_color(c_white, c_red, (heat/heat_max)*0.5), 1)
 
         shader_reset()
     }
@@ -38,11 +38,14 @@ var drawgun = function(_v)
 
 drawgun(gun_behind)
 
+if(flash > 0)
+    shader_set(sh_flash)
+
 // ponytail
 var px = x - 5 * facing
 if(facing < 0)
 var px = x - 1 - 5 * facing
-var py = y - 13
+var py = y - 13 * squash
 if(running)
 {
     var f = floor(image_index)
@@ -125,12 +128,19 @@ if(ponytail_visible)
         draw_line_width_colour(ponytail_points[i, 0], ponytail_points[i, 1], ponytail_points[i + 1, 0], ponytail_points[i + 1, 1], 1, ponytail_colors[i], ponytail_colors[i])
     }
 }
-if(flash > 0)
-    shader_set(sh_flash)
+
+var sx = image_xscale
+var sy = image_yscale
+image_xscale *= stretch
+image_yscale *= squash
 
 draw_self()
 
-shader_reset()
+image_xscale = sx
+image_yscale = sy
+
+if(flash > 0)
+    shader_reset()
 
 drawgun(!gun_behind)
 
@@ -146,3 +156,5 @@ if(global.draw_debug)
 
     array_clear(collision_checks)
 }
+
+drawMyShit()

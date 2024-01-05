@@ -1,10 +1,13 @@
+__lastframe = floor(image_index)
+__lastspr = sprite_index
+
 if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
-    image_index += 0.2 * global.dt * !global.pause
+    image_index += 0.2 * global.dt
 
 running = (sprite_index == _sp.run)
 
 if(state != "ledgeclimb")
-    ledgegrabTimer = approach(ledgegrabTimer, 0, 1 * global.dt)
+    ledgegrabTimer = approach(ledgegrabTimer, 0, global.dt)
 
 input_dir = (input.right() - input.left()) * hascontrol
 
@@ -21,7 +24,7 @@ else if(jump_buffer < 10 && state != "ledgegrab")
     platformtarget = noone
 }
 
-if(place_meeting(x, y, par_solid) && !ghost && !global.pause) y -= 1 * global.dt;
+if(place_meeting(x, y, par_solid) && !ghost) y -= 1 * global.dt;
 
 if(!on_ground)
     duck = 0
@@ -41,8 +44,8 @@ else
 {
     accel = air_accel;
     fric = air_fric;
-    if(abs(hsp) > spd * 1.3)
-        fric *= 0.1
+    // if(abs(hsp) > spd * 1.3)
+    //     fric *= 0.1
 }
 
 PAUSECHECK //prevent any further code from running if the game is paused (hopefully)
@@ -72,7 +75,7 @@ if (input.jump() && can_jump)
             vsp = jumpspd
             s = audio_play_sound(sn_jump, 0, false)
         }
-        else
+        else if(!place_meeting(x, y - 2, par_solid))
         {
             state = "normal"
             c = collision_point(x, y + 2, par_solid, 1, 1)
@@ -85,6 +88,10 @@ if (input.jump() && can_jump)
                     vsp = c.vsp
             }
             vsp += jumpspd / 2
+            s = audio_play_sound(sn_jump, 0, false)
+        }
+        else
+        {
             s = audio_play_sound(sn_jump, 0, false)
         }
 
@@ -167,13 +174,13 @@ if (input.jump() && can_jump)
             hsp += spd * 0.8 * input_dir + (0.4 * -facing)
 
             if(!_place_meeting(x, (c) ? c.bbox_top : y, par_solid)) // if theres space jump as normal
-                vsp -= 2.7 * !keyboard_check(ord("S"))
+                vsp -= 2.7 * !input.down()
             else // else displace the player first
             {
                 if(state == "ledgegrab")
                     x -= 4 * facing
                 y += 12
-                vsp -= 2.7 * !keyboard_check(ord("S"))
+                vsp -= 2.7 * !input.down()
                 sprite_index = _sp.jump
                 image_index = 0
             }
@@ -184,7 +191,7 @@ if (input.jump() && can_jump)
             if(state == "ledgegrab")
                 x -= 4 * facing
             y += 12
-            vsp -= 2.7 * !keyboard_check(ord("S"))
+            vsp -= 2.7 * !input.down()
             sprite_index = _sp.jump
             image_index = 0
 		    audio_play_sound(sn_walljump, 0, false)
@@ -223,40 +230,24 @@ if(input.unjump() && vsp < 0)
     vsp /= 2
 }
 
-if _position_meeting(x, y + 1, par_solid)
+if(vsp > 4)
 {
-    var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
-    if(running && (ceil(image_index) == 5 || ceil(image_index) == 1) && !skidding)
-    {
-        if (!audio_is_playing(footsound))
-            audio_play_sound(footsound, 8, false)
-    }
-    if(running && run && abs(hsp) >= spd && ceil(image_index) % 3 == 0)
-    {
-        with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
-        {
-            sprite_index = spr_fx_dust2;
-            vx = random_range(-0.1, 0.1);
-            vy = random_range(-0.5, -0.1);
-            vz = 0;
-        }
-    }
+    squash = min(1.4, max(1, 1.01 * (vsp / 12)))
+    stretch = max(0.65, min(1, 0.99 / (vsp / 12)))
 }
 
 if(skidding && on_ground)
 {
     sprite_index = _sp.run
     image_index = 0
-    if(ceil(t) % 3 == 0)
+
+    with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
     {
-        with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
-        {
-            sprite_index = spr_fx_dust2;
-            image_index = irandom(1)
-            vx = random_range(-0.1, 0.1);
-            vy = random_range(-0.5, -0.1);
-            vz = 0;
-        }
+        sprite_index = spr_fx_dust2;
+        image_index = irandom(1)
+        vx = random_range(-0.1, 0.1);
+        vy = random_range(-0.5, -0.1);
+        vz = 0;
     }
 }
 
@@ -269,7 +260,7 @@ for(var i = 0; i < array_length(names); i++)
 
     var inputPressed = input[$ names[i] + "Pressed"]()
 
-    if(inputPressed && (attack_state == names[i] && attack_states[$ attack_state].age >= (attack_states[$ attack_state].duration * def.spamCoeff)))
+    if(can_use_skills && inputPressed && (attack_state == names[i] && attack_states[$ attack_state].age >= (attack_states[$ attack_state].duration * def.spamCoeff)))
     {
         if(!def.beginCooldownOnEnd)
             skill.cooldown = def.baseStockCooldown
@@ -306,7 +297,7 @@ for(var i = 0; i < array_length(names); i++)
     var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority || skills[$ attack_state].def.priority < 0)
     var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
 
-    if(skill.cooldown <= 0 && inputHeld && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
+    if(can_use_skills && skill.cooldown <= 0 && inputHeld && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
     {
         if(!def.beginCooldownOnEnd)
             skill.cooldown = def.baseStockCooldown
@@ -330,6 +321,9 @@ if(attack_state != noone)
 
 x = round(x)
 y = round(y)
+
+squash = approach(squash, 1, 0.15 * global.dt)
+stretch = approach(stretch, 1, 0.1 * global.dt)
 
 if(hp <= 0) && !ded
 {

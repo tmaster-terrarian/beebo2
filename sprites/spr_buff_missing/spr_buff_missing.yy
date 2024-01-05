@@ -25,8 +25,8 @@
   "nineSlice": null,
   "origin": 4,
   "parent": {
-    "name": "status_effects",
-    "path": "folders/Sprites/status_effects.yy",
+    "name": "buffs",
+    "path": "folders/Sprites/buffs.yy",
   },
   "preMultiplyAlpha": false,
   "sequence": {

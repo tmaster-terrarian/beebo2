@@ -14,8 +14,9 @@ if(!swung)
 	var e = instance_place(x + 4 * facing, y, par_unit)
 	if e
 	{
-		if e.team != team
+		if canHurt(self, e)
 		{
+			parent.movex(-0.5 * sign(facing))
 			var s = choose(sn_punch_1, sn_punch_2)
 			audio_play_sound(s, 1, 0)
 		}

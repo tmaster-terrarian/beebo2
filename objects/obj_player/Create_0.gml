@@ -1,6 +1,6 @@
 event_inherited()
-stats = variable_clone(global.chardefs.beebo.stats)
-level_stats = variable_clone(global.chardefs.beebo.level_stats)
+stats = global.chardefs.beebo.stats
+level_stats = global.chardefs.beebo.level_stats
 _apply_stats()
 
 skills = variable_clone(global.chardefs.beebo.skills)
@@ -19,6 +19,8 @@ can_dodge = 1
 can_ledgegrab = 1
 
 vsp_max = 20
+
+oneshotprotection = 0
 
 hascontrol = 1
 lasthsp = 0
@@ -81,8 +83,15 @@ gun_behind = 0
 gun_flip = 1
 draw_gun = 1
 has_gun = 1
+fire = 0
+firebomb = 0
+
+draw_hud = 1
 
 _p = self
+
+squash = 1
+stretch = 1
 
 input =
 {
@@ -143,12 +152,16 @@ _oncollide_v = function()
     if (state == "normal")
     {
         landTimer = 8
-        sprite_index = _sp.jump
+        sprite_index = abs(input_dir) ? _sp.run : _sp.idle
         image_index = 0
     }
-    if (vsp > 0.2)
+    if (vsp > 0.4)
+    {
         audio_play_sound(sn_player_land, 0, false)
-    if (vsp > 0)
+        squash = 0.9
+        stretch = 1.4
+    }
+    if (vsp > 0.2)
     {
         for (var i = 0; i < 4; i++)
         {
@@ -163,6 +176,33 @@ _oncollide_v = function()
     vsp = 0
 }
 
+drawMyShit = function()
+{
+    var w = 24
+
+    if(hp >= 0)
+    {
+        var c = c_black
+        // var avgx = (bbox_left + bbox_right) / 2
+        var avgx = x
+
+        draw_rectangle_color(avgx - floor(w/2) - 2, bbox_bottom + 5, avgx + ceil(w/2) + 1, bbox_bottom + 11, c,c,c,c,false)
+
+        c = c_white
+        draw_rectangle_color(avgx - floor(w/2) - 1, bbox_bottom + 6, avgx + ceil(w/2), bbox_bottom + 10, c,c,c,c,false)
+
+        draw_sprite_ext(spr_enemyhpbar, 0, avgx - floor(w/2), bbox_bottom + 7, w, 1, 0, c_white, 1)
+
+        draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_bottom + 7, ceil((hp_change / total_hp_max) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 1, avgx - floor(w/2), bbox_bottom + 7, ceil((hp / total_hp_max) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_bottom + 7, ceil(((shield / max_shield) * max_shield / total_hp_max) * w), 1, 0, c_white, 1)
+        if(ceil(hp_change) < ceil(hp))
+        {
+            draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_bottom - 7, ceil(-(hp - hp_change)), 1, 0, c_white, 1)
+        }
+    }
+}
+
 _squish = function()
 {
     x = lastSafeX
@@ -171,7 +211,32 @@ _squish = function()
     timer0 = 0
 }
 
-draw_hud = 1
+onFrameChange = function()
+{
+    var f = floor(image_index)
+    var c = ceil(image_index)
+    if(sprite_index == _sp.run)
+    {
+        if position_meeting(x, y + 1, par_solid)
+        {
+            var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
+            if(running && (f == 5 || f == 1) && !skidding)
+            {
+                audio_play_sound(footsound, 8, false)
+            }
+            if(running && run && abs(hsp) >= spd && c % 3 == 0)
+            {
+                with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
+                {
+                    sprite_index = spr_fx_dust2;
+                    vx = random_range(-0.1, 0.1);
+                    vy = random_range(-0.5, -0.1);
+                    vz = 0;
+                }
+            }
+        }
+    }
+}
 
 state = "normal"
 states =
@@ -179,6 +244,7 @@ states =
     _p : other,
     braindead : function()
     {with(other){
+        can_use_skills = 0
         fxtrail = 0
         can_jump = 0
         can_walljump = 0
@@ -203,6 +269,7 @@ states =
             vsp = 0
             has_gun = 0
             image_alpha = 0
+            can_use_skills = 0
         }
         state = "intro"
         if(timer0 < 60)
@@ -217,6 +284,7 @@ states =
                 has_gun = 1
                 hsp = 2 + random(1.5)
                 vsp = -2 - random(1)
+                can_use_skills = 1
             }
             audio_play_sound(sn_walljump, 2, 0)
             audio_play_sound(sn_walljump, 2, 0)
@@ -237,7 +305,7 @@ states =
         {
             if (hsp < 0)
             {
-                if(hsp < -spd * 0.8)
+                if(-hsp > spd * 0.6)
                     skidding = 1
                 else
                     skidding = 0
@@ -255,7 +323,7 @@ states =
                     sprite_index = _sp.crawl
                 }
             }
-            if(abs(hsp) > spd * 1.3)
+            if(abs(hsp) > 2.6)
                 run = 7
             else
                 run = 0
@@ -275,12 +343,11 @@ states =
         {
             if (hsp > 0)
             {
-                if(hsp > spd * 0.8)
+                if(hsp > spd * 0.6)
                     skidding = 1
                 else
                     skidding = 0
                 hsp = approach(hsp, 0, fric * global.dt)
-                skidding = 1
             }
             else if (on_ground && vsp >= 0)
             {
@@ -294,7 +361,7 @@ states =
                     sprite_index = _sp.crawl
                 }
             }
-            if(abs(hsp) > spd * 1.3)
+            if(abs(hsp) > 2.6)
                 run = 7
             else
                 run = 0
@@ -312,15 +379,15 @@ states =
         }
         else
         {
-            skidding = 0
             running = 0
             hsp = approach(hsp, lasthsp, fric * 2 * global.dt)
-            if (abs(hsp) < spd)
+            if (abs(hsp) < spd + abs(lasthsp))
             {
+                skidding = 0
                 if run
                     run--
             }
-            if (abs(hsp) < 1.5 && on_ground && !landTimer)
+            if (abs(hsp) < 1.5 + abs(lasthsp) && on_ground && !landTimer)
             {
                 up = input.up()
                 sprite_index = _sp.idle
@@ -360,7 +427,7 @@ states =
                     wallslideTimer += global.dt
                     var _a = 1
                     var _w = instance_place(x + (2 * input_dir), y, par_solid)
-                    if(can_ledgegrab && ledgegrabTimer <= 0)
+                    if(can_ledgegrab && ledgegrabTimer <= 0 && instance_exists(_w))
                     if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
                     {
                         _a = sign(bbox_top - _w.bbox_top)
@@ -443,7 +510,7 @@ states =
         {
             var _a = 1
             var _w = instance_place(x + (2 * input_dir), y, par_solid)
-            if(can_ledgegrab && ledgegrabTimer == 0)
+            if(can_ledgegrab && ledgegrabTimer == 0 && instance_exists(_w))
             if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
             {
                 _a = sign(bbox_top - _w.bbox_top)
@@ -495,6 +562,20 @@ states =
         ghost = 0
         hsp = 0
         vsp = 0
+
+        if(!instance_exists(platformtarget))
+        {
+            platformtarget = noone
+            state = "normal"
+            timer0 = 0
+            sprite_index = _sp.jump
+            mask_index = _sp.m_default
+            movex(-4 * facing, _oncollide_h, 0)
+            movey(12, _oncollide_h, 0)
+            ghost = 0
+            return
+        }
+
         if(timer0 == 0)
         {
             if(facing == 0)
@@ -593,11 +674,12 @@ states =
         ghost = 0
         sprite_index = _sp.dead
         image_index = on_ground + (on_ground && rand)
+        can_use_skills = 0
 
         if(on_ground)
-            hsp = approach(hsp, 0, fric * 2 * global.dt)
+            hsp = approach(hsp, lasthsp, fric * 2 * global.dt)
         else
-            vsp = approach(vsp, 20, grv * global.dt)
+            vsp = approach(vsp, vsp_max, grv * global.dt)
     }}
 }
 

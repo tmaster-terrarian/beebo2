@@ -1,4 +1,4 @@
-if(team != other.team && other.id != parent)
+if(canHurt(self, other) && other.id != parent)
 {
 	if(destroy_on_hit)
 		instance_destroy()

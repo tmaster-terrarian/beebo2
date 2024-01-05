@@ -1,9 +1,14 @@
 event_inherited();
+var ind = string_replace(object_get_name(object_index), "obj_", "")
+
+stats = global.chardefs[$ ind].stats
+level_stats = global.chardefs[$ ind].level_stats
+_apply_stats()
+
+skills = variable_clone(global.chardefs[$ ind].skills)
+attack_states = variable_clone(global.chardefs[$ ind].attack_states)
+
 _target = noone
-if(team == Team.enemy)
-{
-    items = global.enemyItems
-}
 
 depth = 60
 

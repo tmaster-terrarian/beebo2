@@ -6,8 +6,10 @@ damage = 0
 proc = 0
 lifetime = -1
 
+context = noone
+
 destroy_on_hit = 0
-crit = 0
+crit = -1
 
 max_instances = -1
 

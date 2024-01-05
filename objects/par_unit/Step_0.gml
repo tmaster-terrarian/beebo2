@@ -1,12 +1,3 @@
-if(global.pause)
-    return;
-
-if(hp <= 0) && !ded
-{
-    ded = 1
-    instance_destroy()
-}
-
 if(fucked > 0)
 	fucked = approach(fucked, 0, global.dt / 6)
 else
@@ -31,4 +22,10 @@ for(var i = 0; i < array_length(names); i++)
         skill.cooldown = def.baseStockCooldown
         skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks + bonus_stocks[$ names[i]])
     }
+}
+
+if(hp <= 0) && !ded
+{
+    ded = 1
+    instance_destroy()
 }

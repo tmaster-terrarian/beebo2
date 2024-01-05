@@ -6,7 +6,7 @@
 #macro SCRIBBLE_DEFAULT_SPRITE_SPEED        1        //The default animation speed for sprites inserted into text
 #macro SCRIBBLE_LEGACY_ANIMATION_SPEED      false    //Set to <False> to use the old animation speed system which ignores the IDE sprite speed
 #macro SCRIBBLE_DEFAULT_DELAY_DURATION      450      //Default duration of the [delay] command, in milliseconds
-#macro SCRIBBLE_SLANT_GRADIENT              0.25     //The x-axis displacement when using the [slant] tag as a proportion of the glyph height
+#macro SCRIBBLE_SLANT_GRADIENT              0.33     //The x-axis displacement when using the [slant] tag as a proportion of the glyph height
 #macro SCRIBBLE_DEFAULT_Z                   0        //Default z-position when drawing text models. This can be overwritten by the .z() text element method
 
 #macro SCRIBBLE_DEFAULT_WAVE_SIZE           4        //Default wave amplitude, in pixels

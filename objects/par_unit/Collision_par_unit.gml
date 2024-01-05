@@ -1,4 +1,4 @@
-if(fucked && other.team == team)
+if(fucked && other.team != Team.player)
 {
 	flash = 4
 	if(!other.fucked)
@@ -12,6 +12,14 @@ if(fucked && other.team == team)
 		hsp *= -1
 		vsp = -1.5
 		other.vsp = vsp
+		if(x > other.x)
+		{
+			x += (x - bbox_left)
+		}
+		else
+		{
+			x += (x - bbox_right)
+		}
 	}
 	else
 	{
@@ -29,7 +37,7 @@ if(fucked && other.team == team)
 
 		    with(par_unit)
 		    {
-		        if(place_meeting(x, y, other) && team != other.team)
+		        if(place_meeting(x, y, other) && canHurt(self, other))
 		        {
 		            damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
 		        }
@@ -37,5 +45,6 @@ if(fucked && other.team == team)
 		}
 		hsp *= -1
 		vsp = -1.5
+		other.vsp = vsp
 	}
 }
