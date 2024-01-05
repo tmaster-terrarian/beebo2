@@ -488,7 +488,7 @@ global.enemyCount = 0
 global.fx_bias = 0
 global.usesplitscreen = 0
 
-global.friendlyfire = 1
+global.friendlyfire = 0
 
 global.money = 0
 
