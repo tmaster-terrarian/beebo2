@@ -39,22 +39,7 @@ if(!global.pause && global.runEnabled)
             }
         }
         mainDirector.waveType = waveType
-        if(waveType == 0)
-        {
-            mainDirector.Enable()
-        }
-        else // TODO: Replace this line with shop creation
-        {
-            mainDirector.waveType = waveType
-            mainDirector.Disable()
-            wave5delay = 900
-
-            var pcount = array_length(global.players)
-            for(var i = 0; i < pcount; i++)
-            {
-                instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 140, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
-            }
-        }
+        mainDirector.Enable()
     }
 
     if(wave5delay == 0 && wavetimer == -1)
@@ -91,9 +76,21 @@ if(!global.pause && global.runEnabled)
 
             mainDirector.Disable()
             wavetimer = 600
+
+            var pcount = array_length(global.players)
+            for(var i = 0; i < pcount; i++)
+            {
+                instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 96, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
+            }
         }
         else
         {
+            if(global.enemyCount == 1)
+                with(par_unit)
+                {
+                    if(team == Team.enemy)
+                        hp = -10000000
+                }
             if(killzoneTimer > 0)
                 killzoneTimer = approach(killzoneTimer, 0, global.dt)
             if(killzoneTimer == 0)

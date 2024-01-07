@@ -37,6 +37,7 @@ image_index = 0
 ded = 0
 attack = 0
 up = 0
+stun_immune = 1
 
 lastSafeX = x
 lastSafeY = y

@@ -34,12 +34,36 @@ else
     _timer.draw(24, SC_H - 1)
 
     var _debugtext = scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]CREDITS: {mainDirector.credits}\nLASTCARD: {(mainDirector.lastSpawnCard == noone) ? "noone" : mainDirector.lastSpawnCard.index}\nLASTSPAWNSUCCESS: {mainDirector.lastSpawnSucceeded}\nENABLED: {mainDirector.enabled}").wrap(320)
-    // _draw_rect(1, 1, _debugtext.get_width(), _debugtext.get_height() - 1, c_black, 0.5)
-    // _debugtext.draw(2, 1)
+    _draw_rect(1, 1, _debugtext.get_width(), _debugtext.get_height() - 1, c_black, 0.5)
+    _debugtext.draw(2, 1)
 
     var _MONEY = scribble($"[fa_left][fa_top][spr_hudnumbers][c_yellow]$[/c]:{floor(_money)}")
-    _draw_rect(1, 1, _MONEY.get_width(), _MONEY.get_height(), c_black, 0.5)
-    _MONEY.draw(1, 1)
+    // _draw_rect(1, 1, _MONEY.get_width(), _MONEY.get_height(), c_black, 0.5)
+    // _MONEY.draw(1, 1)
+
+    if(mainDirector.waveType == 1 && global.enemyCount > 0)
+    {
+        global.combinedBossHealth = 0
+        with(par_unit)
+        {
+            if(boss)
+            {
+                global.combinedBossHealth += total_hp
+                if(!contributed)
+                    global.combinedBossMaxHealth += total_hp_max
+                contributed = 1
+            }
+        }
+
+        draw_sprite_ext(spr_enemyhpbar, 0, 4, 4, SC_W - 8, 2, 0, c_white, 1)
+
+        draw_sprite_ext(spr_enemyhpbar, 3, 4, 4, global.combinedBossHealth/global.combinedBossMaxHealth * (SC_W - 8), 2, 0, c_white, 1)
+    }
+    else
+    {
+        global.combinedBossHealth = 0
+        global.combinedBossMaxHealth = 0
+    }
 
     // var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.stocks)} {ceil(global.players[0].skills.secondary.stocks)} {ceil(global.players[0].skills.utility.stocks)} {ceil(global.players[0].skills.special.stocks)}")
 

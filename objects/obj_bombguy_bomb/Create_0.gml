@@ -1,3 +1,4 @@
+damage_boosted = 0
 event_inherited();
 max_instances = -1
 

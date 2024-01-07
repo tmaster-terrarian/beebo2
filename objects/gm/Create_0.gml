@@ -29,7 +29,10 @@ bgm_fade = function(index, fadetime, loop = 1, gain = 1, offset = 0, pitch = 1)
     audio_sound_gain(current_bgm, gain, fadetime * 1000)
 }
 
-global.wave = 0
+global.combinedBossHealth = 0
+global.combinedBossMaxHealth = 0
+
+global.wave = 4
 global.runEnabled = 1
 
 wavetimer = 600

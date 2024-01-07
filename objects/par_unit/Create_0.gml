@@ -9,7 +9,9 @@ regen = 1
 accel = 0
 fric = 0
 hp = 1
-hp_change = 1
+total_hp = hp
+hp_change = noone
+hp_change_delay = 0
 crit_chance = 0
 jumps = 1
 fxtrail = 0
@@ -31,17 +33,13 @@ __lastframe = image_index
 __lastspr = sprite_index
 oneshotprotection = 0
 crit_modifier = 1
-total_hp = hp
+hitstun = 0
+stun_immune = 0
 
 fucked = 0
-
-elite = 0
-
 can_use_skills = 1
-
+contributed = 0
 target = noone
-
-hp_change_delay = 0
 
 bonus_stocks = {
     primary: 0,

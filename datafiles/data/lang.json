@@ -74,7 +74,12 @@
         "modifier.cut_hp.description": "[kw_health]Maximum health[/c] is multiplied by [kw_number]50%[/c] [kw_perstack](x50% per stack)[/c], [kw_damage]damage[/c] is multiplied by [kw_number]200%[/c] [kw_perstack](x200% per stack)[/c].",
 
         "modifier.evolution.name": "Evolution",
-        "modifier.evolution.summary": "[kw_downside]Everything[/c] gets [kw_number]3 stacks[/c] of a [kw_downside]random item[/c]."
+        "modifier.evolution.summary": "[kw_downside]Everything[/c] gets [kw_number]3 stacks[/c] of a [kw_downside]random item[/c].",
+
+        "boss.obj_e_strikes_back.name": "jose",
+        "boss.obj_e_strikes_back.sub": "the reminder",
+        "boss.obj_e_wall.name": "the wall",
+        "boss.obj_e_wall.sub": "just a wall"
     },
     "es":
     {

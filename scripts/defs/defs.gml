@@ -86,7 +86,7 @@ function initSkills()
                     direction = other.fire_angle + random_range(-v, v);
                     image_angle = direction;
 
-                    damage = other.damage
+                    damage = other.damage * 0.5
                     proc = 0.8
                 }
                 with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
@@ -282,7 +282,6 @@ function initSkills()
                 sprite_index = duck ? spr_anime_swing_duck : spr_anime_swing1
                 can_jump = 0
                 can_walljump = 0
-                hsp = min(abs(hsp), 0.75) * sign(hsp)
                 vsp = min(abs(vsp), 0.75) * sign(vsp)
                 sword_xscale = -sign(facing)
                 _sword_angle = duck ? 20 * facing : 100 * facing
@@ -344,7 +343,6 @@ function initSkills()
                                     sword_xscale = approach(sword_xscale, -2 * facing, 0.2 * global.dt)
                                     swordpos.x = 3
                                     swordpos.y = -3
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
@@ -356,7 +354,6 @@ function initSkills()
                                     sword_xscale = approach(sword_xscale, -1.5 * facing, 0.05 * global.dt)
                                     swordpos.x = 2
                                     swordpos.y = -3
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 16, global.dt * attack_speed)
                                 }
@@ -407,7 +404,6 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -3 + (timer0 - 4)
                                     swordpos.y = -6
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
@@ -419,7 +415,6 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -5
                                     swordpos.y = -9
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 16, global.dt * attack_speed)
                                 }
@@ -471,7 +466,6 @@ function initSkills()
                                     sword_xscale = -1.75 * facing
                                     swordpos.x = 5 - (timer0 - 8) * 2
                                     swordpos.y = -14
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
@@ -481,7 +475,6 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -4
                                     swordpos.y = -14
-                                    hsp = approach(hsp, 0, fric)
                                     vsp = approach(vsp, 0, fric)
                                     timer0 = approach(timer0, 16, global.dt * attack_speed)
                                 }
@@ -791,6 +784,10 @@ function initSkills()
 
 function initChars()
 {
+    global.chardefs = {
+        base: new CharacterDef("base")
+    }
+
     global.chardefs.beebo = new CharacterDef("beebo", function(def) {
         def.stats = {
             hp_max: 100,
@@ -801,7 +798,7 @@ function initChars()
             firerate: 5,
             bombrate: 80,
             spread: 4,
-            damage: 10,
+            damage: 12,
             ground_accel: 0.12,
             ground_fric: 0.08,
             air_accel: 0.07,
@@ -950,7 +947,7 @@ function initChars()
             firerate : 80,
             bombrate : 1,
             spread : 2,
-            damage : 8,
+            damage : 24,
             ground_accel : 0.12,
             ground_fric : 0.08,
             air_accel : 0.07,

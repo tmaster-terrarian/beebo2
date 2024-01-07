@@ -50,12 +50,14 @@ if(drawhp) && (hp > 0) && team == Team.enemy
 
     draw_sprite_ext(spr_enemyhpbar, 0, avgx - floor(w/2), bbox_top - 10, w, 1, 0, c_white, 1)
 
-    draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_top - 10, ceil((hp_change / total_hp_max) * w), 1, 0, c_white, 1)
-    draw_sprite_ext(spr_enemyhpbar, 1, avgx - floor(w/2), bbox_top - 10, ceil((hp / total_hp_max) * w), 1, 0, c_white, 1)
-    draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_top - 10, ceil(((shield / max_shield) * max_shield / total_hp_max) * w), 1, 0, c_white, 1)
+    c = (elite ? c_white : merge_color(c_white, c_red, 0.5))
+
+    draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_top - 10, ceil((hp_change / total_hp_max) * w), 1, 0, c, 1)
+    draw_sprite_ext(spr_enemyhpbar, 1 + 2 * elite, avgx - floor(w/2), bbox_top - 10, ceil((hp / total_hp_max) * w), 1, 0, c_white, 1)
+    draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_top - 10, ceil(((shield / max_shield) * max_shield / total_hp_max) * w), 1, 0, c, 1)
     if(ceil(hp_change) < ceil(hp))
     {
-        draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_top - 10, ceil(-(hp - hp_change)), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_top - 10, ceil(-(hp - hp_change)), 1, 0, c, 1)
     }
 }
 

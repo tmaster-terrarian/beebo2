@@ -232,7 +232,7 @@ function damage_event(ctx)
 					// do armor here pls
 				}
 
-				if(object_get_parent(ctx.target.object_index) == obj_player && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
+				if(object_get_parent(ctx.target.object_index) == obj_player && damage > ctx.target.total_hp_max * 0.9 && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
 				{
 					damage = ctx.target.total_hp_max * 0.9
 					ctx.target.oneshotprotection = 6
@@ -1148,10 +1148,10 @@ global.itemdefs =
 	hyperthreader : itemdef("hyperthreader", {
 		rarity : item_rarity.legendary
 	}),
-	buff_damage : itemdef("buff_damage", {
+	boost_damage : itemdef("boost_damage", {
 		rarity : item_rarity.none
 	}),
-	buff_hp : itemdef("buff_hp", {
+	boost_health : itemdef("boost_health", {
 		rarity : item_rarity.none
 	})
 }
@@ -1784,6 +1784,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 	self.interval = interval
 	self.maxSpawns = maxSpawns
 	self.enabled = 0
+	self.team = Team.enemy
 
 	self.credits = 0
 	self.creditsPerSecond = 0
@@ -1819,31 +1820,41 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 		if(self.waveType == 1) // boss wave
 		{
-			var choice, r
+			var choice == noone, r
 			for(var i = 0; i < 3; i++)
 			{
+				if(choice != noone)
+					break;
 				for(var c = 0; c < 100; c++) // doing this instead of a while loop in the case where nothing can spawn
 				{
 					r = irandom(array_length(global.spawn_cards[i]) - 1)
 					var rr = global.spawn_cards[i][r]
-					if(rr.cost > self.credits)
-						continue
-
-					choice = rr
-					while(rr.cost <= self.credits)
+					if(rr.cost <= self.credits)
 					{
-						var elite = (rr.cost * 6 <= self.credits)
-						var cost = rr.cost * (1 + elite * 4)
+						choice = rr
+						break;
+					}
+				}
+			}
+			if(choice != noone)
+			{
+				gm.bossName = string_loc("boss." + choice.index + ".name")
+				gm.bossSub = string_loc("boss." + choice.index + ".sub")
+
+				var _spawnIndex = asset_get_index(choice.index)
+				if(object_exists(_spawnIndex))
+				{
+					while(choice.cost <= self.credits)
+					{
+						var elite = (choice.cost * 6 <= self.credits) // make elite if affordable
+						var cost = choice.cost * (1 + elite * 4)
 						self.credits -= cost
 
 						var xpReward = global.difficultyCoeff * cost * self.expMult
 						var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-						var ins = instance_create_depth(obj_camera.tx + irandom_range(-32, 32), ((card.spawnsOnGround) ? 152 + card.spawnOffsetY : obj_camera.ty + random_range(-24, 48)), 50, rr.index, {boss: true, xpReward, moneyReward, elite})
-						item_add_stacks("boost_damage", ins, 1)
-						item_add_stacks("boost_health", ins, 1)
+						trySpawnUnit(obj_camera.tx + irandom_range(-32, 32), ((choice.spawnsOnGround) ? 152 + choice.spawnOffsetY : obj_camera.ty + random_range(-24, 48)), self.team, _spawnIndex, {boss: true, xpReward, moneyReward, elite})
 					}
-					return
 				}
 			}
 		}
@@ -1886,7 +1897,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 			}
 
 			var _spawnIndex = asset_get_index(card.index)
-			if(self.spawnCounter < self.maxSpawns && (card.cost <= self.credits) && (card.cost >= self.credits / 6 && card.cost < 10000) && object_exists(_spawnIndex) && global.enemyCount < 30)
+			if(self.spawnCounter < self.maxSpawns && (card.cost <= self.credits) && (card.cost >= self.credits / 6 && card.cost < 600) && object_exists(_spawnIndex) && global.enemyCount < 30)
 			{
 				var elite = (card.cost * 6 <= self.credits)
 				var cost = card.cost * (1 + elite * 4)
@@ -1894,7 +1905,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 				var xpReward = global.difficultyCoeff * cost * self.expMult
 				var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-				var obj = instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward})
+				var obj = instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward, boss: self.waveType})
 				obj.elite = elite
 
 				self.lastSpawnPos.x += random_range(-24, 24)
@@ -1902,13 +1913,13 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 				self.spawnCounter++
 				self.lastSpawnSucceeded = 1
-				self.spawnTimer = random_range(self.interval.minval, self.interval.maxval)
+				self.spawnTimer = random_range(self.interval.minimum, self.interval.maximum)
 			}
 			else
 			{
 				self.spawnCounter = 0
 				self.lastSpawnSucceeded = 0
-				self.spawnTimer = random_range(self.waveInterval.minval, self.waveInterval.maxval)
+				self.spawnTimer = random_range(self.waveInterval.minimum, self.waveInterval.maximum)
 			}
 		}
 	}
@@ -1926,13 +1937,47 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 function range(minval, maxval) constructor
 {
-	self.minval = min(minval, maxval)
-	self.maxval = max(minval, maxval)
+	self.minimum = min(minval, maxval)
+	self.maximum = max(minval, maxval)
 
 	toString = function()
 	{
-		return $"{minval} - {maxval}"
+		return $"{minval} to {maxval}"
 	}
+}
+
+function trySpawnUnit(ind, x, y, team, _args = {})
+{
+	var out = {succeeded: 0, onSpawnResult: 0}
+
+	var _obj
+	if(is_string(ind))
+		_obj = asset_get_index(string(ind))
+	else
+		_obj = ind
+
+	_args.team = team
+
+	if(object_exists(_obj))
+	{
+		var ins = instance_create_depth(x, y, 60, _obj, _args)
+		out.succeeded = 1
+		out.onSpawnResult = onUnitSpawn(ins)
+	}
+}
+
+function onUnitSpawn(ins)
+{
+	if(!instance_exists(ins))
+		return -1
+	var out = 0
+	if(ins.boss)
+	{
+		item_add_stacks("boost_damage", ins, 1)
+		item_add_stacks("boost_health", ins, 1)
+		out = 1
+	}
+	return out
 }
 
 // no more pains  ihope
@@ -2110,10 +2155,6 @@ function CharacterDef(name, func = noone) constructor
 }
 
 initSkills()
-
-global.chardefs = {
-	base: new CharacterDef("base")
-}
 
 initChars()
 

@@ -9,6 +9,9 @@ flash = approach(flash, 0, global.dt)
 if(regen)
     hp = approach(hp, hp_max, regen_rate/60 * global.dt)
 
+if(hp_change == noone)
+    hp_change = hp
+
 if(hp_change_delay > 0)
     hp_change_delay = approach(hp_change_delay, 0, global.dt)
 else
