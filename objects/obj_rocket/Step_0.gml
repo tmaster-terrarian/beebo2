@@ -28,8 +28,31 @@ timer += global.dt
 
 if(timer % (8 / spd + 4) <= 1)
 {
-    with(instance_create_depth(x + lengthdir_x(-4, image_angle), y + lengthdir_y(-4, image_angle), depth + 2, fx_steam))
-    {
-        vy = random_range(0.1, 0.5)
-    }
+    instance_create_depth(x + lengthdir_x(-4, image_angle), y + lengthdir_y(-4, image_angle), depth + 2, fx_particle_emitter, {
+        spr: spr_fx_steam,
+        posGlobal: 1,
+        dynamicRot: 0,
+        max_particles: 30,
+        life: 1,
+        lifeR: 0.25,
+        interval: -1,
+        dir: image_angle + 180,
+        dirR: 15,
+        spd: 0.6,
+        spdR: 0.2,
+        spdE: 0,
+        spdER: 0,
+        xR: 1,
+        yR: 1,
+        imgE: 3,
+        angle: 0,
+        angleR: 0,
+        angleE: 0,
+        angleER: 0,
+        colorE: $FF999999,
+        alpha: 1,
+        alphaE: 1,
+        grvX: 0,
+        grvY: 0.2
+    })
 }

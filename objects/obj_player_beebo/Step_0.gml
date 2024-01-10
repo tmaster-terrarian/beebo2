@@ -1,6 +1,13 @@
-event_inherited();
+if(has_gun)
+{
+    if(input.secondaryPressed() && instance_exists(bomb) && skills.secondary.cooldown > 0)
+    {
+        bomb.bulleted = 1
+        addQueueFunc(function() {instance_destroy(bomb)}, 0.1)
+    }
+}
 
-PAUSECHECK
+event_inherited();
 
 ponytail_visible = 1
 gun_behind = 0

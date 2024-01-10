@@ -136,9 +136,9 @@ function initSkills()
 
                 fire = 1
 
-                var _obj = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {damage_boosted : ((heat > 20) ? heat : 0)})
+                bomb = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {damage_boosted : ((heat > 20) ? heat : 0)})
 
-                with(_obj)
+                with(bomb)
                 {
                     parent = other
                     team = other.team
@@ -151,6 +151,7 @@ function initSkills()
 
                     bulleted_delay = 20
                 }
+                if(heat > 1)
                 repeat(6)
                 {
                     var dist = random_range(0.1, 1) * 12

@@ -373,11 +373,13 @@ global.fixedStep = {
 		var f = {
 			_thisObject: thisObject,
 			__func: func,
-			_func: function() { with(_thisObject) other.__func(); deleteQueueFunction(other)},
+			_func: function() { with(_thisObject) other.__func() },
 			myT: delaySeconds * 60,
+			startT: 0,
 			uniqueId: _id
 		}
-		array_push(self._functions, f)
+		f.startT = self.t
+		array_push(self._queueFunctions, f)
 		return f
 	},
 
@@ -392,9 +394,10 @@ global.fixedStep = {
 				break
 
 			var f = self._queueFunctions[q]
-			if(floor(f.myT) == self.t)
+			if(floor(f.myT) == self.t - f.startT)
 			{
 				f._func()
+				deleteQueueFunction(f)
 				q--
 			}
 		}
@@ -407,6 +410,11 @@ global.fixedStep = {
 function addFixedStep(func)
 {
 	return global.fixedStep.addFunction(func, self)
+}
+
+function addQueueFunc(func, delaySeconds)
+{
+	return global.fixedStep.addQueueFunction(func, delaySeconds, self)
 }
 
 function deleteFixedStep(func)
@@ -1820,7 +1828,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 		if(self.waveType == 1) // boss wave
 		{
-			var choice == noone, r
+			var choice = noone, r
 			for(var i = 0; i < 3; i++)
 			{
 				if(choice != noone)
@@ -1905,11 +1913,9 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 				var xpReward = global.difficultyCoeff * cost * self.expMult
 				var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-				var obj = instance_create_depth(self.lastSpawnPos.x, self.lastSpawnPos.y, 60, _spawnIndex, {xpReward, moneyReward, boss: self.waveType})
-				obj.elite = elite
+				trySpawnUnit(self.lastSpawnPos.x, self.lastSpawnPos.y, self.team, _spawnIndex, {xpReward, moneyReward, boss: self.waveType, elite})
 
-				self.lastSpawnPos.x += random_range(-24, 24)
-				self.lastSpawnPos.y = min(140, self.lastSpawnPos.y + (card.spawnsOnGround ? random_range(-24, 24) : 0))
+				self.lastSpawnPos = {x: obj_camera.tx + random_range(-64, 64), y: ((card.spawnsOnGround) ? 152 + card.spawnOffsetY : obj_camera.ty + random_range(-24, 48))}
 
 				self.spawnCounter++
 				self.lastSpawnSucceeded = 1

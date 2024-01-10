@@ -31,3 +31,5 @@ heat_max = stats.heat_max
 heat_rate = stats.heat_rate
 cool_rate = stats.cool_rate
 cool_delay = 0
+
+bomb = noone

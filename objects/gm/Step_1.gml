@@ -156,7 +156,9 @@ with(par_unit)
     if(item_get_stacks("hyperthreader", self))
         spdInc += 0.5 + (item_get_stacks("hyperthreader", self) - 1) * 0.25
 
+
     var spdDec = 1
+
 
     var spdFac = spdInc/spdDec
 

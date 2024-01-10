@@ -20,7 +20,8 @@ function loadInputSettings()
         var names = variable_struct_get_names(s[i].buttons)
         var size = variable_struct_names_count(s[i].buttons)
 
-        for (var j = 0; j < size; j++) {
+        for (var j = 0; j < size; j++)
+        {
             var name = names[j]
             var element = s[i].buttons[$ name]
 
@@ -28,7 +29,7 @@ function loadInputSettings()
             obj[$ name].playerIndex = s[i].gpIndex
 
             if(s[i].gpIndex < 0) // KBM
-            { 
+            {
                 if(obj[$ name].mouse)
                 {
                     with(obj[$ name])

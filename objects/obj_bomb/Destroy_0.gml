@@ -1,11 +1,11 @@
 _size = 1
 _dmg = damage
-_fps = 0.25
+_fps = 0.3
 
 if(bulleted)
 {
     _size *= 1.3
-    _fps = 0.167
+    _fps = 0.2
 
     screen_shake_set(6, 60)
 }
@@ -33,5 +33,26 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
         {
             damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
         }
+        if(place_meeting(x, y, other) && other.parent.id == id && other.crit)
+        {
+            var dist = point_distance(other.x, other.y + 2, x, (bbox_bottom + bbox_top)/2)
+            var dir = point_direction(other.x, other.y + 2, x, (bbox_bottom + bbox_top)/2)
+            hsp += lengthdir_x(80/max(16, dist), dir)
+            vsp += lengthdir_y(80/max(16, dist), dir)
+        }
+    }
+}
+
+with(fx_particle_emitter)
+{
+    for(var i = 0; i < array_length(particles); i++)
+    {
+        var p = particles[i]
+        var dist = point_distance(other.x, other.y - 2, p.x + x * !posGlobal, p.y + y * !posGlobal)
+        var dir = point_direction(other.x, other.y - 2, p.x + x * !posGlobal, p.y + y * !posGlobal)
+        if(dist <= 48)
+            p.spdX += lengthdir_x((32 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir)
+        if(dist <= 64)
+            p.spdY += lengthdir_y((48 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir)
     }
 }
