@@ -309,6 +309,7 @@
     {"name":"__scribble_gen_3_devanagari","order":3,"path":"scripts/__scribble_gen_3_devanagari/__scribble_gen_3_devanagari.yy",},
     {"name":"sh_blurv","order":1,"path":"shaders/sh_blurv/sh_blurv.yy",},
     {"name":"par_unit","order":5,"path":"objects/par_unit/par_unit.yy",},
+    {"name":"spr_fx_boshy","order":9,"path":"sprites/spr_fx_boshy/spr_fx_boshy.yy",},
     {"name":"obj_unit_spawner","order":3,"path":"objects/obj_unit_spawner/obj_unit_spawner.yy",},
     {"name":"fx_target_reticle","order":5,"path":"objects/fx_target_reticle/fx_target_reticle.yy",},
     {"name":"fnt_itemdesc","order":3,"path":"fonts/fnt_itemdesc/fnt_itemdesc.yy",},
