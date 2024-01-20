@@ -1905,7 +1905,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 			}
 
 			var _spawnIndex = asset_get_index(card.index)
-			if(self.spawnCounter < self.maxSpawns && (card.cost <= self.credits) && (card.cost >= self.credits / 6 && card.cost < 600) && object_exists(_spawnIndex) && global.enemyCount < 30)
+			if(self.spawnCounter < self.maxSpawns && (card.cost <= self.credits) && (card.cost >= self.credits / 6 && card.cost < 600) && global.enemyCount < 30)
 			{
 				var elite = (card.cost * 6 <= self.credits)
 				var cost = card.cost * (1 + elite * 4)

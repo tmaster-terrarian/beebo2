@@ -1,5 +1,3 @@
-
-
 if(global.pause)
 {
     _draw_rect(0, 0, SC_W, SC_H, c_black, 0.5)
@@ -29,13 +27,12 @@ else
 
     var time = timer_to_timestamp((global.t / 60) * 1000000)
     var _timer = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]TIMER: {time} WAVE: {global.wave}")
-
     _draw_rect(23, SC_H - 8, _timer.get_width() + 22, SC_H - 2, c_black, 0.5)
     _timer.draw(24, SC_H - 1)
 
     var _debugtext = scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]CREDITS: {mainDirector.credits}\nLASTCARD: {(mainDirector.lastSpawnCard == noone) ? "noone" : mainDirector.lastSpawnCard.index}\nLASTSPAWNSUCCESS: {mainDirector.lastSpawnSucceeded}\nENABLED: {mainDirector.enabled}").wrap(320)
-    _draw_rect(1, 1, _debugtext.get_width(), _debugtext.get_height() - 1, c_black, 0.5)
-    _debugtext.draw(2, 1)
+    // _draw_rect(1, 1, _debugtext.get_width(), _debugtext.get_height() - 1, c_black, 0.5)
+    // _debugtext.draw(2, 1)
 
     var _MONEY = scribble($"[fa_left][fa_top][spr_hudnumbers][c_yellow]$[/c]:{floor(_money)}")
     // _draw_rect(1, 1, _MONEY.get_width(), _MONEY.get_height(), c_black, 0.5)

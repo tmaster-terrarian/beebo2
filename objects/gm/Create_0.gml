@@ -33,7 +33,7 @@ global.combinedBossHealth = 0
 global.combinedBossMaxHealth = 0
 
 global.wave = 0
-global.runEnabled = 0
+global.runEnabled = 1
 
 wavetimer = 600
 killzoneTimer = MINUTE
