@@ -54,7 +54,7 @@ states[$ state]() //MAGIC
 
 if (input.jump() && can_jump)
 {
-    if(on_ground) || (jump_buffer && vsp > 0) || (jumps - 1 && state != "ledgegrab")
+    if(on_ground) || ((jump_buffer && vsp > 0) || (jumps - 1 && state != "ledgegrab"))
     {
         platformtarget = noone
         var s = noone
@@ -119,8 +119,9 @@ if (input.jump() && can_jump)
                 audio_stop_sound(s)
                 audio_play_sound(sn_walljump, 0, false)
             }
-            else if(jump_buffer)
+            else if(jump_buffer && vsp > 0)
             {
+                jump_buffer = 0
                 for (var i = 0; i < 4; i++)
                 {
                     with (instance_create_depth((bbox_left + random(8)), random_range(bbox_bottom, bbox_bottom), (depth - 1), fx_dust))
@@ -324,6 +325,11 @@ y = round(y)
 
 squash = approach(squash, 1, 0.15 * global.dt)
 stretch = approach(stretch, 1, 0.1 * global.dt)
+
+if(place_meeting(x + input_dir, y, par_solid) && abs(input_dir) && sprite_index == _sp.run)
+{
+    sprite_index = _sp.idle
+}
 
 if(hp <= 0) && !ded
 {

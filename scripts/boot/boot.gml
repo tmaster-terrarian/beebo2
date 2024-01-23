@@ -5,30 +5,36 @@ randomize()
 global.run_seed = random_get_seed()
 Log("Startup/INFO", $"Run seed: {global.run_seed}")
 
-// pixelate gui
-display_set_gui_size(320, 180)
+#macro SC_W 320
+#macro SC_H 180
 
 // read and apply screenSize and draw_debug flags
 Log("Startup/INFO", "Reading player settings")
 
+var __s = (320/SC_W)
+
 ini_open("save.ini");
-global.sc = clamp(floor(ini_read_real("settings", "res", 4)), 2, 6);
-if(global.sc < 6)
+global.sc = clamp(floor(ini_read_real("settings", "res", floor(4 * __s))), floor(2 * __s), floor(6 * __s));
+if(global.sc < floor(6 * __s))
 {
 	window_set_fullscreen(false);
-	window_set_size((320 * global.sc), (180 * global.sc));
+	window_set_size((SC_W * global.sc), (SC_H * global.sc));
+	window_center()
 }
 else
 {
 	window_set_fullscreen(true);
 }
-window_center()
+display_set_gui_size(SC_W, SC_H)
+
+global.blurOnPause = clamp(floor(ini_read_real("settings", "blurOnPause", 1)), 0, 1);
 
 global.draw_debug = ini_read_real("debug", "draw_debug", 0)
-global.locale = ini_read_string("settings", "lang", "en")
+global.locale = ini_read_string("settings", "language", "en")
 
-global.snd_volume = ini_read_real("settings", "sound_volume", 0.5)
-global.bgm_volume = ini_read_real("settings", "music_volume", 0.8)
+global.master_volume = ini_read_real("settings", "masterVolume", 0.5)
+global.snd_volume = ini_read_real("settings", "soundVolume", 0.8)
+global.bgm_volume = ini_read_real("settings", "musicVolume", 0.8)
 
 ini_close()
 
@@ -38,7 +44,20 @@ gamepad_set_axis_deadzone(2, 0.3)
 gamepad_set_axis_deadzone(3, 0.3)
 
 // game is too fucking LOUD
-audio_master_gain(0.5 * global.snd_volume);
+audio_master_gain(0.5 * global.master_volume);
+
+audio_group_set_gain(audiogroup_default, global.snd_volume, 0)
+audio_group_load(audiogroup_music)
+
+global.BGM = -1
+global.BGM_EMITTER = audio_emitter_create()
+global.BGM_BUS = audio_bus_create()
+audio_emitter_bus(global.BGM_EMITTER, global.BGM_BUS)
+
+global.BGM_LOWPASS = audio_effect_create(AudioEffectType.LPF2)
+global.BGM_LOWPASS.cutoff = 20000
+global.BGM_LOWPASS.q = 2
+global.BGM_BUS.effects[0] = global.BGM_LOWPASS
 
 // enums
 enum Team
@@ -504,8 +523,6 @@ global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM$:", 
 global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890-KM", 1, -1)
 
 // constants
-#macro SC_W 320
-#macro SC_H 180
 #macro MINUTE 3600
 
 // macro macros
@@ -1861,7 +1878,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 						var xpReward = global.difficultyCoeff * cost * self.expMult
 						var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-						trySpawnUnit(obj_camera.tx + irandom_range(-32, 32), ((choice.spawnsOnGround) ? 152 + choice.spawnOffsetY : obj_camera.ty + random_range(-24, 48)), self.team, _spawnIndex, {boss: true, xpReward, moneyReward, elite})
+						trySpawnUnit(_spawnIndex, obj_camera.tx + irandom_range(-32, 32), ((choice.spawnsOnGround) ? 152 + choice.spawnOffsetY : obj_camera.ty + random_range(-24, 48)), self.team, {boss: true, xpReward, moneyReward, elite})
 					}
 				}
 			}
@@ -1913,7 +1930,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 				var xpReward = global.difficultyCoeff * cost * self.expMult
 				var moneyReward = round(2 * global.difficultyCoeff * cost * self.expMult)
 
-				trySpawnUnit(self.lastSpawnPos.x, self.lastSpawnPos.y, self.team, _spawnIndex, {xpReward, moneyReward, boss: self.waveType, elite})
+				trySpawnUnit(_spawnIndex, self.lastSpawnPos.x, self.lastSpawnPos.y, self.team, {xpReward, moneyReward, boss: self.waveType, elite})
 
 				self.lastSpawnPos = {x: obj_camera.tx + random_range(-64, 64), y: ((card.spawnsOnGround) ? 152 + card.spawnOffsetY : obj_camera.ty + random_range(-24, 48))}
 
@@ -1956,20 +1973,12 @@ function trySpawnUnit(ind, x, y, team, _args = {})
 {
 	var out = {succeeded: 0, onSpawnResult: 0}
 
-	var _obj
-	if(is_string(ind))
-		_obj = asset_get_index(string(ind))
-	else
-		_obj = ind
-
 	_args.team = team
 
-	if(object_exists(_obj))
-	{
-		var ins = instance_create_depth(x, y, 60, _obj, _args)
-		out.succeeded = 1
-		out.onSpawnResult = onUnitSpawn(ins)
-	}
+	var ins = instance_create_depth(x, y, 60, ind, _args)
+	out.succeeded = 1
+	out.onSpawnResult = onUnitSpawn(ins)
+	return out
 }
 
 function onUnitSpawn(ins)

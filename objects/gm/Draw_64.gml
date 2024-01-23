@@ -1,6 +1,6 @@
 if(global.pause)
 {
-    _draw_rect(0, 0, SC_W, SC_H, c_black, 0.5)
+    _draw_rect(-1, -1, SC_W + 1, SC_H + 1, c_black, 0.5)
 
     var txt = scribble("[fa_middle][fa_center][fnt_basic][c_white]-[[ PAUSED ]-")
 

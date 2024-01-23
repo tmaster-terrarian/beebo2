@@ -1,3 +1,11 @@
 if(!global.pause)
+{
+    if(global.usesplitscreen)
+    for(var i = 0; i < array_length(global.players); i++)
+    {
+        view_set_visible(i, 1)
+    }
     application_surface_draw_enable(1)
-surface_resize(application_surface, SC_W / global.zoom, SC_H / global.zoom)
+}
+var z = (global.zoom - global.zoom * 0.5 * (array_length(global.players) > 2 && global.usesplitscreen))
+surface_resize(application_surface, SC_W / z, SC_H / z)

@@ -35,7 +35,10 @@
       ],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"obj_player","varType":5,},
   ],
   "solid": false,
-  "spriteId": null,
+  "spriteId": {
+    "name": "spr_1pixel_red",
+    "path": "sprites/spr_1pixel_red/spr_1pixel_red.yy",
+  },
   "spriteMaskId": null,
-  "visible": true,
+  "visible": false,
 }

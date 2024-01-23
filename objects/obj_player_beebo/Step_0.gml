@@ -11,7 +11,32 @@ event_inherited();
 
 ponytail_visible = 1
 gun_behind = 0
-if(running && sprite_index != _sp.crawl)
+if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
+{
+    ponytail_visible = 0
+    switch(floor(image_index))
+    {
+        case 0:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break
+        case 1:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 2:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 3:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+        case 4:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+        case 5:
+            gun_pos.x = -3; gun_pos.y = -7;
+            break;
+    }
+}
+else if(running && sprite_index != _sp.crawl)
 {
     ponytail_visible = 1
     switch(floor(image_index))
@@ -74,31 +99,7 @@ else if(sprite_index == _sp.crawl)
             break;
     }
 }
-else if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
-{
-    ponytail_visible = 0
-    switch(floor(image_index))
-    {
-        case 0:
-            gun_pos.x = -3; gun_pos.y = -6;
-            break
-        case 1:
-            gun_pos.x = -3; gun_pos.y = -6;
-            break;
-        case 2:
-            gun_pos.x = -3; gun_pos.y = -6;
-            break;
-        case 3:
-            gun_pos.x = -3; gun_pos.y = -7;
-            break;
-        case 4:
-            gun_pos.x = -3; gun_pos.y = -7;
-            break;
-        case 5:
-            gun_pos.x = -3; gun_pos.y = -7;
-            break;
-    }
-}
+
 else if(state == "wallslide")
 {
     ponytail_visible = 1

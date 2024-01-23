@@ -43,8 +43,6 @@ for(var a = 0; a < ponytail_points_count; a++)
     ponytail_segment_len[a] = 1
 }
 
-_dbkey = vk_lalt
-
 punch = 1
 
 _jumps = jumps

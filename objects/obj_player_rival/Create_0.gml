@@ -49,8 +49,6 @@ for(var a = 0; a < hair2_points_count; a++)
     hair2_segment_len[a] = 1
 }
 
-_dbkey = vk_lalt
-
 draw_sword = 0
 sword_angle = 0
 _sword_angle = 0

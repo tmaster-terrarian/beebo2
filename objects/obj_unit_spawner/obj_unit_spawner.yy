@@ -10,8 +10,8 @@
   "managed": true,
   "overriddenProperties": [],
   "parent": {
-    "name": "internal",
-    "path": "folders/Objects/internal.yy",
+    "name": "level",
+    "path": "folders/Objects/level.yy",
   },
   "parentObjectId": null,
   "persistent": false,
@@ -41,6 +41,7 @@
         "Team.player",
       ],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"Team.enemy","varType":6,},
     {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"boss","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"0","varType":3,},
+    {"resourceType":"GMObjectProperty","resourceVersion":"1.0","name":"animate_spawn","filters":[],"listItems":[],"multiselect":false,"rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"value":"0","varType":3,},
   ],
   "solid": false,
   "spriteId": null,

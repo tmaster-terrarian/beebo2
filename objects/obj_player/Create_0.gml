@@ -124,8 +124,11 @@ _oncollide_h = function()
     {
         if(abs(input_dir) && !place_meeting(x + input_dir, y - 2, par_solid))
         {
-            movey(-2)
-            movex(input_dir * 2)
+            if(place_meeting(x + input_dir, y, par_solid))
+            {
+                movey(-2)
+                movex(input_dir * 2)
+            }
         }
         else
         {
@@ -483,7 +486,7 @@ states =
                 vsp += 0.1
             }
         }
-        if (running)
+        if (running && !place_meeting(x + input_dir, y, par_solid))
             image_index += abs(hsp / 6) * global.dt
         else if (duck)
             image_index += abs(hsp / 4) * global.dt
@@ -684,7 +687,7 @@ states =
     }}
 }
 
-_dbkey = vk_lcontrol
+_dbkey = ord(string(player_id + 1))
 
 collision_checks = []
 

@@ -16,7 +16,22 @@ if(!string_starts_with(state, "SKILL"))
 }
 
 if(!string_starts_with(state, "SKILL"))
-if(running && sprite_index != _sp.crawl)
+if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
+{
+    ponytail_visible = 0
+    draw_sword = 1
+    sword_angle_locked = 0
+    sword_nohand = 0
+    switch(floor(image_index)) {
+        case 0: { swordpos.x = 3; swordpos.y = -5 } break;
+        case 1: { swordpos.x = 3; swordpos.y = -5 } break;
+        case 2: { swordpos.x = 3; swordpos.y = -5 } break;
+        case 3: { swordpos.x = 3; swordpos.y = -6 } break;
+        case 4: { swordpos.x = 3; swordpos.y = -6 } break;
+        case 5: { swordpos.x = 3; swordpos.y = -6 } break;
+    }
+}
+else if(running && sprite_index != _sp.crawl)
 {
     ponytail_visible = 1
     sword_angle_locked = 0
@@ -32,21 +47,6 @@ if(running && sprite_index != _sp.crawl)
         case 5: { swordpos.x = 1; swordpos.y = -4 } break;
         case 6: { swordpos.x = 0; swordpos.y = -4 } break;
         case 7: { swordpos.x = 2; swordpos.y = -4 } break;
-    }
-}
-else if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
-{
-    ponytail_visible = 0
-    draw_sword = 1
-    sword_angle_locked = 0
-    sword_nohand = 0
-    switch(floor(image_index)) {
-        case 0: { swordpos.x = 3; swordpos.y = -5 } break;
-        case 1: { swordpos.x = 3; swordpos.y = -5 } break;
-        case 2: { swordpos.x = 3; swordpos.y = -5 } break;
-        case 3: { swordpos.x = 3; swordpos.y = -6 } break;
-        case 4: { swordpos.x = 3; swordpos.y = -6 } break;
-        case 5: { swordpos.x = 3; swordpos.y = -6 } break;
     }
 }
 else if(sprite_index == _sp.jump)

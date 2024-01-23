@@ -33,7 +33,7 @@ global.combinedBossHealth = 0
 global.combinedBossMaxHealth = 0
 
 global.wave = 0
-global.runEnabled = 1
+global.runEnabled = 0
 
 wavetimer = 600
 killzoneTimer = MINUTE
@@ -48,21 +48,26 @@ global.lastsecond = current_second
 
 global.showDebugOverlay = 0
 
+global.BGM_LOWPASS_CUTOFF_TARGET = 20000
+
 togglePause = function()
 {
     global.pause = !global.pause
     if(global.pause)
     {
+        audio_pause_all()
         audio_play_sound(sn_pause, 10, 0, 1, 0, 1)
-        audio_sound_pitch(current_bgm, 0)
         time_source_pause(time_source_game)
 
         UILayer = 0
+
+        audio_resume_sound(global.BGM)
+        global.BGM_LOWPASS_CUTOFF_TARGET = 400
     }
     else
     {
+        audio_resume_all()
         audio_play_sound(sn_pause, 10, 0, 1, 0, 2)
-        audio_sound_pitch(current_bgm, 1)
         time_source_resume(time_source_game)
 
         instance_activate_all();
@@ -70,6 +75,8 @@ togglePause = function()
         pauseSurface = -1;
 
         UILayer = 0
+
+        global.BGM_LOWPASS_CUTOFF_TARGET = 20000
     }
 }
 

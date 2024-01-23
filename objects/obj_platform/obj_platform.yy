@@ -6,8 +6,8 @@
   "managed": true,
   "overriddenProperties": [],
   "parent": {
-    "name": "Objects",
-    "path": "folders/Objects.yy",
+    "name": "level",
+    "path": "folders/Objects/level.yy",
   },
   "parentObjectId": {
     "name": "par_jumpthru",

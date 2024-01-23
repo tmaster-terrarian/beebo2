@@ -136,7 +136,7 @@ function initSkills()
 
                 fire = 1
 
-                bomb = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {damage_boosted : ((heat > 20) ? heat : 0)})
+                bomb = instance_create_depth(x + lengthdir_x(12, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(12, fire_angle) + gun_pos.y - 1, depth - 2, obj_bomb, {max_dmg_boost: heat_max, damage_boosted : ((heat > 20) ? heat : 0)})
 
                 with(bomb)
                 {
