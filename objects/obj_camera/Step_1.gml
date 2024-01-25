@@ -31,7 +31,7 @@ if(!global.usesplitscreen && follow && array_length(global.players) > 1)
         if(instance_exists(p))
         {
             ts[i].x = ((p.bbox_left + p.bbox_right) / 2) + (p.hsp * global.dt)
-            ts[i].y = clamp(((p.bbox_top + p.bbox_bottom) / 2) + p.vsp * global.dt - 4, hh, room_height - hh - 4) - lookup * (24 / global.zoom) // oldie: ((p.lookup + global.players[-i + 1].lookup) / max(1, 2 * abs(sign(p.lookup)) * abs(sign(global.players[-i + 1].lookup))))
+            ts[i].y = clamp(((p.bbox_top + p.bbox_bottom) / 2) + p.vsp * global.dt - 16 + (max(2, p.vsp) - 2) * global.dt * 8, hh, room_height - hh - 4) - lookup * (24 / global.zoom) // oldie: ((p.lookup + global.players[-i + 1].lookup) / max(1, 2 * abs(sign(p.lookup)) * abs(sign(global.players[-i + 1].lookup))))
         }
         tx += ts[i].x
         ty += ts[i].y

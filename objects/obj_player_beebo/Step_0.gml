@@ -3,7 +3,7 @@ if(has_gun)
     if(input.secondaryPressed() && instance_exists(bomb) && skills.secondary.cooldown > 0)
     {
         bomb.bulleted = 1
-        addQueueFunc(function() {instance_destroy(bomb)}, 0.1)
+        setTimeout(function() {instance_destroy(bomb)}, 0.1)
     }
 }
 

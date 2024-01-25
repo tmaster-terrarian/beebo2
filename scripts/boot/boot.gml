@@ -431,7 +431,7 @@ function addFixedStep(func)
 	return global.fixedStep.addFunction(func, self)
 }
 
-function addQueueFunc(func, delaySeconds)
+function setTimeout(func, delaySeconds)
 {
 	return global.fixedStep.addQueueFunction(func, delaySeconds, self)
 }
