@@ -288,6 +288,22 @@ for(var i = 0; i < array_length(names); i++)
     }
 }
 
+if(state == "ghost")
+{
+    var skill = deadskill
+    var def = skill.def
+
+    if(skill.cooldown > 0)
+        skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
+    else if(skill.stocks < def.baseMaxStocks)
+    {
+        skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks)
+
+        if(skill.stocks < def.baseMaxStocks)
+            skill.cooldown = def.baseStockCooldown
+    }
+}
+
 for(var i = 0; i < array_length(names); i++)
 {
     var skill = skills[$ names[i]]
@@ -342,6 +358,8 @@ if(hp <= 0) && !ded
     rand = random(1) < 1/1000
 
     if(abs(hsp) < 2)
-        hsp = 2
+        hsp = 2 * sign(hsp)
     vsp = min(vsp, -1)
+
+    regen = 0
 }

@@ -8,4 +8,4 @@ if(!global.pause)
     application_surface_draw_enable(1)
 }
 var z = (global.zoom - global.zoom * 0.5 * (array_length(global.players) > 2 && global.usesplitscreen))
-surface_resize(application_surface, SC_W / z, SC_H / z)
+surface_resize(application_surface, ceil(SC_W / z), ceil(SC_H / z))

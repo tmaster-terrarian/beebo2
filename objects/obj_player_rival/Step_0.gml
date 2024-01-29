@@ -108,6 +108,13 @@ else if(state == "ledgeclimb")
     sword_nohand = 1
 }
 
+if(ded)
+{
+    ponytail_visible = 0
+    draw_sword = 0
+    sword_nohand = 0
+}
+
 if(!sword_angle_locked && !string_starts_with(state, "SKILL"))
 {
     var floorx = -8 * facing

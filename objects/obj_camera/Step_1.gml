@@ -4,20 +4,20 @@ if(!global.usesplitscreen && follow && array_length(global.players) > 1)
     // target the AVERAGE of the target positions
     ts = []
 
-    tx = 0
-    ty = 0
 
     var lookup = 0
+    var pTotal = 0
     for(var l = 0; l < array_length(global.players); l++)
     {
         array_push(ts, {x: 0, y: 0})
         var p = global.players[l]
-        if(instance_exists(p))
+        if(instance_exists(p) && !p.ded)
         {
             lookup += p.lookup
+            pTotal++
         }
     }
-    lookup /= array_length(global.players)
+    lookup /= pTotal
     if(lookup > 0)
         lookup = 1
     else if(lookup <= -0.25)
@@ -25,19 +25,29 @@ if(!global.usesplitscreen && follow && array_length(global.players) > 1)
     else
         lookup = 0
 
+    if(pTotal)
+    {
+        tx = 0
+        ty = 0
+    }
+
     for(var i = 0; i < array_length(global.players); i++)
     {
         var p = global.players[i]
-        if(instance_exists(p))
+        if(instance_exists(p) && !p.ded)
         {
             ts[i].x = ((p.bbox_left + p.bbox_right) / 2) + (p.hsp * global.dt)
             ts[i].y = clamp(((p.bbox_top + p.bbox_bottom) / 2) + p.vsp * global.dt - 16 + (max(2, p.vsp) - 2) * global.dt * 8, hh, room_height - hh - 4) - lookup * (24 / global.zoom) // oldie: ((p.lookup + global.players[-i + 1].lookup) / max(1, 2 * abs(sign(p.lookup)) * abs(sign(global.players[-i + 1].lookup))))
+            tx += ts[i].x
+            ty += ts[i].y
         }
-        tx += ts[i].x
-        ty += ts[i].y
     }
-    tx /= array_length(global.players)
-    ty /= array_length(global.players)
+
+    if(pTotal)
+    {
+        tx /= pTotal
+        ty /= pTotal
+    }
 }
 else if(instance_exists(target) && follow)
 {

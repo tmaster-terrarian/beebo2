@@ -6,6 +6,9 @@ _apply_stats()
 skills = variable_clone(global.chardefs.beebo.skills)
 attack_states = variable_clone(global.chardefs.beebo.attack_states)
 
+deadskill = variable_clone(global.chardefs.dead.skills.primary)
+deadskill_state = variable_clone(global.chardefs.dead.attack_states.primary)
+
 depth = 50
 
 xpTarget = 155
@@ -73,7 +76,8 @@ _sp =
     run: spr_player_run,
     wallslide: spr_player_wallslide,
     ledgegrab: spr_player_ledgegrab,
-    ledgeclimb: spr_player_ledgeclimb
+    ledgeclimb: spr_player_ledgeclimb,
+    ghost: spr_player_ghost
 }
 sprite_index = _sp.idle
 
@@ -197,12 +201,12 @@ drawMyShit = function()
 
         draw_sprite_ext(spr_enemyhpbar, 0, avgx - floor(w/2), bbox_bottom + 7, w, 1, 0, c_white, 1)
 
-        draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_bottom + 7, ceil((hp_change / total_hp_max) * w), 1, 0, c_white, 1)
-        draw_sprite_ext(spr_enemyhpbar, 1, avgx - floor(w/2), bbox_bottom + 7, ceil((hp / total_hp_max) * w), 1, 0, c_white, 1)
-        draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_bottom + 7, ceil(((shield / max_shield) * max_shield / total_hp_max) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_bottom + 7, ceil(max(hp_change / total_hp_max, 0) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 1, avgx - floor(w/2), bbox_bottom + 7, ceil(max(hp / total_hp_max, 0) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil(max(hp / total_hp_max, 0) * w) - 1, bbox_bottom + 7, ceil(max((shield / max_shield) * max_shield / total_hp_max, 0) * w), 1, 0, c_white, 1)
         if(ceil(hp_change) < ceil(hp))
         {
-            draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil((hp / total_hp_max) * w), bbox_bottom - 7, ceil(-(hp - hp_change)), 1, 0, c_white, 1)
+            draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil(max(hp / total_hp_max, 0) * w), bbox_bottom - 7, ceil(max(-(hp - hp_change) / total_hp_max, 0) * w), 1, 0, c_white, 1)
         }
     }
 }
@@ -677,13 +681,118 @@ states =
         can_walljump = 0
         ghost = 0
         sprite_index = _sp.dead
-        image_index = on_ground + (on_ground && rand)
+        image_index = on_ground// + (on_ground && rand) // benbo refrence ?!?!?
         can_use_skills = 0
 
         if(on_ground)
+        {
             hsp = approach(hsp, lasthsp, fric * 2 * global.dt)
+            if(timer0 < 60)
+                timer0 = approach(timer0, 60, global.dt)
+            else
+            {
+                timer0 = 0
+                state = "ghost"
+                instance_create_depth(x, y, depth + 1, obj_empty, {sprite_index, image_index, image_xscale, image_angle, image_speed: 0})
+                vsp = -2
+                mask_index = mask_player
+
+                _items = []
+                array_copy(_items, 0, items, 0, array_length(items))
+                items = []
+            }
+        }
         else
             vsp = approach(vsp, vsp_max, grv * global.dt)
+    }},
+
+    ghost: function()
+    {with(other){
+        duck = 0
+        fxtrail = 0
+        can_jump = 0
+        can_walljump = 0
+        ghost = 1
+        on_ground = 0
+        sprite_index = _sp.ghost
+        image_alpha = 0.6
+        can_use_skills = 0
+        running = 0
+        fric = 0.04
+        accel = 0.06
+        var input_dir2 = (input.down() - input.up()) * hascontrol
+
+        if (input_dir == 1)
+        {
+            if (hsp < 0)
+            {
+                hsp = approach(hsp, 0, fric * 2 * global.dt)
+            }
+            else
+                hsp = approach(hsp, 2, accel * global.dt)
+            facing = 1
+        }
+        else if (input_dir == -1)
+        {
+            if (hsp > 0)
+            {
+                hsp = approach(hsp, 0, fric * 2 * global.dt)
+            }
+            else
+                hsp = approach(hsp, -2, accel * global.dt)
+            facing = -1
+        }
+        else
+        {
+            hsp = approach(hsp, 0, fric * global.dt)
+        }
+        if (input_dir2 == 1)
+        {
+            if (vsp < 0)
+            {
+                vsp = approach(vsp, 0, fric * 2 * global.dt)
+            }
+            else
+                vsp = approach(vsp, 2, accel * global.dt)
+        }
+        else if (input_dir2 == -1)
+        {
+            if (vsp > 0)
+            {
+                vsp = approach(vsp, 0, fric * 2 * global.dt)
+            }
+            else
+                vsp = approach(vsp, -2, accel * global.dt)
+        }
+        else
+        {
+            vsp = approach(vsp, 0, fric * global.dt)
+        }
+
+        fire_angle = 180 * (facing == -1)
+
+        var skill = deadskill
+        var def = skill.def
+
+        var inputHeld = input.primary()
+        var preventSkillSelfInterrupt = attack_state != "primary"
+        var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority || skills[$ attack_state].def.priority < 0)
+        var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
+        if(skill.cooldown <= 0 && inputHeld && preventSkillSelfInterrupt && enoughStocksToFire)
+        {
+            if(!def.beginCooldownOnEnd)
+                skill.cooldown = def.baseStockCooldown
+            skill.stocks -= def.stockToConsume
+
+            if(attack_state != noone)
+            {
+                attack_states[$ attack_state].onExit(attack_states[$ attack_state], self)
+                attack_state = noone
+            }
+
+            attack_state = "primary"
+            deadskill_state.onEnter(deadskill_state, self)
+        }
     }}
 }
 

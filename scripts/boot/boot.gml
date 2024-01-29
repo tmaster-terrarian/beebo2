@@ -246,26 +246,6 @@ function damage_event(ctx)
 				if(ctx.crit)
 					damage *= 2 * ctx.attacker.crit_modifier
 
-				if(ctx.reduceable)
-				{
-					// do armor here pls
-				}
-
-				if(object_get_parent(ctx.target.object_index) == obj_player && damage > ctx.target.total_hp_max * 0.9 && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
-				{
-					damage = ctx.target.total_hp_max * 0.9
-					ctx.target.oneshotprotection = 6
-				}
-
-				var _shield = ctx.target.shield
-				ctx.target.shield = max(0, ctx.target.shield - damage)
-				damage -= _shield
-
-				ctx.target.hp -= damage
-
-				if(ctx.nonlethal && ctx.target.hp < 1)
-					ctx.target.hp = 1
-
 				if(ctx.attacker.team == Team.player)
 				{
 					if(ctx.crit)
@@ -285,16 +265,39 @@ function damage_event(ctx)
 			}
 		}
 
-		ctx.target.drawhp = 1
-		ctx.target.hp_change_delay = 5 * max(ctx.proc, 0.2)
-
-		if(object_get_parent(ctx.target.object_index) == obj_player)
+		if(!ctx.blocked)
 		{
-			audio_play_sound(sn_player_hit, 5, false)
-		}
+			if(ctx.reduceable)
+			{
+				// do armor here pls
+			}
 
-		// damage number
-		instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(damage), dir: _dir})
+			if(object_get_parent(ctx.target.object_index) == obj_player && damage > ctx.target.total_hp_max * 0.9 && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
+			{
+				damage = ctx.target.total_hp_max * 0.9
+				ctx.target.oneshotprotection = 6
+			}
+
+			var _shield = ctx.target.shield
+			ctx.target.shield = max(0, ctx.target.shield - damage)
+			damage -= _shield
+
+			ctx.target.hp -= damage
+
+			if(ctx.nonlethal && ctx.target.hp < 1)
+				ctx.target.hp = 1
+
+			ctx.target.drawhp = 1
+			ctx.target.hp_change_delay = 5 * max(ctx.proc, 0.2)
+
+			if(object_get_parent(ctx.target.object_index) == obj_player)
+			{
+				audio_play_sound(sn_player_hit, 5, false)
+			}
+
+			// damage number
+			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(damage), dir: _dir})
+		}
 
 		// activate attacker's on kill items and target's on death items if target died
 		if(ctx.target.hp <= 0)
@@ -1799,6 +1802,7 @@ global.difficultyCoeff = 1
 global.wave = 0
 global.enemyLevel = 1
 global.enemyItems = []
+global.currentRoomInfo = {}
 
 function Director(creditsStart, expMult, creditMult, waveInterval, interval, maxSpawns) constructor
 {
@@ -1827,6 +1831,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 	self.lastSpawnSucceeded = 0
 	self.lastSpawnCard = noone
 	self.lastSpawnPos = {x: SC_W / 2, y: SC_H / 2}
+	self.spawnRoomInfo = {}
 
 	self.Enable = function()
 	{
@@ -1889,6 +1894,7 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 	{
 		self.enabled = 0
 		self.waveType = 0
+		self.credits = 0
 		self.lastSpawnCard = noone
 		self.lastSpawnPos = {x: obj_camera.tx, y: obj_camera.ty}
 	}
@@ -1949,11 +1955,15 @@ function Director(creditsStart, expMult, creditMult, waveInterval, interval, max
 
 	self.BuildCreditScore = function() // the credit generator
 	{
-		if(self.generatorTicker == 60 && self.generatorTickerSeconds < self.wavePeriods[self.waveType])
+		if(self.generatorTicker == 60)
 		{
-			self.generatorTicker = 0
-			self.generatorTickerSeconds++
-			self.credits += self.creditsPerSecond
+			if(self.generatorTickerSeconds < self.wavePeriods[self.waveType])
+			{
+				self.generatorTicker = 0
+				self.generatorTickerSeconds++
+				self.credits += self.creditsPerSecond
+			}
+			else self.Disable()
 		}
 	}
 }
@@ -1965,7 +1975,7 @@ function range(minval, maxval) constructor
 
 	toString = function()
 	{
-		return $"{minval} to {maxval}"
+		return $"{minval}-{maxval}"
 	}
 }
 

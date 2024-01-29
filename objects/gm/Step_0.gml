@@ -9,8 +9,10 @@ if(keyboard_check_pressed(vk_f2))
 //192 = `
 if(keyboard_check_pressed(192))
 {
-    global.showDebugOverlay = !global.showDebugOverlay
-    show_log(global.showDebugOverlay)
+    // global.showDebugOverlay = !global.showDebugOverlay
+    // show_log(global.showDebugOverlay)
+
+    damage_event(new DamageEventContext(noone, global.players[0], proctype.none, 50, 1, 0, 0, 0).damageType(damage_notif_type.playerhurt))
 }
 
 var _fpsswitch = keyboard_check_pressed(ord("P")) - keyboard_check_pressed(ord("O"))

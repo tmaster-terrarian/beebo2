@@ -24,7 +24,8 @@ _sp =
     duckPunch: spr_benb_duckPunch,
     punch_1: spr_benb_punch_1,
     punch_2: spr_benb_punch_2,
-    dkick: spr_benb_dkick
+    dkick: spr_benb_dkick,
+    ghost: spr_player_ghost
 }
 sprite_index = _sp.idle
 

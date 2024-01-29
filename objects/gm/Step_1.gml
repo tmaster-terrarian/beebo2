@@ -14,43 +14,44 @@ if(!global.pause && global.runEnabled)
 
     if(wavetimer > 0)
         wavetimer = max(wavetimer - global.dt, 0)
-    if(wave5delay > 0)
-        wave5delay = max(wave5delay - global.dt, 0)
+    // if(wave5delay > 0)
+    //     wave5delay = max(wave5delay - global.dt, 0)
 
     if(wavetimer == 0)
     {
         wavetimer = -1
-        if(!doNotIncreaseWave)
-            global.wave++
-        doNotIncreaseWave = 0
+        // if(!doNotIncreaseWave)
+        //     global.wave++
+        // doNotIncreaseWave = 0
 
         var waveType = 0
-        switch((global.wave - 1) % 5)
-        {
-            case 4:
-            {
-                waveType = 1
-                break;
-            }
-            default:
-            {
-                waveType = 0
-                break;
-            }
-        }
-        mainDirector.waveType = waveType
+        // switch((global.wave - 1) % 5)
+        // {
+        //     case 4:
+        //     {
+        //         waveType = 1
+        //         break;
+        //     }
+        //     default:
+        //     {
+        //         waveType = 0
+        //         break;
+        //     }
+        // }
+        // mainDirector.waveType = waveType
+        mainDirector.waveType = 0
         mainDirector.Enable()
     }
 
-    if(wave5delay == 0 && wavetimer == -1)
-    {
-        wave5delay = -1
-        mainDirector.Enable()
-    }
+    // if(wave5delay == 0 && wavetimer == -1)
+    // {
+    //     wave5delay = -1
+    //     mainDirector.Enable()
+    // }
 
     var waveFac = 1.5 * global.wave
     var diffFac = 0.0506 * global.difficultySetting
-    global.difficultyCoeff = (1 + diffFac * waveFac) * power(1.02, global.wave) // ror2 is so cool man
+    global.difficultyCoeff = (1 + diffFac * waveFac) * power(1.04, global.wave) // ror2 is so cool man
     global.enemyLevel = min(1 + round((global.difficultyCoeff - 1)/0.33), 9999)
 
     global.enemyCount = 0
@@ -66,39 +67,40 @@ if(!global.pause && global.runEnabled)
         mainDirector.Step()
 
     // if the director is totally pooped, proceed to next wave
-    if((mainDirector.credits < 8 && mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1)
+    if((mainDirector.generatorTickerSeconds >= mainDirector.wavePeriods[mainDirector.waveType]) && wavetimer == -1)
     {
-        if(global.enemyCount == 0)
-        {
-            killzoneTimer = MINUTE / 2
-            if(instance_exists(fx_death_fog))
-                fx_death_fog.done = 1
+        mainDirector.Disable()
+        // if(global.enemyCount == 0)
+        // {
+        //     killzoneTimer = MINUTE / 2
+        //     if(instance_exists(fx_death_fog))
+        //         fx_death_fog.done = 1
 
-            mainDirector.Disable()
-            wavetimer = 600
+        //     mainDirector.Disable()
+        //     wavetimer = 600
 
-            var pcount = array_length(global.players)
-            for(var i = 0; i < pcount; i++)
-            {
-                instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 96, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
-            }
-        }
-        else
-        {
-            if(global.enemyCount == 1)
-                with(par_unit)
-                {
-                    if(team == Team.enemy)
-                        hp = -10000000
-                }
-            if(killzoneTimer > 0)
-                killzoneTimer = approach(killzoneTimer, 0, global.dt)
-            if(killzoneTimer == 0)
-            {
-                killzoneTimer = -1
-                instance_create_depth(0, 0, 0, fx_death_fog)
-            }
-        }
+        //     var pcount = array_length(global.players)
+        //     for(var i = 0; i < pcount; i++)
+        //     {
+        //         instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 96, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
+        //     }
+        // }
+        // else
+        // {
+        //     if(global.enemyCount == 1)
+        //         with(par_unit)
+        //         {
+        //             if(team == Team.enemy)
+        //                 hp = -10000000
+        //         }
+        //     if(killzoneTimer > 0)
+        //         killzoneTimer = approach(killzoneTimer, 0, global.dt)
+        //     if(killzoneTimer == 0)
+        //     {
+        //         killzoneTimer = -1
+        //         instance_create_depth(0, 0, 0, fx_death_fog)
+        //     }
+        // }
     }
 }
 
@@ -139,7 +141,7 @@ with(par_unit)
     hp_max = (base_hp_max * hpFac) / curse
 
 
-    var shieldFac = 0
+    var shieldFac = 0.0
     max_shield = hp_max * shieldFac
 
 

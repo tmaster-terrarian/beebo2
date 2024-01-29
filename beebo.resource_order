@@ -222,6 +222,7 @@
     {"name":"__scribble_font_add_sprite","order":9,"path":"scripts/__scribble_font_add_sprite/__scribble_font_add_sprite.yy",},
     {"name":"scribble_anim_wobble","order":9,"path":"scripts/scribble_anim_wobble/scribble_anim_wobble.yy",},
     {"name":"__shd_scribble_bake_outline_4dir","order":1,"path":"shaders/__shd_scribble_bake_outline_4dir/__shd_scribble_bake_outline_4dir.yy",},
+    {"name":"spr_player_ghost","order":16,"path":"sprites/spr_player_ghost/spr_player_ghost.yy",},
     {"name":"scribble","order":10,"path":"scripts/scribble/scribble.yy",},
     {"name":"spr_player_run_rev","order":14,"path":"sprites/spr_player_run_rev/spr_player_run_rev.yy",},
     {"name":"scribble_msdf_thickness_offset","order":5,"path":"scripts/scribble_msdf_thickness_offset/scribble_msdf_thickness_offset.yy",},

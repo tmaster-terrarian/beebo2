@@ -8,9 +8,6 @@ if(keyboard_check(_dbkey))
 
 event_inherited();
 
-if(regen && hp > 0) heal_event(id, regen_rate/60 * global.dt, healtype.regen)
-if(hp > hp_max) hp = hp_max
-
 if(oneshotprotection > 0)
 {
     oneshotprotection = approach(oneshotprotection, 0, global.dt)
@@ -26,11 +23,11 @@ var cam_w = camera_get_view_width(cam)
 var cam_h = camera_get_view_height(cam)
 
 //bound position to room
-if(bbox_left < max(0, cam_x) || bbox_right > min(cam_x + cam_w, room_width))
+if(bbox_left < 0 || bbox_right > room_width)
 {
-    while(bbox_left < max(0, cam_x))
+    while(bbox_left < 0)
         x++
-    while(bbox_right > min(room_width, cam_x + cam_w))
+    while(bbox_right > room_width)
         x--
 
     if(!keyboard_check(_dbkey))
@@ -42,13 +39,47 @@ if(bbox_left < max(0, cam_x) || bbox_right > min(cam_x + cam_w, room_width))
         image_index = 0
     }
 }
-if(bbox_top < max(0, cam_y))
+if(bbox_top < 0)
 {
-    while(bbox_top < max(0, cam_y))
+    while(bbox_top < 0)
         y++
 
     if(!keyboard_check(_dbkey))
         _oncollide_v()
+    vsp = 0
+}
+
+//bound position to screen
+if((bbox_left < cam_x || bbox_right > cam_x + cam_w) && state != "dead")
+{
+    while(bbox_left < cam_x)
+        x++
+    while(bbox_right > cam_x + cam_w)
+        x--
+
+    if(!keyboard_check(_dbkey) && state != "ghost")
+        _oncollide_h()
+    hsp = 0
+
+    if(running)
+    {
+        image_index = 0
+    }
+}
+if(bbox_top < cam_y && state != "dead")
+{
+    while(bbox_top < cam_y)
+        y++
+
+    if(!keyboard_check(_dbkey) && state != "ghost")
+        _oncollide_v()
+    vsp = 0
+}
+if(bbox_top > cam_y + cam_h && state == "ghost")
+{
+    while(bbox_top > cam_y + cam_h)
+        y--
+
     vsp = 0
 }
 

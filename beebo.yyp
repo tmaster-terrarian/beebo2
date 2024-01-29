@@ -270,6 +270,7 @@
     {"id":{"name":"__scribble_font_add_sprite","path":"scripts/__scribble_font_add_sprite/__scribble_font_add_sprite.yy",},},
     {"id":{"name":"scribble_anim_wobble","path":"scripts/scribble_anim_wobble/scribble_anim_wobble.yy",},},
     {"id":{"name":"__shd_scribble_bake_outline_4dir","path":"shaders/__shd_scribble_bake_outline_4dir/__shd_scribble_bake_outline_4dir.yy",},},
+    {"id":{"name":"spr_player_ghost","path":"sprites/spr_player_ghost/spr_player_ghost.yy",},},
     {"id":{"name":"scribble","path":"scripts/scribble/scribble.yy",},},
     {"id":{"name":"scribble_anim_blink","path":"scripts/scribble_anim_blink/scribble_anim_blink.yy",},},
     {"id":{"name":"fx_dust","path":"objects/fx_dust/fx_dust.yy",},},

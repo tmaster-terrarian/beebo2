@@ -11,7 +11,7 @@ else
 
     if(instance_exists(target))
     {
-        angle = angleRotate(angle, point_direction(x, y, target.x, target.y), turnspd * global.dt);
+        angle = angleRotate(angle, point_direction(x, y, target.x, ((target.bbox_top + target.bbox_bottom) / 2)), turnspd * global.dt);
     }
     else
     {

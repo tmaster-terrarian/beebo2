@@ -20,7 +20,8 @@ _sp =
     run: spr_anime_run_sword,
     wallslide: spr_anime_wallslide,
     ledgegrab: spr_anime_ledgegrab,
-    ledgeclimb: spr_anime_ledgeclimb
+    ledgeclimb: spr_anime_ledgeclimb,
+    ghost: spr_player_ghost
 }
 sprite_index = _sp.idle
 

@@ -20,7 +20,8 @@ _sp =
     run: spr_player_run,
     wallslide: spr_player_wallslide,
     ledgegrab: spr_player_ledgegrab,
-    ledgeclimb: spr_player_ledgeclimb
+    ledgeclimb: spr_player_ledgeclimb,
+    ghost: spr_player_ghost
 }
 sprite_index = _sp.idle
 

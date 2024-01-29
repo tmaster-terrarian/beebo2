@@ -14,6 +14,7 @@ spd = 2.5
 turnspd = 8
 turnspdDecay = 0.15
 target = noone
+mustHitTarget = 1
 
 image_speed = 0.33
 

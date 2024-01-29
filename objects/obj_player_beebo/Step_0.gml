@@ -134,6 +134,13 @@ else
     gun_pos.y = -7;
 }
 
+if(ded)
+{
+    ponytail_visible = 0
+    has_gun = 0
+    draw_gun = 0
+}
+
 if(has_gun)
 {
     if(gamepad)
@@ -231,7 +238,7 @@ if(has_gun)
             }
             else audio_play_sound(snReload, 0, 0)
         }
-        if(gun_spr_ind >= image_number - 1)
+        if(gun_spr_ind >= 10)
         {
             gun_spr = spr_player_gun
             gun_spr_ind = 0

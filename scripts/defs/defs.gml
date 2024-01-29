@@ -1,5 +1,62 @@
 function initSkills()
 {
+    var deadPrimarySkill = new Skill("dead.primary", function(def) {
+        def.baseMaxStocks = 1
+        def.baseStockCooldown = 1
+        def.beginCooldownOnEnd = 0
+        def.fullRestockOnAssign = 1
+        def.isCombatSkill = 1
+        def.mustKeyPress = 0
+        def.rechargeStock = 1
+        def.requiredStock = 1
+        def.stockToConsume = 1
+        def.slot = "primary"
+        def.priority = 0
+        def.buffer = 0
+    })
+
+    var deadPrimarySkillState = new State(function(def) {
+        def.baseDuration = 20/60
+        def.onEnter = function(ins, obj) {
+            ins.duration = ins.baseDuration / obj.attack_speed
+
+            with(obj)
+            {
+                screen_shake_set(1, 5)
+
+                var v = spread
+                var _obj = instance_create_depth(x + lengthdir_x(14, fire_angle), y + lengthdir_y(14, fire_angle) - 8, depth - 3, obj_bullet)
+
+                with (_obj)
+                {
+                    parent = other
+                    team = other.team
+                    audio_play_sound(sn_player_shoot, 1, false);
+
+                    _speed = 12;
+                    direction = other.fire_angle;
+                    image_angle = direction;
+
+                    damage = other.damage * 0.5
+                    proc = 0.8
+                }
+                with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
+                {
+                    image_yscale = other.facing
+                    angle = other.fire_angle
+                    dir = other.facing
+                    hsp = -other.facing * random_range(1, 1.5)
+                    vsp = -1 + random_range(-0.2, 0.1)
+                }
+            }
+        }
+        def.onExit = function(ins, obj) {
+            ins.age = 0
+            obj.attack_state = noone
+        }
+    }, deadPrimarySkill)
+    deadPrimarySkill.activationState = deadPrimarySkillState
+
     #region BEEBER
     var beeboPrimarySkill = new Skill("beebo.rapidfire", function(def) {
         def.baseMaxStocks = 1
@@ -110,6 +167,14 @@ function initSkills()
                     }
                 }
                 cool_delay = ins.duration + 30
+            }
+        }
+        def.update = function(ins, obj) {
+            ins.age = approach(ins.age, ins.duration, global.dt / 60)
+            if(ins.age >= ins.duration)
+            {
+                with(ins) onExit(self, obj)
+                return;
             }
         }
         def.onExit = function(ins, obj) {
@@ -789,6 +854,11 @@ function initChars()
         base: new CharacterDef("base")
     }
 
+    global.chardefs.dead = new CharacterDef("dead", function(def) {
+        def.skills.primary = new SkillInstance(global.skilldefs[$ "dead.primary"])
+        def.attack_states.primary = variable_clone(def.skills.primary.def.activationState)
+    })
+
     global.chardefs.beebo = new CharacterDef("beebo", function(def) {
         def.stats = {
             hp_max: 100,
@@ -900,8 +970,8 @@ function initChars()
         def.skills = {
             primary:   new SkillInstance(global.skilldefs[$ "benb.punch"]),
 		    secondary: new SkillInstance(global.skilldefs[$ "benb.dkick"]),
-		    utility: new SkillInstance(global.skilldefs[$ "base"]),
-		    special: new SkillInstance(global.skilldefs[$ "base"])
+		    utility:   new SkillInstance(global.skilldefs[$ "base"]),
+		    special:   new SkillInstance(global.skilldefs[$ "base"])
         }
 
         def.attack_states = {

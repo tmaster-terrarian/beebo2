@@ -1,4 +1,4 @@
-if(canHurt(self, other) && other.id != parent)
+if(canHurt(self, other) && other.id != parent && (!mustHitTarget || (mustHitTarget && other.id == target)))
 {
 	if(context == noone)
 		damage_event(new DamageEventContext(parent, other, proctype.onhit, damage, proc).forceCrit(crit))

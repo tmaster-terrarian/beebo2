@@ -13,8 +13,10 @@ if(bounded && place_meeting(tx, ty, obj_trigger_camera_bounds))
 }
 
 // approach the targeted object
-x += (tx - x) / follow_rate * global.dt
-y += (ty - y) / follow_rate * global.dt
+dx = (tx - x) / follow_rate * global.dt
+dy = (ty - y) / follow_rate * global.dt
+x += dx
+y += dy
 
 // snap to pixels and offset with camera shake
 _x = round(x - wh + random_range(-shake, shake))

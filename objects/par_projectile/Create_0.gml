@@ -19,3 +19,5 @@ image_speed = 0
 
 rx = 0
 ry = 0
+
+mustHitTarget = 0
