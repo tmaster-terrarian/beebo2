@@ -1,4 +1,4 @@
 event_inherited();
 
-depth = 99
+depth = 90
 image_speed = 0

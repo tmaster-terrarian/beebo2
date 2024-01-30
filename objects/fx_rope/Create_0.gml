@@ -1,4 +1,4 @@
-hsp = 0
+fhsp = 0
 grv = 0.2
 
 var c1 = make_color_rgb(52, 28, 39)

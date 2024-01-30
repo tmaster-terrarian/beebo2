@@ -195,6 +195,7 @@
     {"name":"spr_player_duck","order":8,"path":"sprites/spr_player_duck/spr_player_duck.yy",},
     {"name":"scribble_external_sound_exists","order":1,"path":"scripts/scribble_external_sound_exists/scribble_external_sound_exists.yy",},
     {"name":"spr_anime_ledgegrab","order":7,"path":"sprites/spr_anime_ledgegrab/spr_anime_ledgegrab.yy",},
+    {"name":"fx_shadows","order":15,"path":"objects/fx_shadows/fx_shadows.yy",},
     {"name":"__scribble_class_null_element","order":4,"path":"scripts/__scribble_class_null_element/__scribble_class_null_element.yy",},
     {"name":"__scribble_gen_4_build_words","order":4,"path":"scripts/__scribble_gen_4_build_words/__scribble_gen_4_build_words.yy",},
     {"name":"scribble_font_has_character","order":11,"path":"scripts/scribble_font_has_character/scribble_font_has_character.yy",},
