@@ -24,7 +24,18 @@ else if(jump_buffer < 10 && state != "ledgegrab")
     platformtarget = noone
 }
 
-if(place_meeting(x, y, par_solid) && !ghost) y -= 1 * global.dt;
+if(place_meeting(x, y, par_solid) && !place_meeting(x, y - 1, par_jumpthru) && !ghost) y -= 1 * global.dt;
+
+if(place_meeting(x, y, par_jumpthru))
+{
+    if(vsp < 0)
+    {
+        vsp -= 0.2 * global.dt
+        if(vsp > jumpspd/4)
+            vsp = jumpspd/4
+        y--
+    }
+}
 
 if(!on_ground)
     duck = 0
@@ -97,7 +108,7 @@ if (input.jump() && can_jump)
 
         if(!on_ground)
         {
-            if _place_meeting(x + spd, y, par_solid) && can_walljump
+            if _place_meeting(x + spd, y, par_solid) && !place_meeting(x + spd, y, par_jumpthru) && can_walljump
             {
                 state = "normal"
                 hsp = -spd
@@ -108,7 +119,7 @@ if (input.jump() && can_jump)
                 audio_stop_sound(s)
                 audio_play_sound(sn_walljump, 0, false)
             }
-            else if _place_meeting(x - spd, y, par_solid) && can_walljump
+            else if _place_meeting(x - spd, y, par_solid) && !place_meeting(x - spd, y, par_jumpthru) && can_walljump
             {
                 state = "normal"
                 hsp = spd
@@ -201,7 +212,7 @@ if (input.jump() && can_jump)
     }
     else if(can_walljump)
     {
-        if _place_meeting(x + spd, y, par_solid)
+        if _place_meeting(x + spd, y, par_solid) && !place_meeting(x + spd, y, par_jumpthru)
         {
             platformtarget = noone
             state = "normal"
@@ -212,7 +223,7 @@ if (input.jump() && can_jump)
             hsp += w.hsp / 2
             audio_play_sound(sn_walljump, 0, false)
         }
-        else if _place_meeting(x - spd, y, par_solid)
+        else if _place_meeting(x - spd, y, par_solid) && !place_meeting(x - spd, y, par_jumpthru)
         {
             platformtarget = noone
             state = "normal"

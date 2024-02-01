@@ -41,6 +41,8 @@ movex = function(_x, _oncollide = noone, _dt = 0)
     var mx = round(rx)
     if(abs(mx))
     {
+        if(place_meeting(x, y, par_jumpthru))
+            instance_deactivate_object(par_jumpthru)
         rx -= mx
         var s = sign(mx)
         if(ghost || (place_meeting(x + mx, y, par_solid) && instance_place(x + mx, y, par_solid).ghost))
@@ -49,7 +51,7 @@ movex = function(_x, _oncollide = noone, _dt = 0)
         {
             if(place_meeting(x + s, y, par_solid))
             {
-                if(instance_place(x + s, y, par_solid).ghost)
+                if(instance_place(x + s, y, par_solid).ghost || place_meeting(x + s, y, par_jumpthru))
                 {
                     x += s
                     continue
@@ -74,6 +76,7 @@ movex = function(_x, _oncollide = noone, _dt = 0)
                 x += s
             }
         }
+        instance_activate_object(par_jumpthru)
     }
 }
 movey = function(_y, _oncollide = noone, _dt = 0)
@@ -82,6 +85,10 @@ movey = function(_y, _oncollide = noone, _dt = 0)
     var my = round(ry)
     if(abs(my))
     {
+        if(my < 0)
+        {
+            instance_deactivate_object(par_jumpthru)
+        }
         ry -= my
         var s = sign(my)
         if(ghost || (place_meeting(x, y + my, par_solid) && instance_place(x, y + my, par_solid).ghost))
@@ -114,5 +121,6 @@ movey = function(_y, _oncollide = noone, _dt = 0)
             else
                 y += s
         }
+        instance_activate_object(par_jumpthru)
     }
 }

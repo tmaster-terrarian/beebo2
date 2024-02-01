@@ -435,7 +435,7 @@ states =
                     wallslideTimer += global.dt
                     var _a = 1
                     var _w = instance_place(x + (2 * input_dir), y, par_solid)
-                    if(can_ledgegrab && ledgegrabTimer <= 0 && instance_exists(_w))
+                    if(can_ledgegrab && ledgegrabTimer <= 0 && instance_exists(_w) && !place_meeting(x, y, par_solid))
                     if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
                     {
                         _a = sign(bbox_top - _w.bbox_top)
@@ -518,7 +518,7 @@ states =
         {
             var _a = 1
             var _w = instance_place(x + (2 * input_dir), y, par_solid)
-            if(can_ledgegrab && ledgegrabTimer == 0 && instance_exists(_w))
+            if(can_ledgegrab && ledgegrabTimer == 0 && instance_exists(_w) && !place_meeting(x, y, par_solid))
             if(!_position_meeting((input_dir == 1) ? _w.bbox_left + 1 : _w.bbox_right - 1, _w.bbox_top - 1, par_solid) && !_position_meeting((input_dir == 1) ? _w.bbox_left - 2 : _w.bbox_right + 2, _w.bbox_top + 10, par_solid) && (round(_w.image_angle / 90) * 90 == _w.image_angle) && (_w.bbox_top >= 4))
             {
                 _a = sign(bbox_top - _w.bbox_top)

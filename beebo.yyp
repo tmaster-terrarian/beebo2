@@ -68,6 +68,8 @@
   ],
   "IncludedFiles": [
     {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"lang.json","CopyToMask":-1,"filePath":"datafiles/data",},
+    {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"testing testing.ldtk","CopyToMask":-1,"filePath":"datafiles/data/ldtkTest",},
+    {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"Untitled-1.json","CopyToMask":-1,"filePath":"datafiles/data",},
     {"resourceType":"GMIncludedFile","resourceVersion":"1.0","name":"options.json","CopyToMask":-1,"filePath":"datafiles",},
   ],
   "isEcma": false,
@@ -189,6 +191,7 @@
     {"id":{"name":"scribble_super_glyph_copy","path":"scripts/scribble_super_glyph_copy/scribble_super_glyph_copy.yy",},},
     {"id":{"name":"spr_anime","path":"sprites/spr_anime/spr_anime.yy",},},
     {"id":{"name":"obj_trigger_camera_bounds","path":"objects/obj_trigger_camera_bounds/obj_trigger_camera_bounds.yy",},},
+    {"id":{"name":"spr_anime_ghost","path":"sprites/spr_anime_ghost/spr_anime_ghost.yy",},},
     {"id":{"name":"spr_item_amorphous_plush","path":"sprites/spr_item_amorphous_plush/spr_item_amorphous_plush.yy",},},
     {"id":{"name":"scribble_refresh_everything","path":"scripts/scribble_refresh_everything/scribble_refresh_everything.yy",},},
     {"id":{"name":"draw_sprite_flat","path":"scripts/draw_sprite_flat/draw_sprite_flat.yy",},},

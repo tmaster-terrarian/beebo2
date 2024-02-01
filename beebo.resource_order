@@ -150,6 +150,7 @@
     {"name":"sn_morse","order":13,"path":"sounds/sn_morse/sn_morse.yy",},
     {"name":"scribble_super_glyph_copy","order":2,"path":"scripts/scribble_super_glyph_copy/scribble_super_glyph_copy.yy",},
     {"name":"obj_trigger_camera_bounds","order":6,"path":"objects/obj_trigger_camera_bounds/obj_trigger_camera_bounds.yy",},
+    {"name":"spr_anime_ghost","order":15,"path":"sprites/spr_anime_ghost/spr_anime_ghost.yy",},
     {"name":"scribble_refresh_everything","order":6,"path":"scripts/scribble_refresh_everything/scribble_refresh_everything.yy",},
     {"name":"draw_sprite_flat","order":9,"path":"scripts/draw_sprite_flat/draw_sprite_flat.yy",},
     {"name":"spr_platform","order":2,"path":"sprites/spr_platform/spr_platform.yy",},

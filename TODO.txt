@@ -1,0 +1,34 @@
+[ ] MODFIER MECHANICS
+    [ ] obtaining
+    [ ] choosing
+        - ui building
+    - frequency
+    - unique effects
+    - permanence
+
+[ ] THE SHOP
+    [ ] spawning
+    [ ] pricing
+    [ ] inventory
+
+[ ] DIFFICULTY SCALING
+    [ ] rework old code
+
+[ ] ROOM GENERATION
+    - ISAAC
+
+[ ] KEEPING THE PLAYERS IN THE DAMN BOX (camera view)
+    [x] basic clamping of position
+    [ ] camera boundary triggers
+        - half done
+
+[ ] SPECIAL ITEMS
+
+[ ] CHARACTERS
+    - make JON-D0
+    - make healer person
+    - finish rival
+    - finish beebo
+    - finish benbo?
+
+

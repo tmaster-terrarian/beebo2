@@ -21,7 +21,7 @@ _sp =
     wallslide: spr_anime_wallslide,
     ledgegrab: spr_anime_ledgegrab,
     ledgeclimb: spr_anime_ledgeclimb,
-    ghost: spr_player_ghost
+    ghost: spr_anime_ghost
 }
 sprite_index = _sp.idle
 
