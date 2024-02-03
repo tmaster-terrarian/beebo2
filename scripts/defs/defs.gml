@@ -317,6 +317,80 @@ function initSkills()
         }
     }, beeboUtilitySkill)
     beeboUtilitySkill.activationState = beeboUtilitySkillState
+
+    var beeboSpecialSkillState = new State(function(def) {
+        def.baseDuration = 45/60
+
+        def.onEnter = function(ins, obj) {
+            ins.duration = ins.baseDuration / obj.attack_speed
+
+            with(obj)
+            {
+                hsp = (1.5 + (spd * 2) + (((spd / stats.spd) * 1) * on_ground) + (((spd / stats.spd - 2) * 0.1) * !on_ground)) * sign(facing)
+                vsp = -1 * !on_ground
+
+                sprite_index = spr_player_dash
+                mask_index = mask_player
+                image_index = 0
+
+                timer0 = 0
+
+                __utilityHit = []
+
+                if(!variable_struct_exists(states, "SKILL_quick_evade"))
+                {
+                    states.SKILL_quick_evade = function() {with(other) {
+                        can_jump = 1
+                        can_walljump = 0
+                        ghost = 0
+                        duck = 0
+                        fxtrail = 1
+                        hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.25 * spd/stats.spd * global.dt)
+                        if(!on_ground)
+                            vsp = approach(vsp, 20, grv/2 * global.dt)
+
+                        if(on_ground && fxtrailtimer <= 1)
+                        {
+                            with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y, depth - 2, fx_dust))
+                            {
+                                vx = random_range(-3, -1) * sign(other.facing)
+                                vy = random_range(-1.5, 0)
+                            }
+                        }
+
+                        var e = instance_place(x, y, par_unit)
+                        if(e && canHurt(self, e) && !array_contains(__utilityHit, e))
+                        {
+                            array_push(__utilityHit, e)
+                            damage_event(new DamageEventContext(id, e, proctype.onhit, base_damage * 0.5, 1, 1, 0))
+                        }
+
+                        if(abs(hsp) <= spd + 1.5)
+                        {
+                            state = "normal"
+                            __utilityHit = []
+                            fxtrail = 0
+                        }
+                    }}
+                }
+                state = "SKILL_quick_evade"
+            }
+        }
+        self.update = function(ins, obj) {
+            ins.age = approach(ins.age, ins.duration, global.dt / 60)
+            if(ins.age >= ins.duration || obj.state != "SKILL_quick_evade")
+            {
+                obj.__utilityHit = []
+                with(ins) onExit(self, obj)
+                return;
+            }
+        }
+        self.onExit = function(ins, obj) {
+            ins.age = 0
+            obj.attack_state = noone
+        }
+    }, beeboSpecialSkill)
+    beeboSpecialSkill.activationState = beeboSpecialSkillState
     #endregion
 
     #region RIVAL

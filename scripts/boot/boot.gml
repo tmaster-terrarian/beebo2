@@ -299,6 +299,19 @@ function damage_event(ctx)
 			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(damage), dir: _dir})
 		}
 
+		if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
+		{
+			for(var i = 0; i < array_length(ctx.attacker.items); i++)
+			{
+				var _item = ctx.attacker.items[i]
+				var _def = getdef(_item.item_id, deftype.item)
+				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
+				{
+					_def.onHit(ctx, _item.stacks)
+				}
+			}
+		}
+
 		// activate attacker's on kill items and target's on death items if target died
 		if(ctx.target.hp <= 0)
 		{
@@ -344,18 +357,6 @@ function damage_event(ctx)
 		else
 		{
 			ctx.target.flash = 3
-		}
-		if(instance_exists(ctx.attacker))
-		{
-			for(var i = 0; i < array_length(ctx.attacker.items); i++)
-			{
-				var _item = ctx.attacker.items[i]
-				var _def = getdef(_item.item_id, deftype.item)
-				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
-				{
-					_def.onHit(ctx, _item.stacks)
-				}
-			}
 		}
 	}
 }
