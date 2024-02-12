@@ -1,4 +1,4 @@
-function loadInputSettings()
+function loadSettings()
 {
     var json = {}
 
@@ -174,7 +174,7 @@ function refreshInputSettings()
     }
 }
 
-function saveInputSettings()
+function saveSettings()
 {
     var file = file_text_open_write("options.json")
 	file_text_write_string(file, json_stringify(global.optionsStruct, 1))

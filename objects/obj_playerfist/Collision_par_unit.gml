@@ -2,7 +2,7 @@ if(canHurt(self, other) && other.id != parent && !array_contains(alreadyHit, oth
 {
 	array_push(alreadyHit, other)
 
-	damage_event(new DamageEventContext(parent, other, proctype.onhit, damage, 1, 1, -1, 1))
+	damage_event(new DamageEventContext(parent, other, damage, 1, 1, -1, 1))
 
 	if(instance_exists(other))
 	{

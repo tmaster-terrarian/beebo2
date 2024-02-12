@@ -31,7 +31,7 @@ if(!done)
         {
             if(team == Team.player)
             {
-                damage_event(new DamageEventContext(noone, self, proctype.none, self.hp_max * (0.001 * other.t/60), 0).forceCrit(0))
+                damage_event(new DamageEventContext(noone, self, self.hp_max * (0.001 * other.t/60), 0).forceCrit(0))
             }
         }
     }

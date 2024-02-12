@@ -288,7 +288,7 @@ function initSkills()
                         if(e && canHurt(self, e) && !array_contains(__utilityHit, e))
                         {
                             array_push(__utilityHit, e)
-                            damage_event(new DamageEventContext(id, e, proctype.onhit, base_damage * 0.5, 1, 1, 0))
+                            damage_event(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
                         }
 
                         if(abs(hsp) <= spd + 1.5)
@@ -362,7 +362,7 @@ function initSkills()
                         if(e && canHurt(self, e) && !array_contains(__utilityHit, e))
                         {
                             array_push(__utilityHit, e)
-                            damage_event(new DamageEventContext(id, e, proctype.onhit, base_damage * 0.5, 1, 1, 0))
+                            damage_event(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
                         }
 
                         if(abs(hsp) <= spd + 1.5)
@@ -473,7 +473,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other.damage, 1, 1, -1, 1))
+                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -534,7 +534,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other.damage, 1, 1, -1, 1))
+                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -596,7 +596,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other.damage, 1, 1, -1, 1))
+                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -799,7 +799,7 @@ function initSkills()
                             {
                                 array_push(__alreadyHit, e)
                                 e.__invuln = 19
-                                damage_event(new DamageEventContext(id, e, proctype.onhit, damage, 1, 1, 0))
+                                damage_event(new DamageEventContext(id, e, damage, 1, 1, 0))
                             }
                             else
                             {
@@ -846,7 +846,7 @@ function initSkills()
                                 {
                                     if(on_ground && canHurt(self, other) && other.parent != id && place_meeting(x, y, other))
                                     {
-                                        damage_event(new DamageEventContext(other.parent, self, proctype.onhit, other.damage, 1, other.crit, 0))
+                                        damage_event(new DamageEventContext(other.parent, self, other.damage, 1, other.crit, 0))
                                         vsp -= 8/max(24, mass) + max(0, 16/clamp(instance_distance(other), 6.4, 32) - 0.5)
                                     }
                                 }

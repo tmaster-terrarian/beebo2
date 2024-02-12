@@ -1,1 +1,1 @@
-deleteFixedStep(step)
+removeFixedStep(step)

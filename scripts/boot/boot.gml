@@ -129,13 +129,12 @@ enum TimeUnits
 global.__eventContextId = 0
 
 // classes
-function DamageEventContext(attacker, target, proc_type, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
+function DamageEventContext(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
 {
 	self.attacker = attacker
 	self.target = target
 	self.damage = damage
 	self.proc = proc
-	self.proc_type = proc_type
 
 	self.use_attacker_items = use_attacker_items
 	self.force_crit = force_crit
@@ -379,13 +378,15 @@ global.fixedStep = {
 	_queueFunctions: [],
 	t: 0,
 
-	addFunction: function(func, thisObject = self) {
+	addFunction: function(func, maxIterations, thisObject = self) {
 		var _id = floor(get_timer() / 1000)
 		var f = {
 			_thisObject: thisObject,
 			__func: func,
 			_func: function() { with(_thisObject) other.__func() },
-			uniqueId: _id
+			uniqueId: _id,
+			_iterations: 0,
+			_maxIterations: maxIterations
 		}
 		array_push(self._functions, f)
 		return f
@@ -409,7 +410,20 @@ global.fixedStep = {
 	step: function() {
 		for(var i = 0; i < array_length(self._functions); i++)
 		{
-			self._functions[i]._func()
+			if(i >= array_length(self._queueFunctions))
+				break
+
+			var f = self._functions[i]
+			if(f._maxIteratons > 0 && f._iterations < f._maxIteratons)
+			{
+				f._func()
+				f._iterations++
+			}
+			else if(f._maxIteratons > 0)
+			{
+				removeFixedStep(f)
+				i--
+			}
 		}
 		for(var q = 0; q < array_length(self._queueFunctions); q++)
 		{
@@ -420,7 +434,7 @@ global.fixedStep = {
 			if(floor(f.myT) == self.t - f.startT)
 			{
 				f._func()
-				deleteQueueFunction(f)
+				stopTimeout(f)
 				q--
 			}
 		}
@@ -430,9 +444,9 @@ global.fixedStep = {
 
 #macro FIXED_TICK global.fixedStep.t
 
-function addFixedStep(func)
+function addFixedStep(func, maxIterations = -1)
 {
-	return global.fixedStep.addFunction(func, self)
+	return global.fixedStep.addFunction(func, round(maxIterations), self)
 }
 
 function setTimeout(func, delaySeconds)
@@ -440,7 +454,7 @@ function setTimeout(func, delaySeconds)
 	return global.fixedStep.addQueueFunction(func, delaySeconds, self)
 }
 
-function deleteFixedStep(func)
+function removeFixedStep(func)
 {
 	global.______grahhhhhh = func.uniqueId // I LOVE SCOPE SO MUCH AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	var ind = array_find_index(global.fixedStep._functions, function(e, i) {
@@ -453,7 +467,7 @@ function deleteFixedStep(func)
 	}
 }
 
-function deleteQueueFunction(func)
+function stopTimeout(func)
 {
 	global.______grahhhhhh = func.uniqueId
 	var ind = array_find_index(global.fixedStep._queueFunctions, function(e, i) {
@@ -1012,7 +1026,7 @@ function instance_closest_bbox_edge_y(ins1, ins2 = noone) {
 }
 
 global.optionsStruct = {}
-loadInputSettings()
+loadSettings()
 
 // WOOO SEED LOADING YEA
 if(global.optionsStruct.forcedRunSeed != -1)
@@ -1021,10 +1035,22 @@ if(global.optionsStruct.forcedRunSeed != -1)
 	random_set_seed(global.optionsStruct.forcedRunSeed)
 }
 
+global.lang = { en: {}, es: {} }
+global.langCache = {}
+
 // localization
 function string_loc(key) // example key: item.beeswax.name
 {
-	return (variable_struct_exists(global.lang, global.locale) && variable_struct_exists(global.lang[$ global.locale], key)) ? global.lang[$ global.locale][$ key] : (variable_struct_exists(global.lang.en, key) ? global.lang.en[$ key] : key)
+	if(!variable_struct_exists(global.langCache, key))
+	{
+		var val = (variable_struct_exists(global.lang, global.locale) && variable_struct_exists(global.lang[$ global.locale], key)) ? global.lang[$ global.locale][$ key] : (variable_struct_exists(global.lang.en, key) ? global.lang.en[$ key] : key)
+		global.langCache[$ key] = val
+		return val
+	}
+	else
+	{
+		return global.langCache[$ key]
+	}
 }
 
 function locale()
@@ -1032,8 +1058,10 @@ function locale()
 	static init = function()
 	{
 		delete global.lang
+		delete global.langCache
 
 		global.lang = { en: {}, es: {} }
+		global.langCache = {}
 
 		var file = file_text_open_read("data/lang.json")
 		global.lang = file_json_read(file)
@@ -1075,8 +1103,6 @@ function locale()
 }
 locale()
 
-global.lang = { en: {}, es: {} }
-
 locale.init()
 Log("Startup/INFO", $"loaded languages: {struct_get_names(global.lang)}")
 
@@ -1090,10 +1116,8 @@ function _itemdef(name) constructor {
 	proc_type = proctype.none
 	rarity = item_rarity.none
 
-	calc = function(stacks) { return 0 }
 	draw = function(stacks) {}
 	step = function(target, stacks) {}
-	proc = function(context, stacks) {}
 	onHit = function(context, stacks) {}
 	onKill = function(context, stacks) {}
 }
@@ -1125,7 +1149,6 @@ global.itemdefs =
 		rarity : item_rarity.common
 	}),
 	eviction_notice : itemdef("eviction_notice", {
-		proc_type : proctype.onhit,
 		rarity : item_rarity.legendary,
 		onHit : function(context, stacks)
 		{
@@ -1141,21 +1164,27 @@ global.itemdefs =
 				p.target = context.target
 				p.parent = context.attacker
 
-				p.context = new DamageEventContext(context.attacker, context.target, proctype.none, context.attacker.base_damage * (4 + stacks), 0).forceCrit(context.crit).useAttackerItems(1).isReduceable(1).exclude("eviction_notice")
+				p.context = new DamageEventContext(context.attacker, context.target, context.attacker.base_damage * (4 + stacks), 0)
+					.forceCrit(context.crit)
+					.useAttackerItems(1)
+					.isReduceable(1)
+					.exclude("eviction_notice")
 			}
 		}
 	}),
 	serrated_stinger : itemdef("serrated_stinger", {
-		proc_type : proctype.onhit,
 		rarity : item_rarity.common,
 		onHit : function(context, stacks)
 		{
-			if(random(1) <= (0.1 * stacks * context.proc))
+			if(random(1) < (0.1 * stacks * context.proc))
 			{
-				var ctx = new DamageEventContext(context.attacker, context.target, proctype.none, context.attacker.base_damage, 0).useAttackerItems(1).isReduceable(1)
-				ctx.damage = ctx.attacker.base_damage
-				var b = buff_instance_create("bleed", ctx.exclude("serrated_stinger").damageType(damage_notif_type.bleed), 1)
-				b.damage = context.attacker.base_damage
+				var ctx = new DamageEventContext(context.attacker, context.target, context.attacker.base_damage * 0.2, 0)
+					.useAttackerItems(1)
+					.isReduceable(1)
+					.exclude("serrated_stinger")
+					.damageType(damage_notif_type.bleed)
+
+				var b = buff_instance_create("bleed", ctx, 3 * context.proc, 1)
 			}
 		}
 	}),
@@ -1184,8 +1213,8 @@ global.itemdefs =
 		rarity : item_rarity.none
 	})
 }
-
 global.itemdefs_by_rarity = [{}, {}, {}, {}, {}]
+
 struct_foreach(global.itemdefs as (_name, _item)
 {
 	global.itemdefs_by_rarity[_item.rarity][$ _name] = _item
@@ -1377,7 +1406,9 @@ function _buffdef(name) constructor
 
 	self.ticksPerSecond = 0
 
-	self.apply = function(instance) {}
+	self.apply = function(instance) {
+		instance.timer = ceil(instance.timer * 60) / 60
+	}
 
 	self.timer_step = function(instance) {
 		if(self.timed)
@@ -1439,11 +1470,6 @@ global.buffdefs =
 		duration: 3,
 		ticksPerSecond: 4,
 		stackable: 1,
-		apply: function(instance)
-		{
-			instance.timer = self.duration * instance.context.proc
-			instance.context.damage = instance.context.attacker.base_damage * 0.2
-		},
 		tick: function(instance)
 		{
 			damage_event(instance.context)
@@ -1454,11 +1480,10 @@ global.buffdefs =
 		duration: 3,
 		ticksPerSecond: 0,
 		stackable: 1,
-		apply: function(instance)
-		{
-			instance.timer = self.duration
-			instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
-		},
+		// apply: function(instance)
+		// {
+		// 	instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
+		// },
 		on_expire: function(instance)
 		{
 			damage_event(instance.context)
@@ -1469,22 +1494,22 @@ global.buffdefs =
 
 Log("Startup/INFO", $"successfully created {buffdef.total_buffs} buffs")
 
-function buff_instance(buff_id, context, stacks) constructor
+function buff_instance(buff_id, context, duration, stacks) constructor
 {
 	self.buff_id = buff_id
 	self.context = context
 	self.stacks = stacks
-	self.timer = -1
+	self.timer = duration
 
 	var def = getdef(buff_id, deftype.buff)
 	def.apply(self)
 }
 
 // applies a buff instance with id [buff_id] to [target]
-//  context example: new DamageEventContext(attacker, target, proctype.none, 0, proc, 1, 0)
-function buff_instance_create(buff_id, context, stacks = 1)
+//  context example: new DamageEventContext(attacker, target, 0, proc, 1, 0)
+function buff_instance_create(buff_id, context, duration = -1, stacks = 1)
 {
-	var buff = new buff_instance(buff_id, context, stacks)
+	var buff = new buff_instance(buff_id, context, duration, stacks)
 	var b = buff_get_instance(buff_id, context.target)
 	if(b != -1)
 	{
@@ -1514,6 +1539,11 @@ function buff_instance_create(buff_id, context, stacks = 1)
 	else
 		array_push(context.target.buffs, buff)
 	return buff
+}
+
+function buff_instance_create_headless(buff_id, target, duration = -1, stacks = 1)
+{
+	return buff_instance_create(buff_id, new DamageEventContext(noone, target, 0, 0, false, false, false), duration, stacks)
 }
 
 function buff_instance_remove(instance)

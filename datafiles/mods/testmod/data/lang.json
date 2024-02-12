@@ -1,0 +1,8 @@
+{
+    "en": {
+        "item.example_item.name": "Example Item",
+        "item.example_item.pickup": "Example short summary",
+        "item.example_item.description": "Example detailed summary",
+        "item.example_item.lore": "Example lore entry text"
+    }
+}

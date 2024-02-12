@@ -1,5 +1,8 @@
 {
     "forcedRunSeed": -1,
+    "enabledMods": [
+        "testmod"
+    ],
     "inputSettings": [
         {
             "gpIndex": -1,

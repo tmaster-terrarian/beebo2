@@ -39,7 +39,7 @@ if(fucked && other.team != Team.player)
 		    {
 		        if(place_meeting(x, y, other) && canHurt(self, other))
 		        {
-		            damage_event(new DamageEventContext(other.parent, id, proctype.onhit, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
+		            damage_event(new DamageEventContext(other.parent, id, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
 		        }
 		    }
 		}

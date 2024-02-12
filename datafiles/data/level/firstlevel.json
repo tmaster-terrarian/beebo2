@@ -1,0 +1,32 @@
+{
+    "grid_width": 5,
+    "grid_height": 5,
+    "cell_width": 320,
+    "cell_height": 180,
+    "rooms": [
+        {
+            "weight": 1.0,
+            "occupies": [
+                [1, 1],
+                [0, 1]
+            ],
+            "objects": [
+                {
+                    "id": "obj_wall",
+                    "x": 0,
+                    "y": 0,
+                    "vars": {
+                        "image_xscale": 2
+                    }
+                }
+            ],
+            "connections": [
+                {
+                    "direction": "east",
+                    "x": 112,
+                    "y": 17
+                }
+            ]
+        }
+    ]
+}
