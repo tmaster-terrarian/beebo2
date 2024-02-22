@@ -1317,13 +1317,11 @@ function modifierdef(_name, _struct = {})
 	return __newstruct
 }
 
-global.modifierdefs =
-{
-	unknown : modifierdef("unknown"),
-	cut_hp : modifierdef("cut_hp"),
-	evolution : modifierdef("evolution", {
-		on_pickup : function()
-		{
+global.modifierdefs = {
+	unknown: modifierdef("unknown"),
+	cut_hp: modifierdef("cut_hp"),
+	evolution: modifierdef("evolution", {
+		on_pickup: function() {
 			var item = item_id_get_random(1, global.itemdata.item_tables.chest_small)
 			var stacks = 1
 			var r = getdef(item, deftype.item).rarity
@@ -1413,7 +1411,6 @@ function _buffdef(name) constructor
 	self.timer_step = function(instance) {
 		if(self.timed)
 		{
-			PAUSECHECK
 			if(instance.timer <= 0)
 			{
 				self.on_expire(instance)
@@ -1421,7 +1418,7 @@ function _buffdef(name) constructor
 			}
 			else if(self.ticksPerSecond > 0)
 			{
-				if((instance.timer % (1 / self.ticksPerSecond)) == 1/60)
+				if(ceil((instance.timer % (1 / self.ticksPerSecond)) * 60) == 1)
 				{
 					self.tick(instance)
 				}
@@ -2117,8 +2114,9 @@ function CharacterDef(name, func = noone) constructor
 }
 
 initSkills()
-
 initChars()
+
+loadLevelData()
 
 // UI SHIZ
 
@@ -2425,5 +2423,9 @@ function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constr
 		draw_text_ext_color(round(xx), round(yy), self.label, -1, self.w, self.color, self.color, self.color, self.color, self.alpha)
 	}
 }
+
+global.enabledMods = []
+mergeMods()
+Log("Startup/INFO", $"completed merging mod contents with base game.")
 
 Log("Startup/INFO", $"initialization completed, elapsed time: [{timer_to_timestamp(get_timer() - _boot_starttime)}]")

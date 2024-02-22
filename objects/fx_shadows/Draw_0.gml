@@ -39,11 +39,11 @@ for(var p = 0; p < array_length(global.players); p++)
                 var pX = mesh.verts[i].x
                 var pY = mesh.verts[i].y
 
-                var eX = pX + lengthdir_x(6 * SC_W/global.zoom, point_direction(plr.x, plr.y - 8, pX, pY)) + choose(1, -1) * (random(1) + random(1))
-                var eY = pY + lengthdir_y(6 * SC_W/global.zoom, point_direction(plr.x, plr.y - 8, pX, pY)) + choose(1, -1) * (random(1) + random(1))
+                var eX = pX + lengthdir_x(6 * SC_W/global.zoom, point_direction(plr.x, plr.y - 8, pX, pY)) + (choose(1, -1) * (random(1) + random(1))) * jitter
+                var eY = pY + lengthdir_y(6 * SC_W/global.zoom, point_direction(plr.x, plr.y - 8, pX, pY)) + (choose(1, -1) * (random(1) + random(1))) * jitter
 
-                draw_vertex_color(pX, pY, c_white, 1)
-                draw_vertex_color(eX, eY, c_white, 1)
+                draw_vertex_color(pX, pY, c_gray, 1)
+                draw_vertex_color(eX, eY, c_gray, 1)
             }
             draw_primitive_end()
         }
