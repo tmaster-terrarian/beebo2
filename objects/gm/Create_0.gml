@@ -98,7 +98,7 @@ addFixedStep(function() {
             getdef(buffs[i].buff_id, deftype.buff).timer_step(buffs[i])
         }
     }
-}, self)
+})
 
 #region UI INIT
 

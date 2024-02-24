@@ -378,15 +378,14 @@ global.fixedStep = {
 	_queueFunctions: [],
 	t: 0,
 
-	addFunction: function(func, maxIterations, thisObject = self) {
+	addFunction: function(func, thisObject = self) {
 		var _id = floor(get_timer() / 1000)
 		var f = {
 			_thisObject: thisObject,
 			__func: func,
 			_func: function() { with(_thisObject) other.__func() },
 			uniqueId: _id,
-			_iterations: 0,
-			_maxIterations: maxIterations
+			t: 0
 		}
 		array_push(self._functions, f)
 		return f
@@ -410,20 +409,10 @@ global.fixedStep = {
 	step: function() {
 		for(var i = 0; i < array_length(self._functions); i++)
 		{
-			if(i >= array_length(self._queueFunctions))
-				break
-
 			var f = self._functions[i]
-			if(f._maxIteratons > 0 && f._iterations < f._maxIteratons)
-			{
-				f._func()
-				f._iterations++
-			}
-			else if(f._maxIteratons > 0)
-			{
-				removeFixedStep(f)
-				i--
-			}
+
+			f._func()
+			f.t++
 		}
 		for(var q = 0; q < array_length(self._queueFunctions); q++)
 		{
@@ -444,9 +433,9 @@ global.fixedStep = {
 
 #macro FIXED_TICK global.fixedStep.t
 
-function addFixedStep(func, maxIterations = -1)
+function addFixedStep(func)
 {
-	return global.fixedStep.addFunction(func, round(maxIterations), self)
+	return global.fixedStep.addFunction(func, self)
 }
 
 function setTimeout(func, delaySeconds)
