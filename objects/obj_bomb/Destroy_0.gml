@@ -56,3 +56,23 @@ with(fx_particle_emitter)
             p.spdY += lengthdir_y((48 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir)
     }
 }
+
+with(fx_rope)
+{
+    for(var i = 1; i < rope_points_count - 1; i++)
+    {
+        var p = rope_points[i]
+        var dist = point_distance(other.x, other.y, p.pos.x, p.pos.y)
+        var dir = point_direction(other.x, other.y, p.pos.x, p.pos.y)
+        if(dist <= 64)
+        {
+            p.pos.x += lengthdir_x((48 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir) * 12
+            p.pos.y += lengthdir_y((48 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir) * 12
+        }
+        else if(dist <= 48)
+        {
+            p.pos.x += lengthdir_x((32 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir) * 12
+            p.pos.y += lengthdir_y((32 + 16 * other.bulleted)/max(16 + 4 * other.bulleted, dist), dir) * 12
+        }
+    }
+}

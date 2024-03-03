@@ -21,7 +21,7 @@ function draw_sprite_outlined(spr, subimg, _x, _y, outlincol = c_white, outlinal
 	surface_set_target(sf1)
 	draw_clear_alpha(c_white, 0)
 
-	shader_set(shd_solid)
+	shader_set(sh_flash)
 	draw_sprite_ext(spr, subimg, _x + 1, _y, 1, 1, 0, c_white, 1)
 	draw_sprite_ext(spr, subimg, _x - 1, _y, 1, 1, 0, c_white, 1)
 	draw_sprite_ext(spr, subimg, _x, _y + 1, 1, 1, 0, c_white, 1)
@@ -73,7 +73,7 @@ function draw_sprite_outlined_ext(spr, subimg, _x, _y, xscale = 1, yscale = 1, r
 	surface_set_target(sf1)
 	draw_clear_alpha(c_white, 0)
 
-	shader_set(shd_solid)
+	shader_set(sh_flash)
 	draw_sprite_ext(spr, subimg, _x + 1, _y, xscale, yscale, rot, c_white, 1)
 	draw_sprite_ext(spr, subimg, _x - 1, _y, xscale, yscale, rot, c_white, 1)
 	draw_sprite_ext(spr, subimg, _x, _y + 1, xscale, yscale, rot, c_white, 1)
