@@ -98,6 +98,8 @@ _apply_stats = function()
     grv = stats.grv
     attack_speed = stats.attack_speed
     mass = ((bbox_bottom - bbox_top) + (bbox_right - bbox_left)) / 2
+    max_shield = stats.shield * hp_max
+    shield = max_shield
 
     bonus_stocks = {
         primary: 0,

@@ -158,6 +158,7 @@
     {"name":"spr_player_wallslide","order":15,"path":"sprites/spr_player_wallslide/spr_player_wallslide.yy",},
     {"name":"fx_casing","order":1,"path":"objects/fx_casing/fx_casing.yy",},
     {"name":"scribble_typist","order":11,"path":"scripts/scribble_typist/scribble_typist.yy",},
+    {"name":"spr_benb_wallslide","order":11,"path":"sprites/spr_benb_wallslide/spr_benb_wallslide.yy",},
     {"name":"__scribble_get_typewriter_events_map","order":15,"path":"scripts/__scribble_get_typewriter_events_map/__scribble_get_typewriter_events_map.yy",},
     {"name":"string_width_scribble","order":5,"path":"scripts/string_width_scribble/string_width_scribble.yy",},
     {"name":"__scribble_get_effects_slash_map","order":6,"path":"scripts/__scribble_get_effects_slash_map/__scribble_get_effects_slash_map.yy",},

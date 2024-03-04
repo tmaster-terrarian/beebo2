@@ -211,37 +211,50 @@ if(has_gun)
     {
         var _skill = attack_states[$ "primary"]
         if(cool_delay - 20 < _skill.duration)
-            gun_spr_ind += 0.2
-        if(gun_spr_ind == 1)
         {
-            audio_play_sound(sn_gun_open, 1, 0)
-        }
-        if(gun_spr_ind == 2)
-        {
-            audio_play_sound(sn_steam, 1, 0)
-            for (i = 0; i < 3; i++)
-            { 
-                with(instance_create_depth(x + gun_pos.x + random_range(-1, 1), y + gun_pos.y + random_range(-1, 1), depth - 1, fx_dust))
+            if(gun_spr_ind < 1)
+            {
+                gun_spr_ind = approach(gun_spr_ind, 1, 0.2 * global.dt)
+                if(gun_spr_ind == 1)
+                    audio_play_sound(sn_gun_open, 1, 0)
+            }
+            else if(gun_spr_ind < 2)
+            {
+                gun_spr_ind = approach(gun_spr_ind, 2, 0.2 * global.dt)
+                if(gun_spr_ind == 2)
                 {
-                    vy = random_range(-1.5, -0.75)
-                    vx = random_range(1.5, 2) * other.gun_flip + other.hsp
+                    audio_play_sound(sn_steam, 1, 0)
+                    for (i = 0; i < 3; i++)
+                    { 
+                        with(instance_create_depth(x + gun_pos.x + random_range(-1, 1), y + gun_pos.y + random_range(-1, 1), depth - 1, fx_dust))
+                        {
+                            vy = random_range(-1.5, -0.75)
+                            vx = random_range(1.5, 2) * other.gun_flip + other.hsp
+                        }
+                    }
                 }
             }
-        }
-        if(gun_spr_ind == 5)
-        {
-            if(firebomb)
+            else if(gun_spr_ind < 5)
             {
-                firebomb = 0
+                gun_spr_ind = approach(gun_spr_ind, 5, 0.2 * global.dt)
+                if(gun_spr_ind == 5)
+                {
+                    if(firebomb)
+                    {
+                        firebomb = 0
+                        gun_spr = spr_player_gun
+                        gun_spr_ind = 0
+                    }
+                    else audio_play_sound(snReload, 0, 0)
+                }
+            }
+            else
+                gun_spr_ind = approach(gun_spr_ind, 10, 0.2 * global.dt)
+            if(gun_spr_ind == 10)
+            {
                 gun_spr = spr_player_gun
                 gun_spr_ind = 0
             }
-            else audio_play_sound(snReload, 0, 0)
-        }
-        if(gun_spr_ind >= 10)
-        {
-            gun_spr = spr_player_gun
-            gun_spr_ind = 0
         }
     }
 }

@@ -36,7 +36,7 @@ global.wave = 0
 global.runEnabled = 0
 
 wavetimer = 600
-killzoneTimer = MINUTE
+killzoneTimer = 3600
 
 doNotIncreaseWave = 0
 

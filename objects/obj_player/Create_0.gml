@@ -203,7 +203,7 @@ drawMyShit = function()
 
         draw_sprite_ext(spr_enemyhpbar, 3, avgx - floor(w/2), bbox_bottom + 7, ceil(max(hp_change / total_hp_max, 0) * w), 1, 0, c_white, 1)
         draw_sprite_ext(spr_enemyhpbar, 1, avgx - floor(w/2), bbox_bottom + 7, ceil(max(hp / total_hp_max, 0) * w), 1, 0, c_white, 1)
-        draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil(max(hp / total_hp_max, 0) * w) - 1, bbox_bottom + 7, ceil(max((shield / max_shield) * max_shield / total_hp_max, 0) * w), 1, 0, c_white, 1)
+        draw_sprite_ext(spr_enemyhpbar, 4, avgx - floor(w/2) + ceil(max(hp / total_hp_max, 0) * w), bbox_bottom + 7, min(ceil(max(shield / total_hp_max, 0) * w), w - ceil(max(hp / total_hp_max, 0) * w)), 1, 0, c_white, 1)
         if(ceil(hp_change) < ceil(hp))
         {
             draw_sprite_ext(spr_enemyhpbar, 2, avgx - floor(w/2) + ceil(max(hp / total_hp_max, 0) * w), bbox_bottom - 7, ceil(max(-(hp - hp_change) / total_hp_max, 0) * w), 1, 0, c_white, 1)

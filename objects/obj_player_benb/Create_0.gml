@@ -18,7 +18,7 @@ _sp =
     dead: spr_benb_dead,
     jump: spr_benb_jump,
     run: spr_benb_run,
-    wallslide: spr_anime_wallslide,
+    wallslide: spr_benb_wallslide,
     ledgegrab: spr_anime_ledgegrab,
     ledgeclimb: spr_anime_ledgeclimb,
     duckPunch: spr_benb_duckPunch,

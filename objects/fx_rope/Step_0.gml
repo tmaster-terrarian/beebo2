@@ -5,6 +5,12 @@ if(rope_points[rope_points_count - 1].anchored)
     rope_points[rope_points_count - 1].pos.x = x + x2
     rope_points[rope_points_count - 1].pos.y = y + y2
 }
+if(instance_exists(anchor_object))
+{
+    rope_points[rope_points_count - 1].anchored = 1
+    rope_points[rope_points_count - 1].pos.x = anchor_object.x + x2
+    rope_points[rope_points_count - 1].pos.y = anchor_object.y + y2
+}
 
 // var p = global.players[0]
 // if(instance_exists(p))
@@ -50,3 +56,8 @@ for(var r = 0; r < rope_points_count; r++)
 }
 
 calcVel()
+
+if(instance_exists(anchor_object))
+{
+    rope_points[rope_points_count - 1].anchored = 0
+}

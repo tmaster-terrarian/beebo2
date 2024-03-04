@@ -156,5 +156,3 @@ if(global.draw_debug)
 
     array_clear(collision_checks)
 }
-
-drawMyShit()

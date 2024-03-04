@@ -483,7 +483,7 @@ function initSkills()
                                     sword_xscale = approach(sword_xscale, -2 * facing, 0.2 * global.dt)
                                     swordpos.x = 3
                                     swordpos.y = -3
-                                    vsp = approach(vsp, 0, fric)
+                                    vsp = approach(vsp, 0, fric * global.dt)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
                                 else
@@ -544,7 +544,7 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -3 + (timer0 - 4)
                                     swordpos.y = -6
-                                    vsp = approach(vsp, 0, fric)
+                                    vsp = approach(vsp, 0, fric * global.dt)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
                                 else
@@ -555,7 +555,7 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -5
                                     swordpos.y = -9
-                                    vsp = approach(vsp, 0, fric)
+                                    vsp = approach(vsp, 0, fric * global.dt)
                                     timer0 = approach(timer0, 16, global.dt * attack_speed)
                                 }
                             }
@@ -606,7 +606,7 @@ function initSkills()
                                     sword_xscale = -1.75 * facing
                                     swordpos.x = 5 - (timer0 - 8) * 2
                                     swordpos.y = -14
-                                    vsp = approach(vsp, 0, fric)
+                                    vsp = approach(vsp, 0, fric * global.dt)
                                     timer0 = approach(timer0, 12, global.dt * attack_speed)
                                 }
                                 else
@@ -615,7 +615,7 @@ function initSkills()
                                     sword_xscale = -1.25 * facing
                                     swordpos.x = -4
                                     swordpos.y = -14
-                                    vsp = approach(vsp, 0, fric)
+                                    vsp = approach(vsp, 0, fric * global.dt)
                                     timer0 = approach(timer0, 16, global.dt * attack_speed)
                                 }
                             }
@@ -951,6 +951,7 @@ function initChars()
             jumps_max: 1,
             grv: 0.2,
             attack_speed: 1,
+            shield: 1,
             heat_max: 100,
             heat_rate: 1,
             cool_rate: 1
@@ -993,7 +994,8 @@ function initChars()
             air_fric: 0.02,
             jumps_max: 1,
             grv: 0.2,
-            attack_speed: 1
+            attack_speed: 1,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 30,
@@ -1033,7 +1035,8 @@ function initChars()
             air_fric: 0.02,
             jumps_max: 2,
             grv: 0.2,
-            attack_speed: 1
+            attack_speed: 1,
+            shield: 0.25,
         }
         def.level_stats = {
             hp_max: 30,
@@ -1073,7 +1076,8 @@ function initChars()
             air_fric: 0.02,
             jumps_max: 1,
             grv: 0.2,
-            attack_speed: 1
+            attack_speed: 1,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 20,
@@ -1099,7 +1103,8 @@ function initChars()
             air_fric : 0.02,
             jumps_max : 1,
             grv : 0.2,
-            attack_speed : 1
+            attack_speed : 1,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 144,
@@ -1125,7 +1130,8 @@ function initChars()
             air_fric : 0.02,
             jumps_max : 1,
             grv : 0.2,
-            attack_speed : 1
+            attack_speed : 1,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 24,
@@ -1151,7 +1157,8 @@ function initChars()
             air_fric : 0.02,
             jumps_max : 1,
             grv : 0.2,
-            attack_speed : 1
+            attack_speed : 1,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 630,

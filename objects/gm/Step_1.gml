@@ -72,7 +72,7 @@ if(!global.pause && global.runEnabled)
         mainDirector.Disable()
         // if(global.enemyCount == 0)
         // {
-        //     killzoneTimer = MINUTE / 2
+        //     killzoneTimer = 1800
         //     if(instance_exists(fx_death_fog))
         //         fx_death_fog.done = 1
 
@@ -134,15 +134,15 @@ with(par_unit)
 
     var hpFac = 1
 
-    hpFac += 0.25 * item_get_stacks("boost_health", self)
+    hpFac += 0.1 * item_get_stacks("boost_health", self)
 
     hpFac *= 1 + elite * 3
 
     hp_max = (base_hp_max * hpFac) / curse
 
 
-    var shieldFac = 0.0
-    max_shield = hp_max * shieldFac
+    var shieldFac = 1
+    max_shield = hp_max * stats.shield * shieldFac
 
 
     total_hp_max = hp_max + max_shield
@@ -185,7 +185,7 @@ with(par_unit)
 
     var dmgFac = 1
 
-    dmgFac += 0.25 * item_get_stacks("boost_damage", self)
+    dmgFac += 0.1 * item_get_stacks("boost_damage", self)
 
     dmgFac *= 1 + elite
 

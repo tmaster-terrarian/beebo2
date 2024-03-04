@@ -28,7 +28,7 @@ if(place_meeting(x, y, par_solid) && !place_meeting(x, y - 1, par_jumpthru) && !
 
 if(place_meeting(x, y, par_jumpthru))
 {
-    if(vsp < 0)
+    if(vsp <= 0)
     {
         vsp -= 0.2 * global.dt
         if(vsp > jumpspd/4)
@@ -270,6 +270,16 @@ for(var i = 0; i < array_length(names); i++)
     var skill = skills[$ names[i]]
     var def = skill.def
 
+    if(skill.cooldown > 0)
+        skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
+    else if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
+    {
+        skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks + bonus_stocks[$ names[i]])
+
+        if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
+            skill.cooldown = def.baseStockCooldown
+    }
+
     var inputPressed = input[$ names[i] + "Pressed"]()
 
     if(can_use_skills && inputPressed && (attack_state == names[i] && attack_states[$ attack_state].age >= (attack_states[$ attack_state].duration * def.spamCoeff)))
@@ -286,16 +296,6 @@ for(var i = 0; i < array_length(names); i++)
 
         attack_state = names[i]
         attack_states[$ attack_state].onEnter(attack_states[$ attack_state], self)
-    }
-
-    if(skill.cooldown > 0)
-        skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
-    else if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
-    {
-        skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks + bonus_stocks[$ names[i]])
-
-        if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
-            skill.cooldown = def.baseStockCooldown
     }
 }
 

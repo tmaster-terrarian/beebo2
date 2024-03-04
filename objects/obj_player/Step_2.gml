@@ -25,10 +25,10 @@ var cam_h = camera_get_view_height(cam)
 //bound position to room
 if(bbox_left < 0 || bbox_right > room_width)
 {
-    while(bbox_left < 0)
-        x++
-    while(bbox_right > room_width)
-        x--
+    if(bbox_left < 0)
+        x = x - bbox_left
+    if(bbox_right > room_width)
+        x = room_width + x - bbox_right
 
     if(!keyboard_check(_dbkey))
         _oncollide_h()
@@ -41,8 +41,7 @@ if(bbox_left < 0 || bbox_right > room_width)
 }
 if(bbox_top < 0)
 {
-    while(bbox_top < 0)
-        y++
+    y += 0 - bbox_top
 
     if(!keyboard_check(_dbkey))
         _oncollide_v()
@@ -52,10 +51,10 @@ if(bbox_top < 0)
 //bound position to screen
 if((bbox_left < cam_x || bbox_right > cam_x + cam_w) && state != "dead")
 {
-    while(bbox_left < cam_x)
-        x++
-    while(bbox_right > cam_x + cam_w)
-        x--
+    if(bbox_left < cam_x)
+        x = cam_x + x - bbox_left
+    if(bbox_right > cam_x + cam_w)
+        x = cam_x + cam_w + x - bbox_right
 
     if(!keyboard_check(_dbkey) && state != "ghost")
         _oncollide_h()
@@ -68,17 +67,15 @@ if((bbox_left < cam_x || bbox_right > cam_x + cam_w) && state != "dead")
 }
 if(bbox_top < cam_y && state != "dead")
 {
-    while(bbox_top < cam_y)
-        y++
+    y = cam_y + y - bbox_top
 
     if(!keyboard_check(_dbkey) && state != "ghost")
         _oncollide_v()
     vsp = 0
 }
-if(bbox_top > cam_y + cam_h && state == "ghost")
+if(bbox_bottom > cam_y + cam_h && state == "ghost")
 {
-    while(bbox_top > cam_y + cam_h)
-        y--
+    y = cam_y + cam_h + y - bbox_bottom
 
     vsp = 0
 }

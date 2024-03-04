@@ -74,7 +74,7 @@ calcVel = function()
         }
 
         var w = instance_position(s.pos.x, s.pos.y, par_solid)
-        if(w)
+        if(w && w != anchor_object)
         {
             var d1 = point_distance(s.pos.x, s.pos.y, s.pos.x, w.bbox_top)
             var d2 = point_distance(s.pos.x, s.pos.y, s.pos.x, w.bbox_bottom)

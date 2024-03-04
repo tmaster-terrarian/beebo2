@@ -239,11 +239,14 @@ function damage_event(ctx)
 
 			if(!ctx.blocked)
 			{
-				var bloody_dagger_bonus = ((ctx.target.facing == 1 && ctx.target.x > ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
-				damage *= 1 + bloody_dagger_bonus
+				var dmgFac = 1
+
+				dmgFac += ((ctx.target.facing == 1 && ctx.target.x > ctx.attacker.x) || (ctx.target.facing == -1 && ctx.target.x < ctx.attacker.x)) * (0.2 * item_get_stacks("bloody_dagger", ctx.attacker))
 
 				if(ctx.crit)
-					damage *= 2 * ctx.attacker.crit_modifier
+					dmgFac *= 2 * ctx.attacker.crit_modifier
+
+				damage *= dmgFac
 
 				if(ctx.attacker.team == Team.player)
 				{
@@ -528,9 +531,6 @@ global.money = 0
 
 global.fnt_hudnumbers = font_add_sprite_ext(spr_hudnumbers, "/1234567890-KM$:", 0, 0)
 global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890-KM", 1, -1)
-
-// constants
-#macro MINUTE 3600
 
 // macro macros
 #macro PAUSECHECK if(global.pause) return;
@@ -2075,7 +2075,8 @@ function CharacterDef(name, func = noone) constructor
 		air_fric : 0.02,
 		jumps_max : 1,
 		grv : 0.2,
-		attack_speed : 1
+		attack_speed : 1,
+		shield : 0,
 	}
 	self.level_stats =
 	{

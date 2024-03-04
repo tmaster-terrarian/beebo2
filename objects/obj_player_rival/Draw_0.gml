@@ -207,5 +207,3 @@ image_yscale = sy
 
 if(flash > 0)
     shader_reset()
-
-drawMyShit()

@@ -208,6 +208,7 @@
     {"id":{"name":"spr_player_wallslide","path":"sprites/spr_player_wallslide/spr_player_wallslide.yy",},},
     {"id":{"name":"fx_casing","path":"objects/fx_casing/fx_casing.yy",},},
     {"id":{"name":"scribble_typist","path":"scripts/scribble_typist/scribble_typist.yy",},},
+    {"id":{"name":"spr_benb_wallslide","path":"sprites/spr_benb_wallslide/spr_benb_wallslide.yy",},},
     {"id":{"name":"__scribble_get_typewriter_events_map","path":"scripts/__scribble_get_typewriter_events_map/__scribble_get_typewriter_events_map.yy",},},
     {"id":{"name":"string_width_scribble","path":"scripts/string_width_scribble/string_width_scribble.yy",},},
     {"id":{"name":"__scribble_get_effects_slash_map","path":"scripts/__scribble_get_effects_slash_map/__scribble_get_effects_slash_map.yy",},},
