@@ -96,6 +96,11 @@ else
 
 UILayers[UILayer].draw()
 
+if(recording)
+{
+    draw_sprite(spr_ui_recording, 0, 4, 4)
+}
+
 // scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]{keyboard_key}").draw(1, 1)
 // scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]{mouse_button}").draw(1, 10)
 // scribble($"[fa_left][fa_top][fnt_itemdesc][c_white]{gamepad_button(0)}").draw(1, 19)

@@ -41,6 +41,21 @@ if(keyboard_check_pressed(vk_escape) || gamepad_button_check_pressed(0, gp_start
     else UILayer = 0
 }
 
+gifTicker++
+if(keyboard_check_pressed(vk_f3))
+{
+	recording = !recording
+	if(recording)
+	{
+		gifTicker = 0
+		gifSaver.startRecording()
+	}
+	else
+	{
+		gifSaver.stopRecording()
+	}
+}
+
 if(global.BGM_LOWPASS.cutoff < global.BGM_LOWPASS_CUTOFF_TARGET)
 {
     global.BGM_BUS.effects[0].bypass = 0

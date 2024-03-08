@@ -1,0 +1,13 @@
+{
+  "$GMScript":"",
+  "%Name":"GifSaver",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"GifSaver",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

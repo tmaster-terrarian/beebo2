@@ -50,6 +50,10 @@ global.showDebugOverlay = 0
 
 global.BGM_LOWPASS_CUTOFF_TARGET = 20000
 
+gifSaver = new GifSaver(1)
+recording = false
+gifTicker = 0
+
 togglePause = function()
 {
     global.pause = !global.pause
