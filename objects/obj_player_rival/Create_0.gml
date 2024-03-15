@@ -18,6 +18,7 @@ _sp =
     dead: spr_anime_dead,
     jump: spr_anime_jump,
     run: spr_anime_run_sword,
+    run_fast: spr_player_run_fast,
     wallslide: spr_anime_wallslide,
     ledgegrab: spr_anime_ledgegrab,
     ledgeclimb: spr_anime_ledgeclimb,

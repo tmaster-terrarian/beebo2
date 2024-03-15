@@ -74,6 +74,7 @@ _sp =
     dead: spr_player_dead,
     jump: spr_player_jump,
     run: spr_player_run,
+    run_fast: spr_player_run_fast,
     wallslide: spr_player_wallslide,
     ledgegrab: spr_player_ledgegrab,
     ledgeclimb: spr_player_ledgeclimb,
@@ -324,7 +325,10 @@ states =
                 skidding = 0
                 if (duck == 0 && !landTimer)
                 {
-                    sprite_index = _sp.run
+                    if(abs(hsp) > spd * 1.3)
+                        sprite_index = _sp.run_fast
+                    else
+                        sprite_index = _sp.run
                 }
                 else if(duck)
                 {
@@ -362,7 +366,10 @@ states =
                 skidding = 0
                 if (duck == 0 && !landTimer)
                 {
-                    sprite_index = _sp.run
+                    if(abs(hsp) > spd * 1.3)
+                        sprite_index = _sp.run_fast
+                    else
+                        sprite_index = _sp.run
                 }
                 else if(duck)
                 {
@@ -392,8 +399,7 @@ states =
             if (abs(hsp) < spd + abs(lasthsp))
             {
                 skidding = 0
-                if run
-                    run--
+                run = approach(run, 0, global.dt)
             }
             if (abs(hsp) < 1.5 + abs(lasthsp) && on_ground && !landTimer)
             {
@@ -491,7 +497,7 @@ states =
             }
         }
         if (running && !place_meeting(x + input_dir, y, par_solid))
-            image_index += abs(hsp / 6) * global.dt
+            image_index += abs(hsp / (image_number * 0.75)) * global.dt
         else if (duck)
             image_index += abs(hsp / 4) * global.dt
         landTimer = approach(landTimer, 0, 1 * global.dt)

@@ -27,9 +27,20 @@ var py1 = y - 13 * squash
 if(running)
 {
     var f = floor(image_index)
-    if(f == 1 || f == 2 || f == 4 || f == 5)
+    if(image_number == 8)
     {
-        py1 += 1
+        if(f == 1 || f == 2 || f == 4 || f == 5)
+        {
+            py1 += 1
+        }
+    }
+    else if(image_number == 6)
+    {
+        px1 += 1 * facing
+        if(f == 1 || f == 4)
+        {
+            py1 += 1
+        }
     }
 }
 if(sprite_index == _sp.jump)
@@ -115,9 +126,20 @@ var py2 = y - 13 * squash
 if(running)
 {
     var f = floor(image_index)
-    if(f == 1 || f == 2 || f == 4 || f == 5)
+    if(image_number == 8)
     {
-        py2 += 1
+        if(f == 1 || f == 2 || f == 4 || f == 5)
+        {
+            py2 += 1
+        }
+    }
+    else if(image_number == 6)
+    {
+        px2 += 1 * facing
+        if(f == 1 || f == 4)
+        {
+            py2 += 1
+        }
     }
 }
 if(sprite_index == _sp.jump)

@@ -4,7 +4,7 @@ __lastspr = sprite_index
 if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
     image_index += 0.2 * global.dt
 
-running = (sprite_index == _sp.run)
+running = (sprite_index == _sp.run || sprite_index == _sp.run_fast)
 
 if(state != "ledgeclimb")
     ledgegrabTimer = approach(ledgegrabTimer, 0, global.dt)
@@ -244,8 +244,8 @@ if(input.unjump() && vsp < 0)
 
 if(vsp > 4)
 {
-    squash = min(1.4, max(1, 1.01 * (vsp / 12)))
-    stretch = max(0.65, min(1, 0.99 / (vsp / 12)))
+    squash = clamp(1.01 * (vsp / 12), 1, 1.4)
+    stretch = clamp(0.99 / (vsp / 12), 0.65, 1)
 }
 
 if(skidding && on_ground)
@@ -353,7 +353,7 @@ y = round(y)
 squash = approach(squash, 1, 0.15 * global.dt)
 stretch = approach(stretch, 1, 0.1 * global.dt)
 
-if(place_meeting(x + input_dir, y, par_solid) && abs(input_dir) && sprite_index == _sp.run)
+if(place_meeting(x + input_dir, y, par_solid) && abs(input_dir) && running)
 {
     sprite_index = _sp.idle
 }

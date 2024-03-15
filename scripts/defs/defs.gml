@@ -326,68 +326,66 @@ function initSkills()
 
             with(obj)
             {
-                hsp = (1.5 + (spd * 2) + (((spd / stats.spd) * 1) * on_ground) + (((spd / stats.spd - 2) * 0.1) * !on_ground)) * sign(facing)
-                vsp = -1 * !on_ground
-
-                sprite_index = spr_player_dash
+                sprite_index = spr_player
                 mask_index = mask_player
                 image_index = 0
 
                 timer0 = 0
 
-                __utilityHit = []
+                __specialHit = []
 
-                if(!variable_struct_exists(states, "SKILL_quick_evade"))
+                recoil = 4
+
+                if(!variable_struct_exists(states, "SKILL_hotswap"))
                 {
-                    states.SKILL_quick_evade = function() {with(other) {
-                        can_jump = 1
+                    states.SKILL_hotswap = function() {with(other) {
+
+                        hsp = clamp(hsp, -spd, spd) * 0.25
+                        if(!on_ground)
+                            vsp = clamp(vsp, -1.5, 1)
+
+                        can_jump = 0
                         can_walljump = 0
                         ghost = 0
                         duck = 0
-                        fxtrail = 1
-                        hsp = approach(hsp, (spd + 1.5) * sign(facing), 0.25 * spd/stats.spd * global.dt)
-                        if(!on_ground)
-                            vsp = approach(vsp, 20, grv/2 * global.dt)
+                        fxtrail = 0
 
-                        if(on_ground && fxtrailtimer <= 1)
+                        gun_angle = 180 * (facing < 0)
+
+                        instance_create_depth(x + 12 * other.facing, y - 12, depth - 1, fx_anim, {sprite_index: spr_fx_hotswap, animspeed: 0.4, image_xscale})
+
+                        audio_play_sound(sn_shotgun_blast, 1, 0)
+
+                        with(par_unit)
                         {
-                            with(instance_create_depth(x + random_range(-1, 4) * sign(facing), y, depth - 2, fx_dust))
+                            if(collision_circle(other.x + 12 * other.facing, other.y - 12, 30, id, 0, 0) && canHurt(other, self) && !array_contains(other.__specialHit, self))
                             {
-                                vx = random_range(-3, -1) * sign(other.facing)
-                                vy = random_range(-1.5, 0)
+                                array_push(other.__specialHit, self)
+                                damage_event(new DamageEventContext(other, self, other.damage * 4, 1))
                             }
                         }
 
                         var e = instance_place(x, y, par_unit)
-                        if(e && canHurt(self, e) && !array_contains(__utilityHit, e))
+                        if(e && canHurt(self, e) && !array_contains(__specialHit, e))
                         {
-                            array_push(__utilityHit, e)
+                            array_push(__specialHit, e)
                             damage_event(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
                         }
 
-                        if(abs(hsp) <= spd + 1.5)
-                        {
-                            state = "normal"
-                            __utilityHit = []
-                            fxtrail = 0
-                        }
+                        state = "normal" // for now i keep this
                     }}
                 }
-                state = "SKILL_quick_evade"
+                state = "SKILL_hotswap"
             }
         }
         self.update = function(ins, obj) {
             ins.age = approach(ins.age, ins.duration, global.dt / 60)
-            if(ins.age >= ins.duration || obj.state != "SKILL_quick_evade")
+            if(ins.age >= ins.duration || obj.state != "SKILL_hotswap")
             {
-                obj.__utilityHit = []
+                obj.__specialHit = []
                 with(ins) onExit(self, obj)
                 return;
             }
-        }
-        self.onExit = function(ins, obj) {
-            ins.age = 0
-            obj.attack_state = noone
         }
     }, beeboSpecialSkill)
     beeboSpecialSkill.activationState = beeboSpecialSkillState

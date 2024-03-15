@@ -18,6 +18,7 @@ _sp =
     dead: spr_player_dead,
     jump: spr_player_jump,
     run: spr_player_run,
+    run_fast: spr_player_run_fast,
     wallslide: spr_player_wallslide,
     ledgegrab: spr_player_ledgegrab,
     ledgeclimb: spr_player_ledgeclimb,

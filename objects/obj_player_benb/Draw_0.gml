@@ -9,9 +9,20 @@ var py = y - 9 * squash
 if(running)
 {
     var f = floor(image_index)
-    if(f == 1 || f == 2 || f == 4 || f == 5)
+    if(image_number == 8)
     {
-        py += 1
+        if(f == 1 || f == 2 || f == 4 || f == 5)
+        {
+            py += 1
+        }
+    }
+    else if(image_number == 6)
+    {
+        px += 1 * facing
+        if(f == 1 || f == 4)
+        {
+            py += 1
+        }
     }
 }
 if(sprite_index == _sp.jump)

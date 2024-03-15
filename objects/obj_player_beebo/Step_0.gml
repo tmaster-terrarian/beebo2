@@ -36,7 +36,7 @@ if(sprite_index == _sp.idle || sprite_index == _sp.idle_lookup)
             break;
     }
 }
-else if(running && sprite_index != _sp.crawl)
+else if(sprite_index == _sp.run)
 {
     ponytail_visible = 1
     switch(floor(image_index))
@@ -64,6 +64,31 @@ else if(running && sprite_index != _sp.crawl)
             break;
         case 7:
             gun_pos.x = -3; gun_pos.y = -6;
+            break;
+    }
+}
+else if(sprite_index == _sp.run_fast)
+{
+    ponytail_visible = 1
+    switch(floor(image_index))
+    {
+        case 0:
+            gun_pos.x = -3; gun_pos.y = -6;
+            break;
+        case 1:
+            gun_pos.x = -2; gun_pos.y = -5;
+            break;
+        case 2:
+            gun_pos.x = -1; gun_pos.y = -6;
+            break;
+        case 3:
+            gun_pos.x = -0; gun_pos.y = -6;
+            break;
+        case 4:
+            gun_pos.x = -0; gun_pos.y = -5;
+            break;
+        case 5:
+            gun_pos.x = -1; gun_pos.y = -6;
             break;
     }
 }
