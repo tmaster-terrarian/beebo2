@@ -6,22 +6,19 @@ __lastspr = sprite_index
 
 flash = approach(flash, 0, global.dt)
 
-if(regen)
-    hp = approach(hp, hp_max, regen_rate/60 * global.dt)
-
-if(hp_change == noone)
-    hp_change = hp
+if(hp_change == "noone")
+    hp_change = total_hp
 
 if(hp_change_delay > 0)
     hp_change_delay = approach(hp_change_delay, 0, global.dt)
 else
 {
-    hp_change += (hp - hp_change) * 0.5 * global.dt
-    if(abs(hp - hp_change) < 0.01)
-        hp_change = hp
+    hp_change += (total_hp - hp_change) * 0.5 * global.dt
+    if(abs(total_hp - hp_change) < 0.01)
+        hp_change = total_hp
 }
 
-hp_change = clamp(hp_change, 0, hp_max)
+hp_change = clamp(hp_change, 0, total_hp_max)
 
 if(combat_timer > 0)
     combat_timer = approach(combat_timer, 0, global.dt)

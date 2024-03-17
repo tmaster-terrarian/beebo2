@@ -1165,5 +1165,32 @@ function initChars()
         }
     })
 
+    global.chardefs.e_player_chaser = new CharacterDef("e_player_chaser", function(def) {
+        def.stats = {
+            hp_max: 100,
+            regen_rate: 1,
+            curse: 1,
+            spd: 2,
+            jumpspd: -3.7,
+            firerate: 5,
+            bombrate: 80,
+            spread: 4,
+            damage: 12,
+            ground_accel: 0.12,
+            ground_fric: 0.08,
+            air_accel: 0.07,
+            air_fric: 0.02,
+            jumps_max: 1,
+            grv: 0.2,
+            attack_speed: 1,
+            shield: 1
+        }
+        def.level_stats = {
+            hp_max: 30,
+            damage: 2.4,
+            regen_rate: 0.2
+        }
+    })
+
     LogInfo("Startup", "Initialized character definitions")
 }

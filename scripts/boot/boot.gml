@@ -274,25 +274,42 @@ function damage_event(ctx)
 				// do armor here pls
 			}
 
-			if(object_get_parent(ctx.target.object_index) == obj_player && damage > ctx.target.total_hp_max * 0.9 && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
+			if(array_contains(global.players, ctx.target) && damage > ctx.target.total_hp_max * 0.9 && ctx.target.total_hp > ctx.target.total_hp_max * 0.9)
 			{
 				damage = ctx.target.total_hp_max * 0.9
 				ctx.target.oneshotprotection = 6
 			}
 
+			var dmg = damage
+
 			var _shield = ctx.target.shield
-			ctx.target.shield = max(0, ctx.target.shield - damage)
-			damage -= _shield
+			ctx.target.shield = clamp(ctx.target.shield - damage, 0, ctx.target.max_shield)
+			if(ctx.target.shield == 0)
+			{
+				// onShieldBroken event
+			}
 
-			ctx.target.hp -= damage
+			ctx.target.hp -= max(damage - _shield, 0)
 
-			if(ctx.nonlethal && ctx.target.hp < 1)
+			if(ctx.target._shield_recharge_handler != -1 || time_source_exists(ctx.target._shield_recharge_handler))
+				call_cancel(ctx.target._shield_recharge_handler)
+			with(ctx.target)
+			{
+				_shield_recharge_handler = call_later(7, time_source_units_seconds, function() {
+					_shield_recharge = 1
+					_shield_recharge_handler = -1
+				}, false)
+			}
+			ctx.target._shield = ctx.target.shield
+			ctx.target._shield_recharge = 0
+
+			if((ctx.nonlethal || ctx.target.oneshotprotection == 6) && ctx.target.hp < 1)
 				ctx.target.hp = 1
 
 			ctx.target.drawhp = 1
-			ctx.target.hp_change_delay = 5 * max(ctx.proc, 0.2)
+			ctx.target.hp_change_delay = 4 * max(ctx.proc, 0.25)
 
-			if(object_get_parent(ctx.target.object_index) == obj_player)
+			if(array_contains(global.players, ctx.target))
 			{
 				audio_play_sound(sn_player_hit, 5, false)
 			}
@@ -369,10 +386,12 @@ function heal_event(target, value, _healtype = healtype.generic)
 		return;
 
 	var heal_fac = 1
-	target.hp += value * heal_fac
+
+	var val = value * heal_fac
+	target.hp += val
 
 	if(_healtype != healtype.regen && _healtype != healtype.hidden)
-		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: value, dir: -target.facing})
+		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: val, dir: -target.facing})
 }
 
 // could this be the ultimate form of framerate independence?

@@ -21,3 +21,15 @@ if(hp > hp_max) hp = hp_max
 
 if(hp > 0)
     regen = 1
+
+if(_shield_recharge)
+{
+    // play shield recharge sound here
+    if(shield < max_shield)
+        shield = approach(shield, max_shield, (max_shield - _shield) / 120 * global.dt)
+    else
+    {
+        _shield = max_shield
+        _shield_recharge = 0
+    }
+}

@@ -192,8 +192,7 @@ drawMyShit = function()
     if(hp >= 0)
     {
         var c = c_black
-        // var avgx = (bbox_left + bbox_right) / 2
-        var avgx = x
+        var avgx = (bbox_left + bbox_right) / 2
 
         draw_rectangle_color(avgx - floor(w/2) - 2, bbox_bottom + 5, avgx + ceil(w/2) + 1, bbox_bottom + 11, c,c,c,c,false)
 
