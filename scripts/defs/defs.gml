@@ -1,5 +1,7 @@
 function initSkills()
 {
+    __dbg_stepIn("dev.bscit.beebo.GlobalScripts.defs.initSkills", _GMFILE_, _GMFUNCTION_)
+
     var deadPrimarySkill = new Skill("dead.primary", function(def) {
         def.baseMaxStocks = 1
         def.baseStockCooldown = 1
@@ -18,6 +20,8 @@ function initSkills()
     var deadPrimarySkillState = new State(function(def) {
         def.baseDuration = 20/60
         def.onEnter = function(ins, obj) {
+            __dbg_stepIn("dev.bscit.beebo.Skills.[dead.primary].activationState.onEnter", _GMFILE_, _GMFUNCTION_)
+
             ins.duration = ins.baseDuration / obj.attack_speed
 
             with(obj)
@@ -49,10 +53,14 @@ function initSkills()
                     vsp = -1 + random_range(-0.2, 0.1)
                 }
             }
+
+            __dbg_stepOut()
         }
         def.onExit = function(ins, obj) {
+            __dbg_stepIn("dev.bscit.beebo.Skills.dead.primary.activationState.onExit", _GMFILE_, _GMFUNCTION_)
             ins.age = 0
             obj.attack_state = noone
+            __dbg_stepOut()
         }
     }, deadPrimarySkill)
     deadPrimarySkill.activationState = deadPrimarySkillState
@@ -949,7 +957,7 @@ function initChars()
             jumps_max: 1,
             grv: 0.2,
             attack_speed: 1,
-            shield: 1,
+            shield: 0,
             heat_max: 100,
             heat_rate: 1,
             cool_rate: 1
@@ -1034,7 +1042,7 @@ function initChars()
             jumps_max: 2,
             grv: 0.2,
             attack_speed: 1,
-            shield: 0.25,
+            shield: 0,
         }
         def.level_stats = {
             hp_max: 30,
@@ -1183,7 +1191,7 @@ function initChars()
             jumps_max: 1,
             grv: 0.2,
             attack_speed: 1,
-            shield: 1
+            shield: 0
         }
         def.level_stats = {
             hp_max: 30,

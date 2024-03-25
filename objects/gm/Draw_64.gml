@@ -25,7 +25,7 @@ else
     _draw_rect(1, SC_H - 8, _fps.get_width(), SC_H - 2, c_black, 0.5)
     _fps.draw(2, SC_H - 1)
 
-    var time = timer_to_timestamp((global.t / 60) * 1000000)
+    var time = timer_to_string((global.t / 60) * 1000000)
     var _timer = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]TIMER: {time} WAVE: {global.wave}")
     _draw_rect(23, SC_H - 8, _timer.get_width() + 22, SC_H - 2, c_black, 0.5)
     _timer.draw(24, SC_H - 1)
