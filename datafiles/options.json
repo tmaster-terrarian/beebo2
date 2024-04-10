@@ -1,7 +1,7 @@
 {
     "forcedRunSeed": -1,
     "enabledMods": [
-        "testmod"
+        "example_mod"
     ],
     "inputSettings": [
         {

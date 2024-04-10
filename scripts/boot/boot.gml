@@ -68,6 +68,8 @@ global.BGM_BUS.effects[0] = global.BGM_LOWPASS
 
 global.__dbg_GlobalFunctions = getGlobalFunctionsList()
 
+global.modsList = []
+
 // enums
 enum Team
 {
@@ -163,46 +165,34 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	// builder methods
 	self.useAttackerItems = function(value = 1)
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.useAttackerItems", _GMFILE_, _GMFUNCTION_)
 		self.use_attacker_items = value
-		__dbg_stepOut()
 		return self
 	}
 	self.forceCrit = function(value = -1)
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.forceCrit", _GMFILE_, _GMFUNCTION_)
 		self.force_crit = value
-		__dbg_stepOut()
 		return self
 	}
 	self.isReduceable = function(value = 1)
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.isReduceable", _GMFILE_, _GMFUNCTION_)
 		self.reduceable = value
-		__dbg_stepOut()
 		return self
 	}
 	self.exclude = function(args)
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.exclude", _GMFILE_, _GMFUNCTION_)
 		for(var i = 0; i < argument_count; i++)
 			array_push(self.excludedItems, string(argument[i]))
-		__dbg_stepOut()
 		return self
 	}
 	self.damageType = function(_type)
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.damageType", _GMFILE_, _GMFUNCTION_)
 		self.damage_type = _type
-		__dbg_stepOut()
 		return self
 	}
 
 	self.toString = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.DamageEventContext.toString", _GMFILE_, _GMFUNCTION_)
 		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.reduceable}, itemBlacklist: {self.excludedItems} \}"
-		__dbg_stepOut()
 		return str
 	}
 
@@ -212,11 +202,8 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	// LogInfo("Main", "DamageEventContext created: " + string(self))
 }
 
-__dbg_stepIn("dev.bscit.beebo.GlobalScripts.boot", _GMFILE_, _GMFUNCTION_)
-
 function damage_event(ctx)
 {
-	__dbg_stepIn("dev.bscit.beebo.damage_event", _GMFILE_, _GMFUNCTION_)
 	var _damage_type = ctx.damage_type
 
 	var damage = ctx.damage
@@ -405,13 +392,10 @@ function damage_event(ctx)
 			ctx.target.flash = 3
 		}
 	}
-	__dbg_stepOut()
 }
 
 function heal_event(target, value, _healtype = healtype.generic)
 {
-	__dbg_stepIn("dev.bscit.beebo.heal_event", _GMFILE_, _GMFUNCTION_)
-
 	if(value == 0)
 		return;
 
@@ -424,8 +408,6 @@ function heal_event(target, value, _healtype = healtype.generic)
 	{
 		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: val, dir: -target.facing})
 	}
-
-	__dbg_stepOut()
 }
 
 function __dbg_stepIn(str, FILE, FUNC)
@@ -445,40 +427,27 @@ function __dbg_clearScope()
 	global.__dbg_scopeName = "<unknown_object>"
 }
 
-
 function ThrowException(err, isEngineCrash = false)
 {
     var _string = "gml.RuntimeException: " + err.message //string_replace(err.message, "<unknown_object>", global.__dbg_scopeName);
 
 	var stack = err.stacktrace
-	if(isEngineCrash)
+	for(var i = 0; i < array_length(stack); i++)
 	{
-		for(var i = 0; i < array_length(stack); i++)
-		{
-			var line = string_split(stack[i], " ")
+		var line = string_split(stack[i], " ")
 
-			// _string += "\n\tat " + global.__dbg_scope[i][0] + string_replace(line[1], "line", (!is_undefined(global.__dbg_scope[i][1]) ? global.__dbg_scope[i][1] : "unknown")) + ":" + line[2];
-			_string += "\n\tat " + stack[i]
-		}
-		LogException(_string)
+		// _string += "\n\tat " + global.__dbg_scope[i][0] + string_replace(line[1], "line", (!is_undefined(global.__dbg_scope[i][1]) ? global.__dbg_scope[i][1] : "unknown")) + ":" + line[2];
+		_string += "\n\tat " + stack[i]
 	}
-	else
-	{
-		for(var i = 0; i < array_length(stack); i++)
-		{
-			var scope = stack[i][0], file = stack[i][1]
-			if(i == 0)
-				_string += "\n\tat " + scope + (file != "" ? "(" + file + ":" + string(err.line) + ")" : "")
-			else
-				_string += "\n\tat " + scope + (file != "" ? "(" + file + ")" : "")
-		}
-		LogException(_string)
+	LogException(_string)
 
-		exception_unhandled_handler(undefined)
+	if(!isEngineCrash)
+	{
 		show_error(err.message, true)
 	}
 }
-function ThrowError(err) // harmless version of ThrowException (doesnt close the game)
+
+function ThrowError(err, _log = true) // harmless version of ThrowException (doesnt close the game)
 {
     var _string = "gml.RuntimeError: " + err.message
 
@@ -486,12 +455,13 @@ function ThrowError(err) // harmless version of ThrowException (doesnt close the
 	for(var i = 0; i < array_length(stack); i++)
 	{
 		var scope = stack[i][0], file = stack[i][1]
-		if(i == 0)
+		if(i > 0)
 			_string += "\n\tat " + scope + (file != "" ? "(" + file + ":" + string(err.line) + ")" : "")
 		else
 			_string += "\n\tat " + scope + (file != "" ? "(" + file + ")" : "")
 	}
-	LogException(_string)
+	if(_log)
+		LogException(_string)
 }
 
 exception_unhandled_handler(function(err) {
@@ -502,20 +472,16 @@ exception_unhandled_handler(function(err) {
 
 function __struct_get(struct, name, structname = -1)
 {
-	__dbg_stepIn("dev.bscit.beebo.__struct_get", _GMFILE_, _GMFUNCTION_)
-
 	if(struct_exists(struct, name))
 		return struct[$ name];
 
-	var message = "Variable " + (structname == -1 ? "$$Anonymous_Struct$$" : string(structname)) + "." + string(name) + " not set before reading it."
+	var message = "Variable " + (structname == -1 ? "$$AnonymousStruct$$" : string(structname)) + "." + string(name) + " not set before reading it."
 	ThrowError({
 		script: global.__dbg_scope[0][1],
 		line: _GMLINE_ - 2,
-		stacktrace: global.__dbg_scope,
+		stacktrace: [["__struct_get", _GMFILE_]],
 		message: message
 	})
-
-	__dbg_stepOut()
 }
 
 // could this be the ultimate form of framerate independence?
@@ -525,7 +491,6 @@ global.fixedStep = {
 	t: 0,
 
 	addFunction: function(func, thisObject = self) {
-		__dbg_stepIn("dev.bscit.beebo.fixedStep.addFunction", _GMFILE_, _GMFUNCTION_)
 		var _id = floor(get_timer() / 1000)
 		var f = {
 			_thisObject: thisObject,
@@ -535,12 +500,10 @@ global.fixedStep = {
 			t: 0
 		}
 		array_push(self._functions, f)
-		__dbg_stepOut()
 		return f
 	},
 
 	addQueueFunction: function(func, delaySeconds, thisObject = self) {
-		__dbg_stepIn("dev.bscit.beebo.fixedStep.addQueueFunction", _GMFILE_, _GMFUNCTION_)
 		var _id = floor(get_timer() / 1000)
 		var f = {
 			_thisObject: thisObject,
@@ -552,12 +515,10 @@ global.fixedStep = {
 		}
 		f.startT = self.t
 		array_push(self._queueFunctions, f)
-		__dbg_stepOut()
 		return f
 	},
 
 	step: function() {
-		__dbg_stepIn("dev.bscit.beebo.fixedStep.step", _GMFILE_, _GMFUNCTION_)
 		for(var i = 0; i < array_length(self._functions); i++)
 		{
 			var f = self._functions[i]
@@ -579,7 +540,6 @@ global.fixedStep = {
 			}
 		}
 		self.t++
-		__dbg_stepOut()
 	}
 }
 
@@ -587,23 +547,18 @@ global.fixedStep = {
 
 function addFixedStep(func)
 {
-	__dbg_stepIn("dev.bscit.beebo.addFixedStep", _GMFILE_, _GMFUNCTION_)
 	var out = global.fixedStep.addFunction(func, self)
-	__dbg_stepOut()
 	return out
 }
 
 function setTimeout(func, delaySeconds)
 {
-	__dbg_stepIn("dev.bscit.beebo.setTimeout", _GMFILE_, _GMFUNCTION_)
 	var out = global.fixedStep.addQueueFunction(func, delaySeconds, self)
-	__dbg_stepOut()
 	return out
 }
 
 function removeFixedStep(func)
 {
-	__dbg_stepIn("dev.bscit.beebo.removeFixedStep", _GMFILE_, _GMFUNCTION_)
 	global.______grahhhhhh = func.uniqueId // I LOVE SCOPE SO MUCH AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 	var ind = array_find_index(global.fixedStep._functions, function(e, i) {
 		return (e.uniqueId == global.______grahhhhhh)
@@ -613,12 +568,10 @@ function removeFixedStep(func)
 	{
 		array_delete(global.fixedStep._functions, ind, 1)
 	}
-	__dbg_stepOut()
 }
 
 function stopTimeout(func)
 {
-	__dbg_stepIn("dev.bscit.beebo.stopTimeout", _GMFILE_, _GMFUNCTION_)
 	global.______grahhhhhh = func.uniqueId
 	var ind = array_find_index(global.fixedStep._queueFunctions, function(e, i) {
 		return (e.uniqueId == global.______grahhhhhh)
@@ -628,7 +581,6 @@ function stopTimeout(func)
 	{
 		array_delete(global.fixedStep._queueFunctions, ind, 1)
 	}
-	__dbg_stepOut()
 }
 
 global.fixedStepTimeSource = time_source_create(time_source_game, 1/60, time_source_units_seconds, global.fixedStep.step, [], -1)
@@ -698,12 +650,10 @@ global.fnt_hudstacks = font_add_sprite_ext(spr_hudstacksfnt, "1234567890-KM", 1,
 // the following eight functions are credited to D'Andrëw Box on Github and are licensed under the MIT license.
 function array_fill(_array, _val)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.array_fill", _GMFILE_, _GMFUNCTION_)
 	for (var i = 0; i < array_length(_array); i++)
 	{
 		_array[i] = _val;
 	}
-	__dbg_stepOut()
 }
 
 function array_clear(_array) // basically just a macro
@@ -718,71 +668,49 @@ function array_empty(_array) // basically just a macro, 2
 
 function array_find_index_by_value(_array, _val)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.array_find_index_by_value", _GMFILE_, _GMFUNCTION_)
-
 	for (var i = 0; i < array_length(_array); i++)
 	{
 		if (_array[i] == _val)
 		{
-			__dbg_stepOut()
 			return i;
 		}
 	}
-
-	__dbg_stepOut()
 	return -1;
 }
 
 function file_text_read_whole(_file)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.file_text_read_whole", _GMFILE_, _GMFUNCTION_)
-
-	if (_file < 0) {__dbg_stepOut(); return ""};
+	if (_file < 0) return "";
 
 	var _file_str = ""
 	while (!file_text_eof(_file)) {
 		_file_str += file_text_readln(_file);
 	}
 
-	__dbg_stepOut()
-
 	return _file_str;
 }
 
 function file_json_read(_file)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.file_json_read", _GMFILE_, _GMFUNCTION_)
-
 	var _str = file_text_read_whole(_file);
-	var out = json_parse(_str);
-
-	__dbg_stepOut()
-	return out
+	return json_parse(_str);
 }
 
 function file_text_get_lines_array(_file)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.file_text_get_lines_array", _GMFILE_, _GMFUNCTION_)
-
-	if (_file < 0) {__dbg_stepOut(); return []};
+	if (_file < 0) return [];
 
 	var _file_arr = [];
-	var _str = "";
 	while (!file_text_eof(_file)) {
-		_str = file_text_readln(_file);
-		array_push(_file_arr, _str);
+		array_push(_file_arr, file_text_readln(_file));
 	}
-
-	__dbg_stepOut()
 	return _file_arr;
 }
 
 // do not pass in a value for _iteration when using this function !
 function json2file(_filename, _json = {}, _iteration = 0)
 {
-	__dbg_stepIn("mit.DAndrewBox.GML-Extended.lib.array.json2file", _GMFILE_, _GMFUNCTION_)
-
-	if (!is_struct(_json)) {__dbg_stepOut(); return ""};
+	if (!is_struct(_json)) return "";
 
 	var _str	= "{";
 	var _keys	= struct_get_names(_json);
@@ -817,8 +745,6 @@ function json2file(_filename, _json = {}, _iteration = 0)
 		file_text_write_string(_file, _str);
 		file_text_close(_file);
 	}
-
-	__dbg_stepOut()
 	return _str;
 }
 // end of 3rd party functions
@@ -837,7 +763,6 @@ function canHurt(obj1, obj2)
 
 function struct_clone(_struct = {})
 {
-	__dbg_stepIn("dev.bscit.beebo.struct_clone", _GMFILE_, _GMFUNCTION_)
 	var __struct = {}
 
 	// hhhhhh i hate scope issues so much
@@ -849,7 +774,6 @@ function struct_clone(_struct = {})
 		var element = variable_struct_get(_struct, name);
 		variable_struct_set(__struct, name, element)
 	}
-	__dbg_stepOut()
 	return __struct
 }
 
@@ -965,7 +889,6 @@ function struct_get_random(_struct)
 
 function getdef(_defid, _deftype = 0)
 {
-	__dbg_stepIn("dev.bscit.beebo.getdef", _GMFILE_, _GMFUNCTION_)
 	switch(_deftype)
 	{
 		case deftype.item:
@@ -978,7 +901,6 @@ function getdef(_defid, _deftype = 0)
 			return __struct_get(global.modifierdefs, _defid, "global.modifierdefs")
 			break;
 	}
-	__dbg_stepOut()
 }
 
 function team_nearest(x, y, team)
@@ -2257,10 +2179,8 @@ function onUnitSpawn(ins)
 // no more pains  ihope
 function FixedTimeline(owner, keyframes) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.FixedTimeline::new", _GMFILE_, _GMFUNCTION_)
 	static HitKeyframe = function(timeline, keyframe)
 	{
-		__dbg_stepIn("dev.bscit.beebo.FixedTimeline.HitKeyFrame", _GMFILE_, _GMFUNCTION_)
 		timeline.currentFrame++
 		if(timeline.currentFrame == array_length(timeline.keyframes)) // reached the end of the line
 		{
@@ -2275,28 +2195,22 @@ function FixedTimeline(owner, keyframes) constructor
 			time_source_reconfigure(timeline.timesource, time_source_game, timeline.keyframes[timeline.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [timeline], -1)
 			time_source_start(timeline.timesource)
 		}
-		__dbg_stepOut()
 	}
 
 	static Destroy = function(timeline) {
-		__dbg_stepIn("dev.bscit.beebo.FixedTimeline.Destroy", _GMFILE_, _GMFUNCTION_)
 		time_source_destroy(timeline.timesource)
 		delete timeline
-		__dbg_stepOut()
 	}
 
 	self.Stop = function() {
-		__dbg_stepIn("dev.bscit.beebo.FixedTimeline.prototype.Stop", _GMFILE_, _GMFUNCTION_)
 		self.currentFrame = 0
 		time_source_reconfigure(self.timesource, time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
 	}
 
 	self.Start = function() {
-		__dbg_stepIn("dev.bscit.beebo.FixedTimeline.prototype.Start", _GMFILE_, _GMFUNCTION_)
 		self.currentFrame = 0
 		time_source_reconfigure(self.timesource, time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
 		time_source_start(self.timesource)
-		__dbg_stepOut()
 	}
 
 	self.owner = owner
@@ -2304,59 +2218,45 @@ function FixedTimeline(owner, keyframes) constructor
 	self.currentFrame = 0
 
 	self.timesource = time_source_create(time_source_game, self.keyframes[self.currentFrame].time, time_source_units_seconds, FixedTimeline.HitKeyframe, [self], -1)
-
-	__dbg_stepOut()
 }
 
 function Keyframe(time, action) // time is delay AFTER LAST KEYFRAME
 {
-	__dbg_stepIn("dev.bscit.beebo.KeyFrame::new", _GMFILE_, _GMFUNCTION_)
 	var obj = {}
 	obj.time = time
 	obj.action = action // function
-	__dbg_stepOut()
 	return obj
 }
 
 function State(func = noone) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.State::new", _GMFILE_, _GMFUNCTION_)
 	self.baseDuration = 0.5
 	self.duration = self.baseDuration
 	self.age = 0
 
 	self.onEnter = function(ins, obj) {
-		__dbg_stepIn("dev.bscit.beebo.Skills.base.activationState.onEnter", _GMFILE_, _GMFUNCTION_)
 		ins.duration = ins.baseDuration
-		__dbg_stepOut()
 	}
 	self.onExit = function(ins, obj) {
-		__dbg_stepIn("dev.bscit.beebo.Skills.base.activationState.onExit", _GMFILE_, _GMFUNCTION_)
 		ins.age = 0
 		obj.attack_state = noone
-		__dbg_stepOut()
 	}
 	self.update = function(ins, obj) {
-		__dbg_stepIn("dev.bscit.beebo.Skills.base.activationState.update", _GMFILE_, _GMFUNCTION_)
 		ins.age = approach(ins.age, ins.duration, global.dt / 60)
 		if(ins.age >= ins.duration)
 		{
 			with(ins) onExit(self, obj)
 		}
-		__dbg_stepOut()
 	}
 
 	if(func != noone)
 		func(self)
-
-	__dbg_stepOut()
 }
 
 global._baseState = new State()
 
 function _baseSkill() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.Skills.base", _GMFILE_, _GMFUNCTION_)
 	self.name = "base"
 	self.displayname = string_loc($"skill.base.name")
 	self.description = string_loc($"skill.base.description")
@@ -2374,7 +2274,6 @@ function _baseSkill() constructor
 	self.priority = 0
 	self.buffer = 0 // unused currently, may be used for buffering inputs
 	self.spamCoeff = 1
-	__dbg_stepOut()
 }
 
 global.skilldefs = {
@@ -2383,7 +2282,6 @@ global.skilldefs = {
 
 function Skill(name, func = noone) : _baseSkill() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.Skill::new", _GMFILE_, _GMFUNCTION_)
 	self.name = string(name)
 	self.displayname = string_loc($"skill.{self.name}.name")
 	self.description = string_loc($"skill.{self.name}.description")
@@ -2392,21 +2290,17 @@ function Skill(name, func = noone) : _baseSkill() constructor
 		func(self)
 
 	global.skilldefs[$ self.name] = self
-	__dbg_stepOut()
 }
 
 function SkillInstance(skill) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.SkillInstance::new", _GMFILE_, _GMFUNCTION_)
 	self.def = skill
 	self.stocks = skill.fullRestockOnAssign * skill.baseMaxStocks
 	self.cooldown = !skill.fullRestockOnAssign * skill.baseStockCooldown
-	__dbg_stepOut()
 }
 
 function CharacterDef(name, func = noone) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.CharacterDef::new", _GMFILE_, _GMFUNCTION_)
 	self.name = string(name)
 	self.displayname = string_loc($"character.{self.name}.name")
 	self.description = string_loc($"character.{self.name}.description")
@@ -2455,8 +2349,6 @@ function CharacterDef(name, func = noone) constructor
 
 	if(func != noone)
 		func(self)
-	
-	__dbg_stepOut()
 }
 
 initSkills()
@@ -2468,7 +2360,6 @@ loadLevelData()
 
 function ui_get_element(ui, x, y)
 {
-	__dbg_stepIn("dev.bscit.beebo.ui_get_element", _GMFILE_, _GMFUNCTION_)
 	for(var i = 0; i < array_length(ui.elements); i++)
 	{
 		var e = ui.elements[i]
@@ -2476,13 +2367,11 @@ function ui_get_element(ui, x, y)
 		if(!is_instanceof(e, UI) && (x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
 			return e
 	}
-	__dbg_stepOut()
 	return noone
 }
 
 function ui_get_element_index(ui, x, y)
 {
-	__dbg_stepIn("dev.bscit.beebo.ui_get_element_index", _GMFILE_, _GMFUNCTION_)
 	for(var i = 0; i < array_length(ui.elements); i++)
 	{
 		var e = ui.elements[i]
@@ -2490,13 +2379,11 @@ function ui_get_element_index(ui, x, y)
 		if((x >= e.x && x <= e.x + e.w) && (y >= e.y && y <= e.y + e.h))
 			return i
 	}
-	__dbg_stepOut()
 	return -1
 }
 
 function UI() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UI::new", _GMFILE_, _GMFUNCTION_)
 	self.elements = []
 	self.enabled = 1
 	self.visible = 1
@@ -2511,7 +2398,6 @@ function UI() constructor
 
 	self.step = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UI.step", _GMFILE_, _GMFUNCTION_)
 		if(!self.enabled || !self.visible)
 			return
 
@@ -2588,12 +2474,10 @@ function UI() constructor
 					e.pressed = 0
 			}
 		}
-		__dbg_stepOut()
 	}
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UI.draw", _GMFILE_, _GMFUNCTION_)
 		if(!self.visible)
 			return
 
@@ -2602,14 +2486,11 @@ function UI() constructor
 			var e = self.elements[i]
 			e.draw()
 		}
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
 function UIElement(x, y, w, h) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UIElement::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2626,12 +2507,10 @@ function UIElement(x, y, w, h) constructor
 	self.draw = function() {}
 
 	self.toggle = 0
-	__dbg_stepOut()
 }
 
 function UIToggledElement(x, y, w, h) constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UIToggledElement::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2650,12 +2529,10 @@ function UIToggledElement(x, y, w, h) constructor
 	self.draw = function() {}
 
 	self.toggle = 1
-	__dbg_stepOut()
 }
 
 function UISpriteButton(x, y, w, h) : UIElement() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UISpriteButton::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2667,7 +2544,6 @@ function UISpriteButton(x, y, w, h) : UIElement() constructor
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UISpriteButton.draw", _GMFILE_, _GMFUNCTION_)
 		var xx = self.x + irandom_range(-2, 2) * self.shaker
 		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
@@ -2675,14 +2551,11 @@ function UISpriteButton(x, y, w, h) : UIElement() constructor
 
 		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_color(c_white) draw_set_alpha(1) draw_set_font(self.font)
 		draw_text(round(xx + self.w/2), round(yy + self.h/2) - 2 + 2 * self.pressed, self.label)
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
 function UIButtonSimple(x, y, w, h) : UIElement() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UIButtonSimple::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2693,7 +2566,6 @@ function UIButtonSimple(x, y, w, h) : UIElement() constructor
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UIButtonSimple.draw", _GMFILE_, _GMFUNCTION_)
 		var xx = self.x + irandom_range(-2, 2) * self.shaker
 		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
@@ -2715,15 +2587,11 @@ function UIButtonSimple(x, y, w, h) : UIElement() constructor
 		draw_set_color(c_white)
 		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_alpha(1) draw_set_font(self.font)
 		draw_text(round(xx + self.w/2), round(yy + self.h/2) - 1, self.label)
-
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
 function UITextButton(x, y, w, h) : UIElement() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UITextButton::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2734,7 +2602,6 @@ function UITextButton(x, y, w, h) : UIElement() constructor
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UITextButton.draw", _GMFILE_, _GMFUNCTION_)
 		var xx = self.x + irandom_range(-2, 2) * self.shaker
 		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
@@ -2742,15 +2609,11 @@ function UITextButton(x, y, w, h) : UIElement() constructor
 
 		draw_set_halign(fa_middle) draw_set_valign(fa_center) draw_set_alpha(1) draw_set_font(self.font)
 		draw_text(round(xx + self.w/2) + self.pressed, round(yy + self.h/2) - 1, self.label)
-
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
 function UICategoryButton(x, y, w, h) : UIToggledElement() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UICategoryButton::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2761,7 +2624,6 @@ function UICategoryButton(x, y, w, h) : UIToggledElement() constructor
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UICategoryButton.draw", _GMFILE_, _GMFUNCTION_)
 		var xx = self.x + irandom_range(-2, 2) * self.shaker
 		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
@@ -2774,15 +2636,11 @@ function UICategoryButton(x, y, w, h) : UIToggledElement() constructor
 
 		draw_set_halign(fa_left) draw_set_valign(fa_top) draw_set_alpha(1) draw_set_font(self.font)
 		draw_text(round(xx) + pressed, round(yy), self.label)
-
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
 function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constructor
 {
-	__dbg_stepIn("dev.bscit.beebo.UIText::new", _GMFILE_, _GMFUNCTION_)
 	self.x = x
 	self.y = y
 	self.w = w
@@ -2796,22 +2654,17 @@ function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constr
 
 	self.draw = function()
 	{
-		__dbg_stepIn("dev.bscit.beebo.UIText.draw", _GMFILE_, _GMFUNCTION_)
 		var xx = self.x + irandom_range(-2, 2) * self.shaker
 		var yy = self.y + irandom_range(-2, 2) * self.shaker
 
 		draw_set_halign(fa_left) draw_set_valign(fa_top) draw_set_font(self.font)
 		draw_text_ext_color(round(xx), round(yy), self.label, -1, self.w, self.color, self.color, self.color, self.color, self.alpha)
-
-		__dbg_stepOut()
 	}
-	__dbg_stepOut()
 }
 
-global.enabledMods = []
-mergeMods()
-Log("Startup/INFO", $"completed merging mod contents with base game.")
+global.modsList = []
+global.loadedMods = []
+initializeMods()
+Log("Startup/INFO", $"finished loading mods.")
 
 Log("Startup/INFO", $"initialization completed, elapsed time: [{timer_to_string(get_timer() - _boot_starttime)}]")
-
-__dbg_stepOut()

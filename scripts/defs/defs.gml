@@ -1,7 +1,5 @@
 function initSkills()
 {
-    __dbg_stepIn("dev.bscit.beebo.GlobalScripts.defs.initSkills", _GMFILE_, _GMFUNCTION_)
-
     var deadPrimarySkill = new Skill("dead.primary", function(def) {
         def.baseMaxStocks = 1
         def.baseStockCooldown = 1
@@ -20,7 +18,6 @@ function initSkills()
     var deadPrimarySkillState = new State(function(def) {
         def.baseDuration = 20/60
         def.onEnter = function(ins, obj) {
-            __dbg_stepIn("dev.bscit.beebo.Skills.[dead.primary].activationState.onEnter", _GMFILE_, _GMFUNCTION_)
 
             ins.duration = ins.baseDuration / obj.attack_speed
 
@@ -53,14 +50,10 @@ function initSkills()
                     vsp = -1 + random_range(-0.2, 0.1)
                 }
             }
-
-            __dbg_stepOut()
         }
         def.onExit = function(ins, obj) {
-            __dbg_stepIn("dev.bscit.beebo.Skills.dead.primary.activationState.onExit", _GMFILE_, _GMFUNCTION_)
             ins.age = 0
             obj.attack_state = noone
-            __dbg_stepOut()
         }
     }, deadPrimarySkill)
     deadPrimarySkill.activationState = deadPrimarySkillState
