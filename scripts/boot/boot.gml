@@ -2664,7 +2664,5 @@ function UIText(x, y, w, color = c_white, alpha = 1) : UIToggledElement() constr
 
 global.modsList = []
 global.loadedMods = []
-initializeMods()
-Log("Startup/INFO", $"finished loading mods.")
 
 Log("Startup/INFO", $"initialization completed, elapsed time: [{timer_to_string(get_timer() - _boot_starttime)}]")
