@@ -1,11 +1,17 @@
 {
     "Lua.diagnostics.disable": [
         "trailing-space",
-        "lowercase-global"
+        "lowercase-global",
+        "undefined-global",
+        "duplicate-set-field"
     ],
-    "Lua.diagnostics.globals": [
-        "random",
-        "buff_instance_create_headless",
-        "lib"
-    ]
+    "Lua.completion.showWord": "Disable",
+    "Lua.workspace.library": [
+        "datafiles/data/?.lua"
+    ],
+    "Lua.completion.keywordSnippet": "Both",
+    "Lua.hint.enable": false,
+    "Lua.hint.paramName": "Literal",
+    "Lua.hint.paramType": false,
+    "Lua.hint.semicolon": "SameLine"
 }

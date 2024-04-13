@@ -15,9 +15,6 @@ Log("Startup/INFO", $"Run seed: {global.run_seed}")
 #macro SC_W 320
 #macro SC_H 180
 
-// read and apply screenSize and draw_debug flags
-Log("Startup/INFO", "Reading player settings")
-
 var __s = (320/SC_W)
 
 ini_open("save.ini");
@@ -142,7 +139,7 @@ enum TimeUnits
 global.__eventContextId = 0
 
 // classes
-function DamageEventContext(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, reduceable = 1) constructor
+function DamageEventContext(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1) constructor
 {
 	self.attacker = attacker
 	self.target = target
@@ -151,7 +148,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 
 	self.use_attacker_items = use_attacker_items
 	self.force_crit = force_crit
-	self.reduceable = reduceable
+	self.isReduceable = isReduceable
 	self.damage_type = damage_notif_type.generic
 	self.crit = 0
 
@@ -173,9 +170,9 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 		self.force_crit = value
 		return self
 	}
-	self.isReduceable = function(value = 1)
+	self.reduceable = function(value = 1)
 	{
-		self.reduceable = value
+		self.isReduceable = value
 		return self
 	}
 	self.exclude = function(args)
@@ -192,7 +189,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 
 	self.toString = function()
 	{
-		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.reduceable}, itemBlacklist: {self.excludedItems} \}"
+		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.isReduceable}, itemBlacklist: {self.excludedItems} \}"
 		return str
 	}
 
@@ -283,7 +280,7 @@ function damage_event(ctx)
 
 		if(!ctx.blocked)
 		{
-			if(ctx.reduceable)
+			if(ctx.isReduceable)
 			{
 				// do armor here pls
 			}
@@ -437,7 +434,7 @@ function ThrowException(err, isEngineCrash = false)
 		var line = string_split(stack[i], " ")
 
 		// _string += "\n\tat " + global.__dbg_scope[i][0] + string_replace(line[1], "line", (!is_undefined(global.__dbg_scope[i][1]) ? global.__dbg_scope[i][1] : "unknown")) + ":" + line[2];
-		_string += "\n\tat " + stack[i]
+		_string += "\n\tat " + string_replace_all(stack[i], "    ", "")
 	}
 	LogException(_string)
 
@@ -765,7 +762,6 @@ function struct_clone(_struct = {})
 {
 	var __struct = {}
 
-	// hhhhhh i hate scope issues so much
 	var names = variable_struct_get_names(_struct)
 	var size = variable_struct_names_count(_struct);
 
@@ -775,6 +771,49 @@ function struct_clone(_struct = {})
 		variable_struct_set(__struct, name, element)
 	}
 	return __struct
+}
+
+/// @function struct_assign_ext
+/// @param {Struct} struct
+/// @param {Struct} newStruct
+/// @returns {Struct}
+function struct_assign(struct, newStruct)
+{
+	var names = variable_struct_get_names(newStruct)
+	var size = variable_struct_names_count(newStruct);
+
+	for (var i = 0; i < size; i++) {
+		var name = names[i];
+		var element = variable_struct_get(newStruct, name);
+		if(is_struct(element) && (variable_struct_exists(struct, name) && is_struct(struct[$ name])))
+			variable_struct_set(struct, name, struct_assign(struct[$ name], element))
+		else
+			variable_struct_set(struct, name, element)
+	}
+	return struct
+}
+
+/// @function struct_assign_ext
+/// @param {Struct} struct
+/// @param {Array<Struct>} newStructs
+/// @returns {Struct}
+function struct_assign_ext(struct, newStructs)
+{
+	for(var i = 0; i < array_length(newStructs); i++)
+	{
+		var names = variable_struct_get_names(newStructs[i])
+		var size = variable_struct_names_count(newStructs[i]);
+
+		for (var j = 0; j < size; j++) {
+			var name = names[j];
+			var element = variable_struct_get(newStructs[i], name);
+			if(is_struct(element) && (variable_struct_exists(struct, name) && is_struct(struct[$ name])))
+				variable_struct_set(struct, name, struct_assign(struct[$ name], element))
+			else
+				variable_struct_set(struct, name, element)
+		}
+	}
+	return struct
 }
 
 // thanks for being so awesome YellowAfterLife
@@ -1259,6 +1298,8 @@ function instance_closest_bbox_edge_y(ins1, ins2 = noone) {
 }
 
 global.optionsStruct = {}
+
+Log("Startup/INFO", "Loading user settings")
 loadSettings()
 
 // WOOO SEED LOADING YEA
@@ -1308,7 +1349,7 @@ function locale()
 		var _starttime = get_timer()
 		Log("Main/INFO", "reloading language data")
 
-		locale.init()
+		// locale.init()
 
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
@@ -1351,7 +1392,7 @@ function _itemdef(name) constructor {
 	proc_type = proctype.none
 	rarity = item_rarity.none
 
-	draw = function(stacks) {}
+	draw = function(target, stacks) {}
 	step = function(target, stacks) {}
 	onHit = function(context, stacks) {}
 	onKill = function(context, stacks) {}
@@ -1379,74 +1420,7 @@ function itemdef(_name, _struct = {})
 
 global.itemdefs =
 {
-	unknown : itemdef("unknown"),
-	beeswax : itemdef("beeswax", {
-		rarity : item_rarity.common
-	}),
-	eviction_notice : itemdef("eviction_notice", {
-		rarity : item_rarity.legendary,
-		onHit : function(context, stacks)
-		{
-			if(context.attacker.hp/context.attacker.hp_max >= 0.8)
-			{
-				var offx = 0
-				var offy = (context.attacker.bbox_top - context.attacker.bbox_bottom) / 2
-
-				var p = instance_create_depth(context.attacker.x + offx, context.attacker.y + offy, context.attacker.depth + 2, obj_paperwork)
-				p.team = context.attacker.team
-				p.dir = point_direction(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
-				p.pmax = point_distance(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y)
-				p.target = context.target
-				p.parent = context.attacker
-
-				p.context = new DamageEventContext(context.attacker, context.target, context.attacker.base_damage * (4 + stacks), 0)
-					.forceCrit(context.crit)
-					.useAttackerItems(1)
-					.isReduceable(1)
-					.exclude("eviction_notice")
-			}
-		}
-	}),
-	serrated_stinger : itemdef("serrated_stinger", {
-		rarity : item_rarity.common,
-		onHit : function(context, stacks)
-		{
-			if(random(1) < (0.1 * stacks * context.proc))
-			{
-				var ctx = new DamageEventContext(context.attacker, context.target, context.attacker.base_damage * 0.2, 0)
-					.useAttackerItems(1)
-					.isReduceable(1)
-					.exclude("serrated_stinger")
-					.damageType(damage_notif_type.bleed)
-
-				var b = buff_instance_create("bleed", ctx, 3 * context.proc, 1)
-			}
-		}
-	}),
-	emergency_field_kit : itemdef("emergency_field_kit", {
-		rarity : item_rarity.legendary
-	}),
-	emergency_field_kit_consumed : itemdef("emergency_field_kit_consumed", {
-		rarity : item_rarity.none
-	}),
-	bloody_dagger : itemdef("bloody_dagger", {
-		rarity : item_rarity.common
-	}),
-	lucky_clover : itemdef("lucky_clover", {
-		rarity : item_rarity.common
-	}),
-	heal_on_level : itemdef("heal_on_level", {
-		rarity : item_rarity.rare
-	}),
-	hyperthreader : itemdef("hyperthreader", {
-		rarity : item_rarity.legendary
-	}),
-	boost_damage : itemdef("boost_damage", {
-		rarity : item_rarity.none
-	}),
-	boost_health : itemdef("boost_health", {
-		rarity : item_rarity.none
-	})
+	unknown : itemdef("unknown")
 }
 global.itemdefs_by_rarity = [{}, {}, {}, {}, {}]
 
@@ -1454,10 +1428,6 @@ struct_foreach(global.itemdefs as (_name, _item)
 {
 	global.itemdefs_by_rarity[_item.rarity][$ _name] = _item
 })
-
-Log("Startup/INFO", $"successfully created {itemdef.total_items} items")
-
-global.hi = getdef("hi", deftype.item)
 
 function item_instance(__id, _stacks = 1) constructor
 {
@@ -1573,8 +1543,6 @@ global.modifierdefs = {
 	})
 }
 
-Log("Startup/INFO", $"successfully created {modifierdef.total_modifiers} modifiers")
-
 function modifier(_modifier_id, _stacks = 1) constructor
 {
 	modifier_id = _modifier_id
@@ -1668,7 +1636,6 @@ function _buffdef(name) constructor
 	self.tick = function(instance) {}
 
 	self.on_stack = function(instance) {}
-	self.on_replaced = function(instance, newinstance) {}
 	self.on_expire = function(instance) {
 		buff_instance_remove(instance)
 	}
@@ -1725,8 +1692,6 @@ global.buffdefs =
 		}
 	})
 }
-
-Log("Startup/INFO", $"successfully created {buffdef.total_buffs} buffs")
 
 function buff_instance(buff_id, context, duration, stacks) constructor
 {
