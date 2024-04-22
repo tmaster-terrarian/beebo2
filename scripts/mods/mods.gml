@@ -28,7 +28,7 @@ function initializeMods()
         events: {
             doDamageEvent: function(ctx)
             {
-                damage_event(ctx)
+                DamageEvent(ctx)
             }
         },
 

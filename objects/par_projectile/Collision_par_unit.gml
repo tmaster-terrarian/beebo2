@@ -1,9 +1,9 @@
 if(canHurt(self, other) && other.id != parent && (!mustHitTarget || (mustHitTarget && other.id == target)))
 {
 	if(context == noone)
-		damage_event(new DamageEventContext(parent, other, damage, proc).forceCrit(crit))
+		DamageEvent(new DamageEventContext(parent, other, damage, proc).forceCrit(crit))
 	else
-		damage_event(context)
+		DamageEvent(context)
 
 	if(destroy_on_hit)
 		instance_destroy()

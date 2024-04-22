@@ -289,7 +289,7 @@ function initSkills()
                         if(e && canHurt(self, e) && !array_contains(__utilityHit, e))
                         {
                             array_push(__utilityHit, e)
-                            damage_event(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
+                            DamageEvent(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
                         }
 
                         if(abs(hsp) <= spd + 1.5)
@@ -362,7 +362,7 @@ function initSkills()
                             if(collision_circle(other.x + 12 * other.facing, other.y - 12, 30, id, 0, 0) && canHurt(other, self) && !array_contains(other.__specialHit, self))
                             {
                                 array_push(other.__specialHit, self)
-                                damage_event(new DamageEventContext(other, self, other.damage * 4, 1))
+                                DamageEvent(new DamageEventContext(other, self, other.damage * 4, 1))
                             }
                         }
 
@@ -370,7 +370,7 @@ function initSkills()
                         if(e && canHurt(self, e) && !array_contains(__specialHit, e))
                         {
                             array_push(__specialHit, e)
-                            damage_event(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
+                            DamageEvent(new DamageEventContext(id, e, base_damage * 0.5, 1, 1, 0))
                         }
 
                         state = "normal" // for now i keep this
@@ -472,7 +472,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
+                                                    DamageEvent(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -533,7 +533,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
+                                                    DamageEvent(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -595,7 +595,7 @@ function initSkills()
                                             {
                                                 if(place_meeting(x, y, other) && canHurt(self, other))
                                                 {
-                                                    damage_event(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
+                                                    DamageEvent(new DamageEventContext(other.parent, id, other.damage, 1, 1, -1, 1))
                                                 }
                                             }
                                             instance_destroy()
@@ -798,7 +798,7 @@ function initSkills()
                             {
                                 array_push(__alreadyHit, e)
                                 e.__invuln = 19
-                                damage_event(new DamageEventContext(id, e, damage, 1, 1, 0))
+                                DamageEvent(new DamageEventContext(id, e, damage, 1, 1, 0))
                             }
                             else
                             {
@@ -845,7 +845,7 @@ function initSkills()
                                 {
                                     if(on_ground && canHurt(self, other) && other.parent != id && place_meeting(x, y, other))
                                     {
-                                        damage_event(new DamageEventContext(other.parent, self, other.damage, 1, other.crit, 0))
+                                        DamageEvent(new DamageEventContext(other.parent, self, other.damage, 1, other.crit, 0))
                                         vsp -= 8/max(24, mass) + max(0, 16/clamp(instance_distance(other), 6.4, 32) - 0.5)
                                     }
                                 }

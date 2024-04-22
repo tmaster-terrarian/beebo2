@@ -13,5 +13,19 @@
     "Lua.hint.enable": false,
     "Lua.hint.paramName": "Literal",
     "Lua.hint.paramType": false,
-    "Lua.hint.semicolon": "SameLine"
+    "Lua.hint.semicolon": "SameLine",
+    "gml-ls.userGlobals": {
+        "functions": {
+            "DamageEvent": {
+                "description": "Invokes a damage event using a DamageEventContext to determine conditions.",
+                "parameters": [
+                    {
+                        "label": "ctx",
+                        "type": "DamageEventContext"
+                    }
+                ]
+            }
+        },
+        "macros": {}
+    }
 }

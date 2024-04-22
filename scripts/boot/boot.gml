@@ -175,7 +175,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 		self.isReduceable = value
 		return self
 	}
-	self.exclude = function(args)
+	self.exclude = function(args = "")
 	{
 		for(var i = 0; i < argument_count; i++)
 			array_push(self.excludedItems, string(argument[i]))
@@ -199,7 +199,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	// LogInfo("Main", "DamageEventContext created: " + string(self))
 }
 
-function damage_event(ctx)
+function DamageEvent(ctx)
 {
 	var _damage_type = ctx.damage_type
 
@@ -426,7 +426,7 @@ function __dbg_clearScope()
 
 function ThrowException(err, isEngineCrash = false)
 {
-    var _string = "gml.RuntimeException: " + err.message //string_replace(err.message, "<unknown_object>", global.__dbg_scopeName);
+	var _string = "gml.RuntimeException: " + err.message //string_replace(err.message, "<unknown_object>", global.__dbg_scopeName);
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
@@ -446,7 +446,7 @@ function ThrowException(err, isEngineCrash = false)
 
 function ThrowError(err, _log = true) // harmless version of ThrowException (doesnt close the game)
 {
-    var _string = "gml.RuntimeError: " + err.message
+	var _string = "gml.RuntimeError: " + err.message
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
@@ -1673,7 +1673,7 @@ global.buffdefs =
 		stackable: 1,
 		tick: function(instance)
 		{
-			damage_event(instance.context)
+			DamageEvent(instance.context)
 		}
 	}),
 	collapse: buffdef("collapse", {
@@ -1687,7 +1687,7 @@ global.buffdefs =
 		// },
 		on_expire: function(instance)
 		{
-			damage_event(instance.context)
+			DamageEvent(instance.context)
 			buff_instance_remove(instance)
 		}
 	})
@@ -2295,7 +2295,7 @@ function CharacterDef(name, func = noone) constructor
 	{
 		hp_max: 30,
 		damage: 2.4,
-        regen_rate: 0
+		regen_rate: 0
 	}
 
 	self.skills = {
