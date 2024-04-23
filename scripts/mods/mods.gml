@@ -147,47 +147,49 @@ function initializeMods()
         lua_global_set(state, "lib", lib)
         global.loadedMods[i].data.libCopy = lib
 
-        lua_add_code(state, @"__idfields = __idfields or { };
-        debug.setmetatable(0, {
-            __index = function(self, name)
-                if (__idfields[name]) then
-                    return _G[name];
-                else
-                    return lib.instance.get(self, name);
-                end
-            end,
-            __newindex = lib.instance.set,
-        })
+        lua_add_code(state, /*lua*/@'
+            __idfields = __idfields or { };
+            debug.setmetatable(0, {
+                __index = function(self, name)
+                    if (__idfields[name]) then
+                        return _G[name];
+                    else
+                        return lib.instance.get(self, name);
+                    end
+                end,
+                __newindex = lib.instance.set,
+            })
 
-        ref = {
-            __r2i = { },
-            __i2r = { },
-            __next = 0
-        }
-        function ref.toid(fn)
-            local id = ref.__r2i[fn]
-            if (id == nil) then
-                id = ref.__next
-                ref.__next = id + 1
-                ref.__r2i[fn] = id
-                ref.__i2r[id] = fn
+            ref = {
+                __r2i = { },
+                __i2r = { },
+                __next = 0
+            }
+            function ref.toid(fn)
+                local id = ref.__r2i[fn]
+                if (id == nil) then
+                    id = ref.__next
+                    ref.__next = id + 1
+                    ref.__r2i[fn] = id
+                    ref.__i2r[id] = fn
+                end
+                return id
             end
-            return id
-        end
-        function ref.fromid(id)
-            return ref.__i2r[id]
-        end
-        function ref.free(fn)
-            local id
-            if (type(fn) == 'number') then
-                id = fn
-                fn = ref.__i2r[id]
-            else
-                id = ref.__r2i[fn]
+            function ref.fromid(id)
+                return ref.__i2r[id]
             end
-            ref.__r2i[fn] = nil
-            ref.__i2r[id] = nil
-        end")
+            function ref.free(fn)
+                local id
+                if (type(fn) == "number") then
+                    id = fn
+                    fn = ref.__i2r[id]
+                else
+                    id = ref.__r2i[fn]
+                end
+                ref.__r2i[fn] = nil
+                ref.__i2r[id] = nil
+            end'
+        )
 
         lua_add_file(state, (i == 0) ? "data/init.lua" : (path + "init.lua"))
 

@@ -1424,8 +1424,7 @@ global.itemdefs =
 }
 global.itemdefs_by_rarity = [{}, {}, {}, {}, {}]
 
-struct_foreach(global.itemdefs as (_name, _item)
-{
+struct_foreach(global.itemdefs as (_name, _item) {
 	global.itemdefs_by_rarity[_item.rarity][$ _name] = _item
 })
 
