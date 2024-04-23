@@ -1,4 +1,4 @@
-PAUSECHECK
+
 
 if(timer < 60 * 0.2)
 {

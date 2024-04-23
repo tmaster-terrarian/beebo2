@@ -59,7 +59,7 @@ else
     //     fric *= 0.1
 }
 
-PAUSECHECK //prevent any further code from running if the game is paused (hopefully)
+// PAUSECHECK //prevent any further code from running if the game is paused (hopefully)
 
 states[$ state]() //MAGIC
 

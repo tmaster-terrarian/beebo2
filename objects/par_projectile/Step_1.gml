@@ -6,7 +6,7 @@ if(max_instances && instance_number(object_index) > max_instances)
 	instance_destroy()
 }
 
-PAUSECHECK
+
 
 if(lifetime > 0)
 	lifetime = approach(lifetime, 0, 1 * global.dt)

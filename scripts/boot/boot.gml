@@ -1389,7 +1389,6 @@ function _itemdef(name) constructor {
 	pickup = string_loc($"item.{name}.pickup")
 	description = string_loc($"item.{name}.description")
 	lore = string_loc($"item.{name}.lore")
-	proc_type = proctype.none
 	rarity = item_rarity.none
 
 	draw = function(target, stacks) {}
@@ -1447,7 +1446,7 @@ function item_get_stacks(item_id, target)
 	return 0
 }
 
-function item_add_stacks(item_id, target, stacks = 1, notify = 0)
+function item_add_stacks(item_id, target, stacks = 1, notify = false)
 {
 	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
 	{
@@ -1470,7 +1469,7 @@ function item_add_stacks(item_id, target, stacks = 1, notify = 0)
 	}
 }
 
-function item_set_stacks(item_id, target, stacks, notify = 0)
+function item_set_stacks(item_id, target, stacks, notify = false)
 {
 	if(notify && stacks >= 1 && object_get_parent(target.object_index) == obj_player)
 	{
@@ -1806,36 +1805,6 @@ function buff_get_stacks(buff_id, target)
 		return b.stacks
 	else
 		return 0
-}
-function buff_add_stacks(buff_id, target, stacks)
-{
-	var def = getdef(buff_id, deftype.buff)
-	var buff = buff_get_instance(buff_id, target)
-	if(buff)
-	{
-		var oldstacks = buff
-
-		buff.stacks += stacks
-		if(buff.stacks <= 0)
-			def.on_expire(buff)
-		else if(buff.stacks > oldstacks)
-			def.on_stack(buff)
-	}
-}
-function buff_set_stacks(buff_id, target, stacks)
-{
-	var def = getdef(buff_id, deftype.buff)
-	var buff = buff_get_instance(buff_id, target)
-	if(buff)
-	{
-		var oldstacks = buff
-
-		buff.stacks = stacks
-		if(buff.stacks <= 0)
-			def.on_expire(buff)
-		else if(buff.stacks > oldstacks)
-			def.on_stack(buff)
-	}
 }
 
 function buff_get_timer(buff_id, target)

@@ -1,4 +1,4 @@
-PAUSECHECK
+
 
 t += global.dt
 

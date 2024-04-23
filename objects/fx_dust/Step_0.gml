@@ -1,5 +1,5 @@
 event_inherited()
-PAUSECHECK
+
 
 vx = approach(vx, 0, fric * global.dt)
 vy = approach(vy, 0, fric * global.dt)

@@ -1,5 +1,5 @@
 event_inherited();
-PAUSECHECK
+
 
 _interval = approach(_interval, interval, global.dt)
 

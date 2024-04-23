@@ -16,7 +16,7 @@ target = get_nearest_notme(x, y, _target)
 retargetTimer = 300
 autoaggro = 1
 aggrotimer = 0
-agpos = {x:x, y:y, cy:y-8}
+agpos = {x, y, cy:y-8}
 seethruwalls = 0
 input_dir = 0
 

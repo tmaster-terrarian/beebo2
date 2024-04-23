@@ -1,5 +1,4 @@
 event_inherited();
-PAUSECHECK
 
 if(!in_combat)
     retargetTimer = approach(retargetTimer, 0, global.dt)

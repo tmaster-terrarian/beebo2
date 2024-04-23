@@ -1,4 +1,4 @@
-PAUSECHECK
+
 
 life = approach(life, 0, global.dt)
 image_alpha = alpha_orig * life / maxlife

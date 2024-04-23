@@ -1,4 +1,4 @@
-PAUSECHECK
+
 
 spawntimer = approach(spawntimer, 0, global.dt)
 

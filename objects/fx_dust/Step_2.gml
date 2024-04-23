@@ -1,5 +1,5 @@
 event_inherited()
-PAUSECHECK
+
 
 x += vx * global.dt
 y += vy * global.dt

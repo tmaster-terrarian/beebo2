@@ -26,6 +26,22 @@
                 ]
             }
         },
-        "macros": {}
+        "macros": {
+            "SC_W": {
+                "description": "The unscaled width of the screen in pixels"
+            },
+            "SC_H": {
+                "description": "The unscaled height of the screen in pixels"
+            }
+        }
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/scripts/__scribble_*/**": true
     }
 }

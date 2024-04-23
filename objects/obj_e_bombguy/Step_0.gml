@@ -1,5 +1,5 @@
 event_inherited();
-PAUSECHECK
+
 
 if(instance_exists(target))
 {

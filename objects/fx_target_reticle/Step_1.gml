@@ -1,4 +1,4 @@
-PAUSECHECK
+
 
 if(!instance_exists(parent))
 {
