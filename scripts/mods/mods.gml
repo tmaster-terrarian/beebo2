@@ -9,94 +9,6 @@ function initializeMods()
 
     global.loadedMods = []
 
-    global.modLibraryStruct = {
-        registerItemDef: function(id, struct = {})
-        {
-            global.itemdefs[$ id] = itemdef(id, struct)
-            global.itemdefs_by_rarity[global.itemdefs[$ id].rarity][$ id] = global.itemdefs[$ id]
-        },
-        registerBuffDef: function(id, struct)
-        {
-            global.buffdefs[$ id] = buffdef(id, struct)
-        },
-
-        createDamageEventContext: function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
-        {
-            return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
-        },
-
-        events: {
-            doDamageEvent: function(ctx)
-            {
-                DamageEvent(ctx)
-            }
-        },
-
-        unit: {
-            inflictBuff: function(buff_id, context, duration = -1, stacks = 1)
-            {
-                return buff_instance_create(buff_id, context, duration, stacks)
-            },
-            inflictBuffNoContext: function(buff_id, target, duration = -1, stacks = 1)
-            {
-                return buff_instance_create_headless(buff_id, target, duration, stacks)
-            }
-        },
-
-        instance: {
-            get: function(ins, prop)
-            {
-                with(ins) return variable_instance_get(id, prop);
-                if(!instance_exists(ins))
-                {
-                    lua_show_error("Couldn't find instance " + string(q));
-                }
-                return undefined;
-            },
-            set: function(ins, prop, val)
-            {
-                with(ins) variable_instance_set(id, prop, val);
-                if(!instance_exists(ins))
-                {
-                    lua_show_error("Couldn't find instance " + string(q));
-                }
-            },
-            destroy: function(ins)
-            {
-                instance_destroy(ins)
-            }
-        },
-
-        enums: {
-            Team: {
-                player: 0,
-                enemy: 1,
-                neutral: 2
-            },
-            ItemRarity: {
-                none: 0,
-                common: 1,
-                rare: 2,
-                legendary: 3,
-                special: 4
-            },
-            DamageColor: {
-                generic: 0,
-                crit: 1,
-                heal: 2,
-                revive: 3,
-                playerhurt: 4,
-                bleed: 5,
-                immune: 6
-            }
-        },
-
-        logInfo: function(text)
-        {
-            Log("Main/INFO", string(text))
-        }
-    }
-
     Log("Modloader/INFO", "Found mod: 'base' (internal)")
     var modFile = file_text_open_read("data/mod.json")
     array_push(global.loadedMods, file_json_read(modFile))
@@ -143,7 +55,8 @@ function initializeMods()
         var state = global.loadedMods[i].data.luaState
         var path = "mods/" + global.modsList[i] + "/"
 
-        var lib = struct_clone(global.modLibraryStruct)
+        var lib = new modLibrary(state)
+        lib._state = state
         lua_global_set(state, "lib", lib)
         global.loadedMods[i].data.libCopy = lib
 
@@ -194,5 +107,161 @@ function initializeMods()
         lua_add_file(state, (i == 0) ? "data/init.lua" : (path + "init.lua"))
 
         Log("Modloader/INFO", global.loadedMods[i].displayName + " finished initializing")
+    }
+}
+
+function modLibrary(state) constructor
+{
+    self.state = state
+
+    self.registerItemDef = function(id, struct = {})
+    {
+        global.itemdefs[$ id] = itemdef(id, struct)
+        global.itemdefs_by_rarity[global.itemdefs[$ id].rarity][$ id] = global.itemdefs[$ id]
+        return global.itemdefs[$ id]
+    }
+    self.registerBuffDef = function(id, struct)
+    {
+        global.buffdefs[$ id] = buffdef(id, struct)
+        return global.buffdefs[$ id]
+    }
+
+    self.createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
+    {
+        return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
+    }
+
+    self.gmlMethod = function(luaFunctionName, argumentCount = 0)
+    {
+        var func = function(a0 = undefined, a1 = undefined, a2 = undefined, a3 = undefined, a4 = undefined, a5 = undefined, a6 = undefined, a7 = undefined, a8 = undefined, a9 = undefined, a10 = undefined, a11 = undefined, a12 = undefined, a13 = undefined, a14 = argument0, a15 = argument1) {
+            // var arr = []
+            // for(var i = 0; i < clamp(a15, 0, 14); i++)
+            // {
+            //     var arg = argument[i]
+            //     if(is_array(arg) || is_struct(arg))
+            //     {
+            //         arr[i] = lua_byref(arg, true)
+            //     }
+            //     else
+            //     {
+            //         arr[i] = arg
+            //     }
+            // }
+
+            // return lua_call_w(self._state, a14, arr)
+
+            var c = undefined
+
+            try
+            {
+                c = lua_call_w(self._state, a14, argument)
+            }
+            catch(error)
+            {
+                Log("Modloader/ERROR", "Failed to invoke Lua function '" + a14 + "' (luaStateID: " + self._state + ")\nCaused by: " + ThrowError(error, false))
+            }
+            return c
+        }
+        return func
+    }
+
+    self.events = {
+        doDamageEvent: function(ctx)
+        {
+            DamageEvent(ctx)
+        }
+    }
+
+    self.unit = {
+        inflictBuff: function(buff_id, context, duration = -1, stacks = 1)
+        {
+            return buff_instance_create(buff_id, context, duration, stacks)
+        },
+        inflictBuffNoContext: function(buff_id, target, duration = -1, stacks = 1)
+        {
+            return buff_instance_create_headless(buff_id, target, duration, stacks)
+        }
+    }
+
+    self.instance = {
+        get: function(ins, prop)
+        {
+            with(ins) return variable_instance_get(id, prop);
+            if(!instance_exists(ins))
+            {
+                lua_show_error("Couldn't find instance " + string(q));
+            }
+            return undefined;
+        },
+        set: function(ins, prop, val)
+        {
+            with(ins) variable_instance_set(id, prop, val);
+            if(!instance_exists(ins))
+            {
+                lua_show_error("Couldn't find instance " + string(q));
+            }
+        },
+        destroy: function(ins)
+        {
+            instance_destroy(ins)
+        }
+    }
+
+    self.enums = {
+        Team: {
+            player: 0,
+            enemy: 1,
+            neutral: 2
+        },
+        ItemRarity: {
+            none: 0,
+            common: 1,
+            rare: 2,
+            legendary: 3,
+            special: 4
+        },
+        DamageColor: {
+            generic: 0,
+            crit: 1,
+            heal: 2,
+            revive: 3,
+            playerhurt: 4,
+            bleed: 5,
+            immune: 6
+        }
+    }
+
+    self.log = function(text)
+    {
+        Log("Main/INFO", string(text))
+    }
+
+    self.math = {
+        Random: function(x)
+        {
+            return random(x)
+        },
+
+        RandomRange: function(_min, _max)
+        {
+            return random_range(_min, _max)
+        },
+
+        intRandom: function(x)
+        {
+            return irandom(x)
+        },
+
+        intRandomRange: function(_min, _max)
+        {
+            return irandom_range(_min, _max)
+        },
+
+        RollChance: function(val)
+        {
+            if(val == 0) return bool(false)
+            if(val == 1) return bool(true)
+            return bool(random(1) <= val)
+        }
     }
 }

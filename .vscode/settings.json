@@ -3,7 +3,8 @@
         "trailing-space",
         "lowercase-global",
         "undefined-global",
-        "duplicate-set-field"
+        "duplicate-set-field",
+        "undefined-field"
     ],
     "Lua.completion.showWord": "Disable",
     "Lua.workspace.library": [

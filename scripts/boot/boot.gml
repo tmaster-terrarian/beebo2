@@ -189,7 +189,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 
 	self.toString = function()
 	{
-		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, procType: {self.proc_type}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.isReduceable}, itemBlacklist: {self.excludedItems} \}"
+		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.isReduceable}, itemBlacklist: {self.excludedItems} \}"
 		return str
 	}
 
@@ -444,7 +444,7 @@ function ThrowException(err, isEngineCrash = false)
 	}
 }
 
-function ThrowError(err, _log = true) // harmless version of ThrowException (doesnt close the game)
+function ThrowError(err, _log = true) // harmless version of ThrowException, doesnt close the game
 {
 	var _string = "gml.RuntimeError: " + err.message
 

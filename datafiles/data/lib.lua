@@ -83,11 +83,13 @@ function DamageEventContext.damageType(value) end
 lib = {
     ---@param id string
     ---@param def ItemDef?
+    ---@return ItemDef
     -- note: leaving the `def` argument blank will register an itemdef with no rarity (gray color)
     registerItemDef = function(id, def) end,
 
     ---@param id string
     ---@param def BuffDef
+    ---@return BuffDef
     registerBuffDef = function(id, def) end,
 
     ---@param attacker table
@@ -100,6 +102,13 @@ lib = {
     ---@return DamageEventContext
     -- An object carrying lots of information for use in damage events
     createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items, force_crit, reduceable) end,
+
+    ---@param luaFunctionName string
+    ---@param argumentCount number?
+    gmlMethod = function(luaFunctionName, argumentCount) end,
+
+    ---@type integer
+    _state = nil,
 
     ---Access units (players/enemies) and do various things with them
     unit = {
@@ -153,5 +162,30 @@ lib = {
     },
 
     ---@param text any
-    logInfo = function (text) end
+    log = function (text) end,
+
+    ---Helpful math functions like random, min, abs, etc.
+    math = {
+        ---@param x number value greater than 0.0
+        ---@return number
+        Random = function(x) end,
+
+        ---@param x integer value greater than 0
+        ---@return integer
+        intRandom = function(x) end,
+
+        ---@param min number
+        ---@param max number
+        ---@return number
+        RandomRange = function(min, max) end,
+
+        ---@param min integer
+        ---@param max integer
+        ---@return integer
+        intRandomRange = function(min, max) end,
+
+        ---@param val number value between 0.0 and 1.0
+        ---@return boolean
+        RollChance = function(val) end,
+    }
 }

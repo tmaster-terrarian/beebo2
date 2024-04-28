@@ -122,7 +122,7 @@ _apply_level = function(_newlevel)
         hp = _oldhp / _oldhp_max * base_hp_max
 
     if(item_get_stacks("heal_on_level", self))
-        heal_event(self, base_hp_max * 0.25 + 0.2 * (item_get_stacks("heal_on_level", self) - 1))
+        heal_event(self, base_hp_max * 0.25 + 0.2 * (item_get_stacks("heal_on_level", self) - 1), healtype.generic)
 
     hp = min(hp, base_hp_max)
 
