@@ -6,10 +6,10 @@ local ItemRarity = lib.enums.ItemRarity
 ---@param stacks number
 -- just adding a bit of jsdoc here so that we can make use of the handy intellisense in vscode
 example_item_onKill = function(context, stacks)
-    lib.log("the target is " .. String(context.target))
+    lib.log("killed instance input: " .. String(context.target.INPUT))
     if(lib.math.RollChance(0.25 * context.proc * stacks)) then
         lib.unit.inflictBuffNoContext("cloak", context.attacker, stacks + 2)
-        lib.log("cloak!")
+        lib.log("cloak triggered!")
     end
 end
 
@@ -22,5 +22,5 @@ lib.registerBuffDef('cloak', {
     timed = true,
     duration = 3,
     ticksPerSecond = 0,
-    stackable = false
+    stackable = false,
 })

@@ -120,14 +120,14 @@ function initSkills()
     })
 
     var beeboPrimarySkillState = new State(function(def) {
-        def.baseDuration = 5/60
+        def.baseDuration = 6/60
         def.onEnter = function(ins, obj) {
             ins.duration = ins.baseDuration / obj.attack_speed
 
             with(obj)
             {
                 screen_shake_set(1, 5)
-                recoil = 3
+                recoil = 2
 
                 fire = 1
 
@@ -1190,6 +1190,33 @@ function initChars()
             hp_max: 30,
             damage: 2.4,
             regen_rate: 0.2
+        }
+    })
+
+    global.chardefs.fx_3d_cube = new CharacterDef("fx_3d_cube", function(def) {
+        def.stats = {
+            hp_max: 100,
+            regen_rate: 0,
+            curse: 1,
+            spd: 0.5,
+            jumpspd: -3.7,
+            firerate: 5,
+            bombrate: 80,
+            spread: 4,
+            damage: 12,
+            ground_accel: 0.12,
+            ground_fric: 0.08,
+            air_accel: 0.07,
+            air_fric: 0.02,
+            jumps_max: 1,
+            grv: 0,
+            attack_speed: 1,
+            shield: 0
+        }
+        def.level_stats = {
+            hp_max: 30,
+            damage: 2.4,
+            regen_rate: 0
         }
     })
 

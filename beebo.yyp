@@ -212,6 +212,7 @@
     {"id":{"name":"getGlobalFunctionsList","path":"scripts/getGlobalFunctionsList/getGlobalFunctionsList.yy",},},
     {"id":{"name":"GifSaver","path":"scripts/GifSaver/GifSaver.yy",},},
     {"id":{"name":"levelData","path":"scripts/levelData/levelData.yy",},},
+    {"id":{"name":"lualib","path":"scripts/lualib/lualib.yy",},},
     {"id":{"name":"mods","path":"scripts/mods/mods.yy",},},
     {"id":{"name":"registry","path":"scripts/registry/registry.yy",},},
     {"id":{"name":"scr_gmre","path":"scripts/scr_gmre/scr_gmre.yy",},},
@@ -274,7 +275,6 @@
     {"id":{"name":"scribble_typist","path":"scripts/scribble_typist/scribble_typist.yy",},},
     {"id":{"name":"scribble_typists_add_event","path":"scripts/scribble_typists_add_event/scribble_typists_add_event.yy",},},
     {"id":{"name":"scribble","path":"scripts/scribble/scribble.yy",},},
-    {"id":{"name":"lualib","path":"scripts/lualib/lualib.yy",},},
     {"id":{"name":"string_height_scribble_ext","path":"scripts/string_height_scribble_ext/string_height_scribble_ext.yy",},},
     {"id":{"name":"string_height_scribble","path":"scripts/string_height_scribble/string_height_scribble.yy",},},
     {"id":{"name":"string_length_scribble","path":"scripts/string_length_scribble/string_length_scribble.yy",},},
@@ -437,6 +437,7 @@
     {"id":{"name":"spr_ui_button_green","path":"sprites/spr_ui_button_green/spr_ui_button_green.yy",},},
     {"id":{"name":"spr_ui_recording","path":"sprites/spr_ui_recording/spr_ui_recording.yy",},},
     {"id":{"name":"spr_wall","path":"sprites/spr_wall/spr_wall.yy",},},
+    {"id":{"name":"spr_tough_wall3d","path":"sprites/spr_tough_wall3d/spr_tough_wall3d.yy",},},
     {"id":{"name":"ts_metaltest","path":"tilesets/ts_metaltest/ts_metaltest.yy",},},
   ],
   "resourceType":"GMProject",
@@ -449,5 +450,6 @@
   "templateType":null,
   "TextureGroups":[
     {"$GMTextureGroup":"","%Name":"Default","autocrop":true,"border":2,"compressFormat":"bz2","customOptions":"","directory":"","groupParent":null,"isScaled":true,"loadType":"default","mipsToGenerate":0,"name":"Default","resourceType":"GMTextureGroup","resourceVersion":"2.0","targets":-1,},
+    {"$GMTextureGroup":"","%Name":"texgroup1","autocrop":true,"border":2,"compressFormat":"png","customOptions":"","directory":"","groupParent":null,"isScaled":true,"loadType":"dynamicpages","mipsToGenerate":0,"name":"texgroup1","resourceType":"GMTextureGroup","resourceVersion":"2.0","targets":-1,},
   ],
 }

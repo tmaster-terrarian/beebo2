@@ -13,6 +13,11 @@ function ItemDef:onHit(context, stacks) end
 ---@param stacks integer
 function ItemDef:onKill(context, stacks) end
 
+---@class Item:ref
+---@field item_id Readonly<string>
+---@field stacks integer
+local Item = {}
+
 ---@class BuffDef
 ---@field timed boolean?
 ---@field duration number?
@@ -34,22 +39,21 @@ function BuffDef:on_stack(instance) end
 ---@param instance Buff
 function BuffDef:on_expire(instance) end
 
----@class Buff
+---@class Buff:ref
 ---@field buff_id Readonly<string>
 ---@field context DamageEventContext
----@field stacks number
+---@field stacks integer
 ---@field timer Readonly<number>
 local Buff = {}
 
----@class ref
----@field id integer
+---@class ref:integer
 local ref = {}
 
 ---@class Instance:ref
 
 ---@class DamageEventContext
----@field attacker Instance|unknown                     the initiator of the event
----@field target Instance|unknown                       the victim of the event
+---@field attacker Instance                             the initiator of the event
+---@field target Instance                               the victim of the event
 ---@field damage Readonly<number>                       how much damage to be dealt<br>readonly - use the constructor to set it
 ---@field proc number                                   proc coefficient<br>(usually) multiplies with item activation chance
 ---@field use_attacker_items Readonly<boolean>          readonly - use the setter method

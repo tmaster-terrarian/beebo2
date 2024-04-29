@@ -77,12 +77,12 @@ onFrameChange = function() {}
 
 _apply_stats = function()
 {
-    hp_max = stats.hp_max
+    hp_max = stats.hp_max * (1 + elite * 3)
     base_hp_max = hp_max
     total_hp_max = hp_max
     hp = hp_max
     total_hp = hp
-    hp_change = total_hp
+    hp_change = hp
     regen_rate = stats.regen_rate
     curse = stats.curse
     damage = stats.damage

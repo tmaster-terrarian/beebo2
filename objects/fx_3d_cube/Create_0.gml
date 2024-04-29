@@ -1,11 +1,14 @@
+event_inherited()
+
 depth = -100
 
-image_zscale = 1
+image_zscale = 2
+_image_xscale = 2
 
 vertex_format_begin()
 vertex_format_add_position_3d()
 vertex_format_add_normal()
-vertex_format_add_colour()
+vertex_format_add_color()
 vertex_format_add_texcoord()
 var format = vertex_format_end()
 
@@ -20,20 +23,20 @@ var v = [
     [ 0.5, -0.5,  0.5 ]
 ]
 var vt = [
-    [ 0.25, 1.00 ],
-    [ 0.50, 1.00 ],
-    [ 0,    0.75 ],
-    [ 0.25, 0.75 ],
-    [ 0.50, 0.75 ],
-    [ 0.75, 0.75 ],
+    [ 0.25, 0    ],
+    [ 0.50, 0    ],
+    [ 0,    0.25 ],
+    [ 0.25, 0.25 ],
+    [ 0.50, 0.25 ],
+    [ 0.75, 0.25 ],
     [ 0,    0.50 ],
     [ 0.25, 0.50 ],
     [ 0.50, 0.50 ],
     [ 0.75, 0.50 ],
-    [ 0.25, 0.25 ],
-    [ 0.50, 0.25 ],
-    [ 0.25, 0    ],
-    [ 0.50, 0    ]
+    [ 0.25, 0.75 ],
+    [ 0.50, 0.75 ],
+    [ 0.25, 1.00 ],
+    [ 0.50, 1.00 ]
 ]
 var vn = [
     [ 1.0,  0.0,  0.0 ],
@@ -78,7 +81,7 @@ for(var i = 0; i < array_length(f); i++)
 
         vertex_position_3d(v_buff, v[_v][0], v[_v][1], v[_v][2])
         vertex_normal(v_buff, vn[_vn][0], vn[_vn][1], vn[_vn][2])
-        vertex_colour(v_buff, image_blend, image_alpha)
+        vertex_color(v_buff, image_blend, image_alpha)
         vertex_texcoord(v_buff, vt[_vt][0], vt[_vt][1])
     }
 }

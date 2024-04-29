@@ -1,3 +1,42 @@
+function lualib_fixInstanceId(value)
+{
+    return handle_parse($"ref instance {int64(value)}")
+}
+
+function lualib_fromLua(luaref, type = "instance")
+{
+    handle_parse($"ref {type} {int64(luaref)}")
+}
+
+function lualib_toLua(v)
+{
+    if(is_handle(v))
+    {
+        return int64(v)
+    }
+    else if(is_struct(v))
+    {
+        var keys = variable_struct_get_names(v)
+        for(var i = 0; i < array_length(keys); i++)
+        {
+            v[$ keys[i]] = lualib_toLua(v[$ keys[i]])
+        }
+        return v
+    }
+    else if(is_array(v))
+    {
+        for(var i = 0; i < array_length(v); i++)
+        {
+            v[i] = lualib_toLua(v[i])
+        }
+        return v
+    }
+    else
+    {
+        return v
+    }
+}
+
 function lualib_gmlMethod(luaFunctionName, state)
 {
     var obj = {
@@ -9,14 +48,14 @@ function lualib_gmlMethod(luaFunctionName, state)
                 var arg = argument[i]
                 if(is_instanceof(arg, DamageEventContext))
                 {
-                    var a = variable_clone(arg)
+                    var a = struct_assign({}, arg)
                     a.attacker = int64(arg.attacker)
                     a.target = int64(arg.target)
                     array_push(arr, lua_byref(a))
                 }
                 else if(is_handle(arg))
                 {
-                    array_push(arr, arg)
+                    array_push(arr, int64(arg))
                 }
                 else
                 {
@@ -98,9 +137,4 @@ function lualib_addModLibrary(state, libStruct)
 function lualib_string(value)
 {
     return string(value)
-}
-
-function lualib_fixInstanceId(value)
-{
-    return handle_parse("ref instance " + string(int64(value)))
 }

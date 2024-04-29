@@ -14,8 +14,8 @@
     "path":"folders/Objects/fx.yy",
   },
   "parentObjectId":{
-    "name":"fx_base",
-    "path":"objects/fx_base/fx_base.yy",
+    "name":"par_enemy",
+    "path":"objects/par_enemy/par_enemy.yy",
   },
   "persistent":false,
   "physicsAngularDamping":0.1,
@@ -34,7 +34,10 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":null,
+  "spriteId":{
+    "name":"spr_tough_wall",
+    "path":"sprites/spr_tough_wall/spr_tough_wall.yy",
+  },
   "spriteMaskId":null,
   "visible":true,
 }
