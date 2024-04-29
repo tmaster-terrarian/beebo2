@@ -28,23 +28,14 @@ if (is_real(v)) {
 	buffer_write(b, buffer_u64, v);
 }
 //*/
+else if(is_handle(v)) {
+	buffer_write(b, buffer_u8, lua_btype_int32);
+	buffer_write(b, buffer_u32, v);
+}
 else if (is_string(v)) {
 	buffer_write(b, buffer_u8, lua_btype_string);
 	buffer_write(b, buffer_string, v);
 } else if (is_array(v)) {
-	/* GMS < 2.3:
-	if (array_height_2d(v) >= 2) { // [[v1, v2], [k1, k2]]
-		var n = array_length_2d(v, 0);
-		buffer_write(b, buffer_u8, lua_btype_struct);
-		buffer_write(b, buffer_u32, n);
-		for (var i = 0; i < n; i++) {
-			var k = v[1, i];
-			if (!is_string(k)) k = string(k);
-			buffer_write(b, buffer_string, k);
-			lua_buffer_write(b, v[0, i]);
-		}
-	} else
-	//*/
 	{
 		var n = array_length_1d(v);
 		if (n == 2 && v[0] == global.g_lua_script_marker) {

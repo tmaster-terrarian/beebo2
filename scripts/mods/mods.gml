@@ -9,7 +9,7 @@ function initializeMods()
 
     global.loadedMods = []
 
-    Log("Modloader/INFO", "Found mod: 'base' (internal)")
+    Log("Modloader/INFO", "Found mod: 'base' (builtin)")
     var modFile = file_text_open_read("data/mod.json")
     array_push(global.loadedMods, file_json_read(modFile))
     file_text_close(modFile)
@@ -20,21 +20,24 @@ function initializeMods()
     {
         try {
             var modFile = file_text_open_read("mods/" + global.modsList[i] + "/mod.json")
-            array_push(global.loadedMods, file_json_read(modFile))
+            var _mod = file_json_read(modFile)
+            array_push(global.loadedMods, _mod)
             file_text_close(modFile)
 
-            Log("Modloader/INFO", "Found mod: '" + global.loadedMods[i].displayName + "' (" + PROGRAM_DIR + "mods/" + global.modsList[i] + ")")
+            Log("Modloader/INFO", "Found mod: '" + _mod.displayName + "' (" + PROGRAM_DIR + "mods/" + _mod.id + ")")
 
             var state = lua_state_create()
-            global.loadedMods[i].data = {}
-            global.loadedMods[i].data.luaState = state
+            _mod.data = {}
+            _mod.data.luaState = state
 
-            if(directory_exists("mods/" + global.modsList[i] + "/data"))
+            // a = 2 // error testing hehe
+
+            if(directory_exists("mods/" + _mod.id + "/data"))
             {
-                if(file_exists("mods/" + global.modsList[i] + "/data/lang.json"))
+                if(file_exists("mods/" + _mod.id + "/data/lang.json"))
                 {
                     var json = {}
-                    var file = file_text_open_read("mods/" + global.modsList[i] + "/data/lang.json")
+                    var file = file_text_open_read("mods/" + _mod.id + "/data/lang.json")
                     json = file_json_read(file)
                     file_text_close(file)
 
@@ -43,76 +46,43 @@ function initializeMods()
             }
         }
         catch(err) {
-            Log("Modloader/WARN", "Failed to load mod '" + global.modsList[i] + "'!\nCaused by: " + ThrowError(err, false))
+            Log("Modloader/WARN", "Failed to load mod '" + global.modsList[i] + "'!")
+            ThrowError(err, true, true)
         }
     }
 
-    locale.reload()
+    Locale.reload()
 
-    Log("Modloader/INFO", "Initializing mods")
+    Log("Modloader/INFO", "Initializing loaded mods..")
     for(var i = 0; i < array_length(global.loadedMods); i++)
     {
-        var state = global.loadedMods[i].data.luaState
-        var path = "mods/" + global.modsList[i] + "/"
+        var _mod = global.loadedMods[i]
+        var state = _mod.data.luaState
+        if(state < 0)
+        {
+            Log("Modloader/ERROR", $"Failed to initialize mod '{_mod.displayName}' ({_mod.id}): invalid state")
+            array_delete(global.loadedMods, i, 1)
+            i--
+            continue
+        }
+
+        var path = "mods/" + _mod.id + "/"
 
         var lib = new modLibrary(state)
-        lib._state = state
-        lua_global_set(state, "lib", lib)
-        global.loadedMods[i].data.libCopy = lib
-
-        lua_add_code(state, /*lua*/@'
-            __idfields = __idfields or { };
-            debug.setmetatable(0, {
-                __index = function(self, name)
-                    if (__idfields[name]) then
-                        return _G[name];
-                    else
-                        return lib.instance.get(self, name);
-                    end
-                end,
-                __newindex = lib.instance.set,
-            })
-
-            ref = {
-                __r2i = { },
-                __i2r = { },
-                __next = 0
-            }
-            function ref.toid(fn)
-                local id = ref.__r2i[fn]
-                if (id == nil) then
-                    id = ref.__next
-                    ref.__next = id + 1
-                    ref.__r2i[fn] = id
-                    ref.__i2r[id] = fn
-                end
-                return id
-            end
-            function ref.fromid(id)
-                return ref.__i2r[id]
-            end
-            function ref.free(fn)
-                local id
-                if (type(fn) == "number") then
-                    id = fn
-                    fn = ref.__i2r[id]
-                else
-                    id = ref.__r2i[fn]
-                end
-                ref.__r2i[fn] = nil
-                ref.__i2r[id] = nil
-            end'
-        )
+        lib.modId = _mod.id
+        lualib_addModLibrary(state, lib)
+        _mod.data.libCopy = lib
 
         lua_add_file(state, (i == 0) ? "data/init.lua" : (path + "init.lua"))
 
-        Log("Modloader/INFO", global.loadedMods[i].displayName + " finished initializing")
+        Log("Modloader/INFO", "initialized " + _mod.id + " with state " + string(state))
     }
 }
 
 function modLibrary(state) constructor
 {
-    self.state = state
+    self._state = state
+    self.modId = "Modloader"
 
     self.registerItemDef = function(id, struct = {})
     {
@@ -128,46 +98,19 @@ function modLibrary(state) constructor
 
     self.createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
     {
-        return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
+        return new DamageEventContext(lualib_fixInstanceId(attacker), lualib_fixInstanceId(target), damage, proc, use_attacker_items, force_crit, isReduceable)
     }
 
-    self.gmlMethod = function(luaFunctionName, argumentCount = 0)
+    self.gmlMethod = function(luaFunctionName)
     {
-        var func = function(a0 = undefined, a1 = undefined, a2 = undefined, a3 = undefined, a4 = undefined, a5 = undefined, a6 = undefined, a7 = undefined, a8 = undefined, a9 = undefined, a10 = undefined, a11 = undefined, a12 = undefined, a13 = undefined, a14 = argument0, a15 = argument1) {
-            // var arr = []
-            // for(var i = 0; i < clamp(a15, 0, 14); i++)
-            // {
-            //     var arg = argument[i]
-            //     if(is_array(arg) || is_struct(arg))
-            //     {
-            //         arr[i] = lua_byref(arg, true)
-            //     }
-            //     else
-            //     {
-            //         arr[i] = arg
-            //     }
-            // }
-
-            // return lua_call_w(self._state, a14, arr)
-
-            var c = undefined
-
-            try
-            {
-                c = lua_call_w(self._state, a14, argument)
-            }
-            catch(error)
-            {
-                Log("Modloader/ERROR", "Failed to invoke Lua function '" + a14 + "' (luaStateID: " + self._state + ")\nCaused by: " + ThrowError(error, false))
-            }
-            return c
-        }
-        return func
+        return lualib_gmlMethod(luaFunctionName, self._state)
     }
 
     self.events = {
         doDamageEvent: function(ctx)
         {
+            ctx.attacker = lualib_fixInstanceId(ctx.attacker)
+            ctx.target = lualib_fixInstanceId(ctx.target)
             DamageEvent(ctx)
         }
     }
@@ -175,35 +118,40 @@ function modLibrary(state) constructor
     self.unit = {
         inflictBuff: function(buff_id, context, duration = -1, stacks = 1)
         {
+            context.attacker = lualib_fixInstanceId(context.attacker)
+            context.target = lualib_fixInstanceId(context.target)
             return buff_instance_create(buff_id, context, duration, stacks)
         },
         inflictBuffNoContext: function(buff_id, target, duration = -1, stacks = 1)
         {
-            return buff_instance_create_headless(buff_id, target, duration, stacks)
+            return buff_instance_create_headless(buff_id, lualib_fixInstanceId(target), duration, stacks)
         }
     }
 
     self.instance = {
         get: function(ins, prop)
         {
-            with(ins) return variable_instance_get(id, prop);
-            if(!instance_exists(ins))
+            var ref = lualib_fixInstanceId(ins)
+            if(!instance_exists(ref))
             {
-                lua_show_error("Couldn't find instance " + string(q));
+                lua_show_error("Couldn't find instance " + string(ins));
             }
+            else return variable_instance_get(ref, string(prop));
+
             return undefined;
         },
         set: function(ins, prop, val)
         {
-            with(ins) variable_instance_set(id, prop, val);
-            if(!instance_exists(ins))
+            var ref = lualib_fixInstanceId(ins)
+            if(!instance_exists(ref))
             {
-                lua_show_error("Couldn't find instance " + string(q));
+                lua_show_error("Couldn't find instance " + string(ins));
             }
+            else variable_instance_set(ref, string(prop), val);
         },
         destroy: function(ins)
         {
-            instance_destroy(ins)
+            instance_destroy(lualib_fixInstanceId(ins))
         }
     }
 
@@ -233,7 +181,7 @@ function modLibrary(state) constructor
 
     self.log = function(text)
     {
-        Log("Main/INFO", string(text))
+        Log(self.modId + "/INFO", string(text))
     }
 
     self.math = {

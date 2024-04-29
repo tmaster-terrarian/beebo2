@@ -274,6 +274,7 @@
     {"id":{"name":"scribble_typist","path":"scripts/scribble_typist/scribble_typist.yy",},},
     {"id":{"name":"scribble_typists_add_event","path":"scripts/scribble_typists_add_event/scribble_typists_add_event.yy",},},
     {"id":{"name":"scribble","path":"scripts/scribble/scribble.yy",},},
+    {"id":{"name":"lualib","path":"scripts/lualib/lualib.yy",},},
     {"id":{"name":"string_height_scribble_ext","path":"scripts/string_height_scribble_ext/string_height_scribble_ext.yy",},},
     {"id":{"name":"string_height_scribble","path":"scripts/string_height_scribble/string_height_scribble.yy",},},
     {"id":{"name":"string_length_scribble","path":"scripts/string_length_scribble/string_length_scribble.yy",},},

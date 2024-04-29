@@ -47,7 +47,7 @@ end
 
 lib.registerItemDef("eviction_notice", {
     rarity = lib.enums.ItemRarity.legendary,
-    onHit = lib.gmlMethod("eviction_notice_onHit", 2)
+    onHit = lib.gmlMethod("eviction_notice_onHit")
 })
 
 --#region serrated_stinger functions
@@ -71,7 +71,7 @@ end
 
 lib.registerItemDef("serrated_stinger", {
     rarity = lib.enums.ItemRarity.common,
-    onHit = lib.gmlMethod("serrated_stinger_onHit", 2)
+    onHit = lib.gmlMethod("serrated_stinger_onHit")
 })
 
 lib.registerItemDef("emergency_field_kit", {

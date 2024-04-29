@@ -41,7 +41,11 @@ function BuffDef:on_expire(instance) end
 ---@field timer Readonly<number>
 local Buff = {}
 
----@class Instance
+---@class ref
+---@field id integer
+local ref = {}
+
+---@class Instance:ref
 
 ---@class DamageEventContext
 ---@field attacker Instance|unknown                     the initiator of the event
@@ -92,8 +96,8 @@ lib = {
     ---@return BuffDef
     registerBuffDef = function(id, def) end,
 
-    ---@param attacker table
-    ---@param target table
+    ---@param attacker Instance
+    ---@param target Instance
     ---@param damage number
     ---@param proc number
     ---@param use_attacker_items boolean?
@@ -104,8 +108,7 @@ lib = {
     createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items, force_crit, reduceable) end,
 
     ---@param luaFunctionName string
-    ---@param argumentCount number?
-    gmlMethod = function(luaFunctionName, argumentCount) end,
+    gmlMethod = function(luaFunctionName) end,
 
     ---@type integer
     _state = nil,
@@ -161,7 +164,8 @@ lib = {
         DamageColor = { generic = 0, crit = 1, heal = 2, revive = 3, playerhurt = 4, bleed = 5, immune = 6 }
     },
 
-    ---@param text any
+    ---log a message to the console
+    ---@param text any the value will be turned into a string
     log = function (text) end,
 
     ---Helpful math functions like random, min, abs, etc.
@@ -189,3 +193,8 @@ lib = {
         RollChance = function(val) end,
     }
 }
+
+---Turns any type of value into a string
+---@param value any
+---@return string
+function String(value) end

@@ -20,7 +20,7 @@ buffer_write(b, buffer_s32, asset_get_index("lua_internal_struct_set"));
 buffer_write(b, buffer_s32, asset_get_index("lua_internal_struct_len"));
 buffer_write(b, buffer_s32, asset_get_index("lua_internal_struct_keys"));
 if (!lua_init_raw(buffer_get_address(b))) {
-	show_debug_message("Apollo extension couldn't load!");
+	Log("Apollo/ERROR", "Apollo extension couldn't load!");
 }
 lua_buffer = b;
 lua_current = -1;
@@ -161,7 +161,7 @@ while (loop) {
 			var error_text = buffer_read(b, buffer_string);
 			if (lua_error_handler >= 0) {
 				script_execute(lua_error_handler, lua_current, error_text);
-			} else show_debug_message("Lua error: " + error_text);
+			} else Log("Apollo/ERROR", "Lua error: " + error_text);
 			break;
 		case lua_status_no_state: show_error(global.g_lua_error_no_state, 1); break;
 		case lua_status_no_func: show_error(global.g_lua_error_no_func, 1); break;

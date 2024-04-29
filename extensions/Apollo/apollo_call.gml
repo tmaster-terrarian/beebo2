@@ -16,18 +16,13 @@ return r;
 var q = argument0, s = argument1, w = argument2;
 var b/*:Buffer*/ = lua_buffer;
 var r, n = array_length_1d(w);
-try {
-	buffer_seek(b, buffer_seek_start, 0);
-	buffer_write(b, buffer_s32, n);
-	for (var i = 0; i < n; i++) lua_buffer_write(b, w[i]);
-	lua_state_exec(q, lua_call_raw(q, s, buffer_get_address(b)));
-	buffer_seek(b, buffer_seek_start, 0);
-	if (buffer_read(b, buffer_s32) > 0) r = lua_buffer_read(b); else r = undefined;
-	return r;
-} catch(err) {
-	ThrowError(err, true)
-	return undefined
-}
+buffer_seek(b, buffer_seek_start, 0);
+buffer_write(b, buffer_s32, n);
+for (var i = 0; i < n; i++) lua_buffer_write(b, w[i]);
+lua_state_exec(q, lua_call_raw(q, s, buffer_get_address(b)));
+buffer_seek(b, buffer_seek_start, 0);
+if (buffer_read(b, buffer_s32) > 0) r = lua_buffer_read(b); else r = undefined;
+return r;
 
 #define lua_call_m
 /// (state_id, func_name, ...args)->results_array

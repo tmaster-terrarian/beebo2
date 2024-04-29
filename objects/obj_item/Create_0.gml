@@ -12,5 +12,5 @@ if(spr != -1)
 if(!variable_struct_exists(global.itemdefs, item_id))
 {
 	item_id = "unknown"
-	Log("Main/WARN", "Item object " + self + " created with invalid item id, reverted to unknown.")
+	Log("Main/WARN", "Item object " + string(self) + " created with invalid item id, reverted to unknown.")
 }

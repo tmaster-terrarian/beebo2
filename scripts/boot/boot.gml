@@ -34,7 +34,7 @@ display_set_gui_size(SC_W, SC_H)
 global.blurOnPause = clamp(floor(ini_read_real("settings", "blurOnPause", 1)), 0, 1);
 
 global.draw_debug = ini_read_real("debug", "draw_debug", 0)
-global.locale = ini_read_string("settings", "language", "en")
+global.Locale = ini_read_string("settings", "language", "en")
 
 global.master_volume = ini_read_real("settings", "masterVolume", 0.5)
 global.snd_volume = ini_read_real("settings", "soundVolume", 0.8)
@@ -434,7 +434,7 @@ function ThrowException(err, isEngineCrash = false)
 		var line = string_split(stack[i], " ")
 
 		// _string += "\n\tat " + global.__dbg_scope[i][0] + string_replace(line[1], "line", (!is_undefined(global.__dbg_scope[i][1]) ? global.__dbg_scope[i][1] : "unknown")) + ":" + line[2];
-		_string += "\n\tat " + string_replace_all(stack[i], "    ", "")
+		_string += "\n\tat " + string_replace_all(string_replace_all(string_replace_all(stack[i], "\t", ""), "    ", ""), "\n", "")
 	}
 	LogException(_string)
 
@@ -444,21 +444,29 @@ function ThrowException(err, isEngineCrash = false)
 	}
 }
 
-function ThrowError(err, _log = true) // harmless version of ThrowException, doesnt close the game
+function ThrowError(err, blame = false, isEngineError = false) // harmless version of ThrowException, doesnt close the game
 {
-	var _string = "gml.RuntimeError: " + err.message
+	var _string = (blame ? "Caused by: " : "") + "gml.RuntimeError: " + err.message
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
 	{
-		var scope = stack[i][0], file = stack[i][1]
-		if(i > 0)
-			_string += "\n\tat " + scope + (file != "" ? "(" + file + ":" + string(err.line) + ")" : "")
+		if(!isEngineError)
+		{
+			var scope = stack[i][0], file = stack[i][1]
+			if(i > 0)
+				_string += "\n\tat " + scope + (file != "" ? "(" + file + ":" + string(err.line) + ")" : "")
+			else
+				_string += "\n\tat " + scope + (file != "" ? "(" + file + ")" : "")
+		}
 		else
-			_string += "\n\tat " + scope + (file != "" ? "(" + file + ")" : "")
+		{
+			var line = string_split(stack[i], " ")
+
+			_string += "\n\tat " + string_replace_all(string_replace_all(string_replace_all(stack[i], "\t", ""), "    ", ""), "\n", "")
+		}
 	}
-	if(_log)
-		LogException(_string)
+	LogException(_string)
 }
 
 exception_unhandled_handler(function(err) {
@@ -477,7 +485,7 @@ function __struct_get(struct, name, structname = -1)
 		script: global.__dbg_scope[0][1],
 		line: _GMLINE_ - 2,
 		stacktrace: [["__struct_get", _GMFILE_]],
-		message: message
+		message
 	})
 }
 
@@ -1166,7 +1174,7 @@ function array_toString(array, separator, useBrackets = true)
 	for(var i = 0; i < array_length(array); i++)
 	{
 		if(is_string(array[i]))
-			str += "'" + string(array[i]) + "'"
+			str += "\"" + string(array[i]) + "\""
 		else if(is_array(array[i]))
 			str += array_toString(array[i], separator, true)
 		else
@@ -1317,7 +1325,7 @@ function string_loc(key) // example key: item.beeswax.name
 {
 	if(!variable_struct_exists(global.langCache, key))
 	{
-		var val = (variable_struct_exists(global.lang, global.locale) && variable_struct_exists(global.lang[$ global.locale], key)) ? global.lang[$ global.locale][$ key] : (variable_struct_exists(global.lang.en, key) ? global.lang.en[$ key] : key)
+		var val = (variable_struct_exists(global.lang, global.Locale) && variable_struct_exists(global.lang[$ global.Locale], key)) ? global.lang[$ global.Locale][$ key] : (variable_struct_exists(global.lang.en, key) ? global.lang.en[$ key] : key)
 		global.langCache[$ key] = val
 		return val
 	}
@@ -1327,7 +1335,7 @@ function string_loc(key) // example key: item.beeswax.name
 	}
 }
 
-function locale()
+function Locale()
 {
 	static init = function(log = true)
 	{
@@ -1342,14 +1350,14 @@ function locale()
 		file_text_close(file)
 
 		if(log)
-			Log("Main/INFO", $"loaded languages: {array_toString(struct_get_names(global.lang), ", ")}")
+			Log("Locale/INFO", $"loaded languages: {array_toString(struct_get_names(global.lang), ", ")}")
 	}
 	static reload = function()
 	{
 		var _starttime = get_timer()
-		Log("Main/INFO", "reloading language data")
+		Log("Locale/INFO", "reloading language data")
 
-		// locale.init()
+		// Locale.init()
 
 		struct_foreach(global.itemdefs as (_name, _item)
 		{
@@ -1358,28 +1366,28 @@ function locale()
 			_item.description = string_loc($"item.{_name}.description")
 			_item.lore = string_loc($"item.{_name}.lore")
 		})
-		Log("Main/INFO", "reloaded item language data")
+		Log("Locale/INFO", "loaded item localizations")
 
 		struct_foreach(global.modifierdefs as (_name, _modifier)
 		{
 			_modifier.displayname = string_loc($"modifier.{_name}.name")
 			_modifier.description = string_loc($"modifier.{_name}.description")
 		})
-		Log("Main/INFO", "reloaded modifier language data")
+		Log("Locale/INFO", "loaded modifier localizations")
 
 		struct_foreach(global.buffdefs as (_name, _buff)
 		{
 			_buff.displayname = string_loc($"buff.{_name}.name")
 			_buff.description = string_loc($"buff.{_name}.description") // likely going to be left underutilized :(
 		})
-		Log("Main/INFO", "reloaded buff language data")
+		Log("Locale/INFO", "loaded buff localizations")
 
-		Log("Main/INFO", $"language data reload completed, elapsed time: [{timer_to_string(get_timer() - _starttime)}]")
+		Log("Locale/INFO", $"language data reload completed, elapsed time: [{timer_to_string(get_timer() - _starttime)}]")
 	}
 }
-locale()
+Locale()
 
-locale.init(false)
+Locale.init(false)
 Log("Startup/INFO", $"loaded languages: {array_toString(struct_get_names(global.lang), ", ")}")
 
 // itemdefs.gml
@@ -1756,19 +1764,17 @@ function buff_instance_remove(instance)
 	}
 }
 
-function buff_instance_exists(buff_id, target) // returns 1 if found, otherwise returns 0
+function buff_instance_exists(buff_id, target) // returns true if found, otherwise returns false
 {
-	for(var i = 0; i < array_length(target.buffs); i++)
-	{
-		if(target.buffs[i].buff_id == buff_id)
-		{
-			return 1
-		}
-	}
-	return -1
+	return buff_get_instance(buff_id, target) != -1
 }
-function buff_get_instance(buff_id, target) // returns buff_instance:struct if found, otherwise returns -1
+function buff_get_instance(buff_id, target) // returns the buff_instance if found, otherwise returns -1
 {
+	if(!variable_instance_exists(target, "buffs"))
+	{
+		target.buffs = []
+		return -1
+	}
 	for(var i = 0; i < array_length(target.buffs); i++)
 	{
 		if(target.buffs[i].buff_id == buff_id)
@@ -1801,7 +1807,7 @@ function buff_instance_set_stacks(instance, stacks)
 function buff_get_stacks(buff_id, target)
 {
 	var b = buff_get_instance(buff_id, target)
-	if(b)
+	if(b != -1)
 		return b.stacks
 	else
 		return 0
@@ -1816,6 +1822,11 @@ function buff_get_timer(buff_id, target)
 }
 function buff_add_timer(buff_id, target, timer)
 {
+	if(!variable_instance_exists(target, "buffs"))
+	{
+		target.buffs = []
+		return;
+	}
 	for(var i = 0; i < array_length(target.buffs); i++)
 	{
 		if(target.buffs[i].buff_id == buff_id)
@@ -1829,6 +1840,11 @@ function buff_add_timer(buff_id, target, timer)
 }
 function buff_set_timer(buff_id, target, timer)
 {
+	if(!variable_instance_exists(target, "buffs"))
+	{
+		target.buffs = []
+		return;
+	}
 	for(var i = 0; i < array_length(target.buffs); i++)
 	{
 		if(target.buffs[i].buff_id == buff_id)
