@@ -28,10 +28,6 @@ if (is_real(v)) {
 	buffer_write(b, buffer_u64, v);
 }
 //*/
-else if(is_handle(v)) {
-	buffer_write(b, buffer_u8, lua_btype_int32);
-	buffer_write(b, buffer_u64, int64(v));
-}
 else if (is_string(v)) {
 	buffer_write(b, buffer_u8, lua_btype_string);
 	buffer_write(b, buffer_string, v);

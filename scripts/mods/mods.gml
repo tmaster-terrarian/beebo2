@@ -103,7 +103,7 @@ function modLibrary(state) constructor
 
     self.gmlMethod = function(luaFunctionName)
     {
-        return lualib_gmlMethod(luaFunctionName, self._state)
+        return lualib_f_gmlMethod(luaFunctionName, self._state)
     }
 
     self.events = {

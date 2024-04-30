@@ -5,6 +5,8 @@ platformtarget = noone
 on_ground = 0
 facing = 1
 
+ignoreJumpthrus = false
+
 lasthsp = 0
 lastvsp = 0
 
@@ -41,7 +43,7 @@ movex = function(_x, _oncollide = noone, _dt = 0)
     var mx = round(rx)
     if(abs(mx))
     {
-        if(place_meeting(x, y, par_jumpthru))
+        if(place_meeting(x, y, par_jumpthru) || ignoreJumpthrus)
             instance_deactivate_object(par_jumpthru)
         rx -= mx
         var s = sign(mx)
@@ -85,7 +87,7 @@ movey = function(_y, _oncollide = noone, _dt = 0)
     var my = round(ry)
     if(abs(my))
     {
-        if(my < 0)
+        if(my < 0 || ignoreJumpthrus)
         {
             instance_deactivate_object(par_jumpthru)
         }

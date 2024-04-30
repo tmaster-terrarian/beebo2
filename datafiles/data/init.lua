@@ -12,23 +12,10 @@ eviction_notice_onHit = function(context, stacks)
     if(context.attacker.hp/context.attacker.hp_max >= 0.8)
     then
         local offx = 0
-        local offy = (lib.instance.get(context.attacker, "bbox_top") - lib.instance.get(context.attacker, "bbox_bottom")) / 2
-
-        local att = {
-            team = lib.instance.get(context.attacker, "team"),
-            x = lib.instance.get(context.attacker, "x"),
-            y = lib.instance.get(context.attacker, "y"),
-            hp = lib.instance.get(context.attacker, "hp"),
-            hp_max = lib.instance.get(context.attacker, "hp_max"),
-            depth = lib.instance.get(context.attacker, "depth")
-        }
-        local tar = {
-            x = lib.instance.get(context.target, "x"),
-            y = lib.instance.get(context.target, "y")
-        }
+        local offy = (context.attacker.bbox_top - context.attacker.bbox_bottom) / 2
 
         local p = instance_create_depth(context.attacker.x + offx, context.attacker.y + offy, context.attacker.depth + 2, obj_paperwork)
-        lib.instance.set(p, "team", att.team)
+        lib.instance.set(p, "team", context.attacker.team)
         lib.instance.set(p, "dir", point_direction(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y))
         lib.instance.set(p, "pmax", point_distance(context.attacker.x + offx, context.attacker.y + offy, context.target.x, context.target.y))
         lib.instance.set(p, "target", context.target)
