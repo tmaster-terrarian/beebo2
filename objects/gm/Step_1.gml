@@ -82,7 +82,7 @@ if(!global.pause && global.runEnabled)
         //     var pcount = array_length(global.players)
         //     for(var i = 0; i < pcount; i++)
         //     {
-        //         instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 96, depth, obj_item, {item_id: item_id_get_random(1, global.itemdata.item_tables.chest_small)})
+        //         instance_create_depth(obj_camera.tx + i * 24 - (pcount - 1) * 12, 96, depth, obj_item, {item_id: item_id_get_random(1, global.item_tables.chest_small)})
         //     }
         // }
         // else
@@ -123,7 +123,7 @@ with(par_unit)
 
     for(var i = 0; i < array_length(items); i++)
     {
-        getdef(items[i].item_id, deftype.item).step(id, items[i].stacks)
+        getdef(items[i].item_id, DefType.item).step(id, items[i].stacks)
         items[i].triggered = 0
     }
 
@@ -229,8 +229,8 @@ if(!global.pause)
         var item = array_shift(item_pickup_queue)
 
         var _i = instance_create_depth(0, 0, 0, fx_pickuptext)
-        _i.name = getdef(item.item_id, deftype.item).displayname
-        _i.shortdesc = getdef(item.item_id, deftype.item).pickup
+        _i.name = getdef(item.item_id, DefType.item).displayname
+        _i.shortdesc = getdef(item.item_id, DefType.item).pickup
         _i.item_id = item.item_id
         _i.target = item.target
     }

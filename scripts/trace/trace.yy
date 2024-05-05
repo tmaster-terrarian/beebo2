@@ -1,0 +1,13 @@
+{
+  "$GMScript":"",
+  "%Name":"trace",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"trace",
+  "parent":{
+    "name":"Apollo",
+    "path":"folders/Extensions/Apollo.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

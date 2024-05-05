@@ -12,7 +12,7 @@ if(keyboard_check_pressed(192))
     // global.showDebugOverlay = !global.showDebugOverlay
     // show_log(global.showDebugOverlay)
 
-    DamageEvent(new DamageEventContext(noone, global.players[0], 50, 1, 0, 0, 0).damageType(damage_notif_type.playerhurt))
+    DamageEvent(new DamageEventContext(noone, global.players[0], 50, 1, 0, 0, 0).damageColor(DamageColor.playerhurt))
 }
 
 var _fpsswitch = keyboard_check_pressed(ord("P")) - keyboard_check_pressed(ord("O"))

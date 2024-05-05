@@ -16,7 +16,7 @@ if(fxtrail && fxtrailtimer == 0)
     create_fxtrail(id)
 }
 
-if(regen && hp > 0) heal_event(id, regen_rate/60 * global.dt, healtype.regen)
+if(regen && hp > 0) heal_event(id, regen_rate/60 * global.dt, HealColor.regen)
 if(hp > hp_max) hp = hp_max
 
 if(hp > 0)

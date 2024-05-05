@@ -4,7 +4,7 @@ draw_sprite_flat_ext(
     y + lengthdir_y(2, t*2) + round(sin(t / 40) * 2 - 2),
     1, 1,
     0,
-    global.itemdata.rarity_colors[getdef(item_id, deftype.item).rarity],
+    global.enumColors.rarity_colors[getdef(item_id, DefType.item).rarity],
     sin(t / 30) * 0.25 + 0.5
 )
 draw_sprite_flat_ext(
@@ -13,7 +13,7 @@ draw_sprite_flat_ext(
     y + lengthdir_y(-2, t*2) + round(sin(t / 40) * 2 - 2),
     1, 1,
     0,
-    global.itemdata.rarity_colors[getdef(item_id, deftype.item).rarity],
+    global.enumColors.rarity_colors[getdef(item_id, DefType.item).rarity],
     sin(t / 30) * 0.25 + 0.5
 )
 

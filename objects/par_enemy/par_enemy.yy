@@ -9,7 +9,7 @@
   "managed":true,
   "name":"par_enemy",
   "overriddenProperties":[
-    {"$GMOverriddenProperty":"","%Name":"","name":"","objectId":{"name":"par_unit","path":"objects/par_unit/par_unit.yy",},"propertyId":{"name":"team","path":"objects/par_unit/par_unit.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Team.enemy",},
+    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"par_unit","path":"objects/par_unit/par_unit.yy",},"propertyId":{"name":"team","path":"objects/par_unit/par_unit.yy",},"resource":null,"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Team.enemy",},
   ],
   "parent":{
     "name":"parents",

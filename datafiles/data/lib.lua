@@ -1,5 +1,18 @@
----@diagnostic disable: missing-return
+---@diagnostic disable: missing-return, unused-local
 ---@meta
+
+-- !!IMPORTANT!!:
+-- you are *not* supposed to `require()` this file, as the actually functional
+-- code is directly injected into the init script of each mod on initialization.
+-- (see [lualib.gml](../../scripts/lualib/lualib.gml))
+-- 
+-- Treat this as you would treat a `.d.ts` file - it's all just type information.
+local NOTICE = nil
+
+---@class Item
+---@field item_id Readonly<string>
+---@field stacks integer
+local Item = {}
 
 ---@class ItemDef
 ---@field rarity lib.enums.ItemRarity?
@@ -13,10 +26,12 @@ function ItemDef:onHit(context, stacks) end
 ---@param stacks integer
 function ItemDef:onKill(context, stacks) end
 
----@class Item:ref
----@field item_id Readonly<string>
+---@class Buff
+---@field buff_id Readonly<string>
+---@field context DamageEventContext
 ---@field stacks integer
-local Item = {}
+---@field timer Readonly<number>
+local Buff = {}
 
 ---@class BuffDef
 ---@field timed boolean?
@@ -39,13 +54,6 @@ function BuffDef:on_stack(instance) end
 ---@param instance Buff
 function BuffDef:on_expire(instance) end
 
----@class Buff:ref
----@field buff_id Readonly<string>
----@field context DamageEventContext
----@field stacks integer
----@field timer Readonly<number>
-local Buff = {}
-
 ---@class ref:integer
 local ref = {}
 
@@ -59,7 +67,7 @@ local ref = {}
 ---@field use_attacker_items Readonly<boolean>          readonly - use the setter method
 ---@field force_crit Readonly<integer>                  readonly - use the setter method
 ---@field isReduceable Readonly<boolean>                readonly - use the setter method
----@field damage_type Readonly<lib.enums.DamageColor>   readonly - use the setter method
+---@field damage_color Readonly<lib.enums.DamageColor>   readonly - use the setter method
 ---@field crit Readonly<boolean>                        will this event crit/has the event dealt a critical hit?<br>readonly - use the setter method
 ---@field blocked Readonly<boolean>                     was the damage blocked in this event?
 ---@field excludedItems Readonly<string[]>              list of items that the event is not allowed to trigger<br>readonly - use the setter method
@@ -85,7 +93,7 @@ function DamageEventContext.exclude(value) end
 
 ---@param value lib.enums.DamageColor
 ---@return DamageEventContext
-function DamageEventContext.damageType(value) end
+function DamageEventContext.damageColor(value) end
 
 ---@class lib
 lib = {
@@ -111,11 +119,31 @@ lib = {
     -- An object carrying lots of information for use in damage events
     createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items, force_crit, reduceable) end,
 
-    ---@param luaFunctionName string
-    gmlMethod = function(luaFunctionName) end,
-
-    ---@type integer
-    _state = nil,
+    ---Creates a function that can be called in the standard way on Gamemaker's end.<br>
+    ---Items, Buffs, and Modifiers require you to declare class methods via `gmlMethod`
+    ---
+    ---In the example below, `funcA` is assigned to a regular Lua function, while `funcB` is assigned to a Gamemaker method.<br>
+    ---Much information is lost when using `gmlMethod`, and thus it should only be used if Gamemaker is expecting a non-Lua method.
+    ---
+    ---GML Example:
+    ---```gml
+    ---var state = new LuaState();
+    ---state.addCode(@'
+    ---    funcA = function() {
+    ---        return "hello world"
+    ---    }
+    ---    funcB = lib.gmlMethod(function() {
+    ---        return "hello world"
+    ---    })
+    ---');
+    ---
+    ---state.get("funcA").call(); // => "hello world"
+    ---
+    ---state.get("funcB")(); // => "hello world"
+    ---```
+    ---@param luaFunction function
+    ---@return GmlMethod
+    gmlMethod = function(luaFunction) end,
 
     ---Access units (players/enemies) and do various things with them
     unit = {
@@ -143,16 +171,6 @@ lib = {
     ---Basic instance manipulation
     instance = {
         ---@param ins Instance
-        ---@param name string
-        ---@return any
-        get = function(ins, name) end,
-
-        ---@param ins Instance
-        ---@param name string
-        ---@param value any
-        set = function(ins, name, value) end,
-
-        ---@param ins Instance
         destroy = function(ins) end,
     },
 
@@ -172,8 +190,8 @@ lib = {
     ---@param text any the value will be turned into a string
     log = function (text) end,
 
-    ---Helpful math functions like random, min, abs, etc.
-    math = {
+    ---Helpful randomness functions
+    rng = {
         ---@param x number value greater than 0.0
         ---@return number
         Random = function(x) end,
@@ -192,13 +210,8 @@ lib = {
         ---@return integer
         intRandomRange = function(min, max) end,
 
-        ---@param val number value between 0.0 and 1.0
+        ---@param val number value between 0.0 and 1.0<br>the comparison is `random(1) <= val`<br>if the value is equal to either end of the range; then it directly returns the value as a boolean
         ---@return boolean
         RollChance = function(val) end,
     }
 }
-
----Turns any type of value into a string
----@param value any
----@return string
-function String(value) end

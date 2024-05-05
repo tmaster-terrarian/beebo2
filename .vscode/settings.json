@@ -4,7 +4,8 @@
         "lowercase-global",
         "undefined-global",
         "duplicate-set-field",
-        "undefined-field"
+        "undefined-field",
+        "inject-field"
     ],
     "Lua.completion.showWord": "Disable",
     "Lua.workspace.library": [

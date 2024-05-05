@@ -2,9 +2,7 @@
 
 function initializeMods()
 {
-    lua_reset()
-
-    global.modsList = global.optionsStruct.enabledMods
+    global.modsList = variable_clone(global.optionsStruct.enabledMods)
     array_insert(global.modsList, 0, "base")
 
     global.loadedMods = []
@@ -26,11 +24,22 @@ function initializeMods()
 
             Log("Modloader/INFO", "Found mod: '" + _mod.displayName + "' (" + PROGRAM_DIR + "mods/" + _mod.id + ")")
 
-            var state = lua_state_create()
+            var state = new LuaState()
+            state.addCodeFromFile = function(dir)
+            {
+                var f = file_text_open_read(string(dir))
+                if(!f)
+                {
+                    Log("Apollo/ERROR", $"failed to read file from path '{string(dir)}'")
+                    return;
+                }
+                var _code = file_text_read_whole(f)
+                file_text_close(f)
+                return lua_add_code(__ptr__, _code)
+            }
+
             _mod.data = {}
             _mod.data.luaState = state
-
-            // a = 2 // error testing hehe
 
             if(directory_exists("mods/" + _mod.id + "/data"))
             {
@@ -58,22 +67,16 @@ function initializeMods()
     {
         var _mod = global.loadedMods[i]
         var state = _mod.data.luaState
-        if(state < 0)
-        {
-            Log("Modloader/ERROR", $"Failed to initialize mod '{_mod.displayName}' ({_mod.id}): invalid state")
-            array_delete(global.loadedMods, i, 1)
-            i--
-            continue
-        }
 
         var path = "mods/" + _mod.id + "/"
 
         var lib = new modLibrary(state)
         lib.modId = _mod.id
-        lualib_addModLibrary(state, lib)
         _mod.data.libCopy = lib
 
-        lua_add_file(state, (i == 0) ? "data/init.lua" : (path + "init.lua"))
+        lualib_addModLibrary(state, lib)
+
+        state.addCodeFromFile(i == 0 ? "data/init.lua" : path + "init.lua")
 
         Log("Modloader/INFO", "initialized " + _mod.id + " with state " + string(state))
     }
@@ -82,7 +85,7 @@ function initializeMods()
 function modLibrary(state) constructor
 {
     self._state = state
-    self.modId = "Modloader"
+    self.modId = ""
 
     self.registerItemDef = function(id, struct = {})
     {
@@ -98,7 +101,7 @@ function modLibrary(state) constructor
 
     self.createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
     {
-        return new DamageEventContext(lualib_fixInstanceId(attacker), lualib_fixInstanceId(target), damage, proc, use_attacker_items, force_crit, isReduceable)
+        return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
     }
 
     self.gmlMethod = function(luaFunctionName)
@@ -129,26 +132,27 @@ function modLibrary(state) constructor
     }
 
     self.instance = {
-        get: function(ins, prop)
-        {
-            var ref = lualib_fixInstanceId(ins)
-            if(!instance_exists(ref))
-            {
-                lua_show_error("Couldn't find instance " + string(ins));
-            }
-            else return variable_instance_get(ref, string(prop));
-
-            return undefined;
-        },
-        set: function(ins, prop, val)
-        {
-            var ref = lualib_fixInstanceId(ins)
-            if(!instance_exists(ref))
-            {
-                lua_show_error("Couldn't find instance " + string(ins));
-            }
-            else variable_instance_set(ref, string(prop), val);
-        },
+        // obsoleted with Apollo v3 (probably)
+        // get: function(ins, prop)
+        // {
+        //     var ref = lualib_fixInstanceId(ins)
+        //     if(!instance_exists(ref))
+        //     {
+        //         lua_show_error("Couldn't find instance " + string(ins));
+        //     }
+        //     else return variable_instance_get(ref, string(prop));
+        //
+        //     return undefined;
+        // },
+        // set: function(ins, prop, val)
+        // {
+        //     var ref = lualib_fixInstanceId(ins)
+        //     if(!instance_exists(ref))
+        //     {
+        //         lua_show_error("Couldn't find instance " + string(ins));
+        //     }
+        //     else variable_instance_set(ref, string(prop), val);
+        // },
         destroy: function(ins)
         {
             instance_destroy(lualib_fixInstanceId(ins))
@@ -157,25 +161,30 @@ function modLibrary(state) constructor
 
     self.enums = {
         Team: {
-            player: 0,
-            enemy: 1,
-            neutral: 2
+            player: Team.player,
+            enemy: Team.enemy,
+            neutral: Team.neutral
         },
         ItemRarity: {
-            none: 0,
-            common: 1,
-            rare: 2,
-            legendary: 3,
-            special: 4
+            none: ItemRarity.none,
+            common: ItemRarity.common,
+            rare: ItemRarity.rare,
+            legendary: ItemRarity.legendary,
+            special: ItemRarity.special
         },
         DamageColor: {
-            generic: 0,
-            crit: 1,
-            heal: 2,
-            revive: 3,
-            playerhurt: 4,
-            bleed: 5,
-            immune: 6
+            generic: DamageColor.generic,
+            crit: DamageColor.crit,
+            heal: DamageColor.heal,
+            revive: DamageColor.revive,
+            playerhurt: DamageColor.playerhurt,
+            bleed: DamageColor.bleed,
+            immune: DamageColor.immune
+        },
+        HealColor: {
+            generic: HealColor.generic,
+            regen: HealColor.regen,
+            hidden: HealColor.hidden
         }
     }
 
@@ -184,7 +193,7 @@ function modLibrary(state) constructor
         Log(self.modId + "/INFO", string(text))
     }
 
-    self.math = {
+    self.rng = {
         Random: function(x)
         {
             return random(x)
@@ -195,20 +204,19 @@ function modLibrary(state) constructor
             return random_range(_min, _max)
         },
 
-        intRandom: function(x)
+        RandomInt: function(x)
         {
             return irandom(x)
         },
 
-        intRandomRange: function(_min, _max)
+        RandomRangeInt: function(_min, _max)
         {
             return irandom_range(_min, _max)
         },
 
-        RollChance: function(val)
+        Roll: function(val)
         {
-            if(val == 0) return bool(false)
-            if(val == 1) return bool(true)
+            if(val == 0 || val == 1) return bool(val)
             return bool(random(1) <= val)
         }
     }

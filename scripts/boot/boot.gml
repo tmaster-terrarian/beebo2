@@ -75,14 +75,7 @@ enum Team
 	neutral
 }
 
-enum proctype
-{
-	onhit,
-	onkill,
-	none
-}
-
-enum item_rarity
+enum ItemRarity
 {
 	none,
 	common,
@@ -91,7 +84,7 @@ enum item_rarity
 	special
 }
 
-enum damage_notif_type
+enum DamageColor
 {
 	generic,
 	crit,
@@ -102,14 +95,14 @@ enum damage_notif_type
 	immune
 }
 
-enum healtype
+enum HealColor
 {
 	generic,
 	regen,
 	hidden
 }
 
-enum deftype
+enum DefType
 {
 	item,
 	modifier,
@@ -136,6 +129,33 @@ enum TimeUnits
 	hours
 }
 
+global.item_tables = {
+	any : [{v: 4, w: 1}, {v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}, {v: 0, w: 1}],
+	any_obtainable : [{v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}],
+	chest_small : [{v: 3, w: 0.01}, {v: 2, w: 1.98}, {v: 1, w: 7.92}],
+	chest_large : [{v: 3, w: 2}, {v: 2, w: 8}]
+}
+
+global.enumColors =
+{
+	rarity_colors: [
+		#798686,
+		#E8F6F4,
+		#38EB73,
+		#F3235E,
+		#D508E5
+	],
+	damage_type_colors: [
+		#E8F6F4,
+		#F3235E,
+		#9CE562,
+		#D508E5,
+		#7b003b,
+		#73252f,
+		#f1b00e
+	]
+}
+
 global.__eventContextId = 0
 
 // classes
@@ -149,7 +169,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	self.use_attacker_items = use_attacker_items
 	self.force_crit = force_crit
 	self.isReduceable = isReduceable
-	self.damage_type = damage_notif_type.generic
+	self.damage_color = DamageColor.generic
 	self.crit = 0
 
 	self.blocked = 0
@@ -181,9 +201,9 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 			array_push(self.excludedItems, string(argument[i]))
 		return self
 	}
-	self.damageType = function(_type)
+	self.damageColor = function(_col)
 	{
-		self.damage_type = _type
+		self.damage_color = _col
 		return self
 	}
 
@@ -201,7 +221,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 
 function DamageEvent(ctx)
 {
-	var _damage_type = ctx.damage_type
+	var _damage_type = ctx.damage_color
 
 	var damage = ctx.damage
 
@@ -218,7 +238,7 @@ function DamageEvent(ctx)
 
 		if(ctx.target.invincible)
 		{
-			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.immune, value: string_loc("damage.immune"), dir: 0})
+			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: DamageColor.immune, value: string_loc("damage.immune"), dir: 0})
 			ctx.target.flash = 2
 			ctx.blocked = 1
 			return
@@ -245,7 +265,7 @@ function DamageEvent(ctx)
 			if(random(1) < ctx.attacker.crit_chance) || ctx.force_crit
 			{
 				ctx.crit = 1
-				_damage_type = damage_notif_type.crit
+				_damage_type = DamageColor.crit
 			}
 
 			if(!ctx.blocked)
@@ -274,7 +294,7 @@ function DamageEvent(ctx)
 			{
 				ctx.crit = ctx.force_crit
 				if(ctx.force_crit)
-					_damage_type = damage_notif_type.crit
+					_damage_type = DamageColor.crit
 			}
 		}
 
@@ -334,7 +354,7 @@ function DamageEvent(ctx)
 			for(var i = 0; i < array_length(ctx.attacker.items); i++)
 			{
 				var _item = ctx.attacker.items[i]
-				var _def = getdef(_item.item_id, deftype.item)
+				var _def = getdef(_item.item_id, DefType.item)
 				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
 				{
 					_def.onHit(ctx, _item.stacks)
@@ -359,7 +379,7 @@ function DamageEvent(ctx)
 				for(var i = 0; i < array_length(ctx.attacker.items); i++)
 				{
 					var _item = ctx.attacker.items[i]
-					var _def = getdef(_item.item_id, deftype.item)
+					var _def = getdef(_item.item_id, DefType.item)
 					if(!array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
 						_def.onKill(ctx, _item.stacks)
@@ -391,7 +411,7 @@ function DamageEvent(ctx)
 	}
 }
 
-function heal_event(target, value, _healtype = healtype.generic)
+function heal_event(target, value, _healtype = HealColor.generic)
 {
 	if(value == 0)
 		return;
@@ -401,9 +421,9 @@ function heal_event(target, value, _healtype = healtype.generic)
 	var val = value * heal_fac
 	target.hp += val
 
-	if(_healtype != healtype.regen && _healtype != healtype.hidden)
+	if(_healtype != HealColor.regen && _healtype != HealColor.hidden)
 	{
-		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: damage_notif_type.heal, value: val, dir: -target.facing})
+		instance_create_depth((target.bbox_left + target.bbox_right) / 2, (target.bbox_top + target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: DamageColor.heal, value: val, dir: -target.facing})
 	}
 }
 
@@ -591,35 +611,6 @@ function stopTimeout(func)
 global.fixedStepTimeSource = time_source_create(time_source_game, 1/60, time_source_units_seconds, global.fixedStep.step, [], -1)
 
 // global variables
-global.itemdata =
-{
-	item_tables :
-	{
-		any : [{v: 4, w: 1}, {v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}, {v: 0, w: 1}],
-		any_obtainable : [{v: 3, w: 1}, {v: 2, w: 1}, {v: 1, w: 1}],
-		chest_small : [{v: 3, w: 0.01}, {v: 2, w: 1.98}, {v: 1, w: 7.92}],
-		chest_large : [{v: 3, w: 2}, {v: 2, w: 8}]
-	},
-	rarity_colors :
-	[
-		#798686,
-		#E8F6F4,
-		#38EB73,
-		#F3235E,
-		#D508E5
-	],
-	damage_type_colors :
-	[
-		#E8F6F4,
-		#F3235E,
-		#9CE562,
-		#D508E5,
-		#7b003b,
-		#73252f,
-		#f1b00e
-	]
-}
-
 global.timescale = 1
 global.dt = 1
 global.t = 0 // run timer
@@ -916,7 +907,7 @@ function screen_shake_add(_strength, _frames)
 	}
 }
 
-function item_id_get_random(_by_rarity, _table = global.itemdata.item_tables.any_obtainable)
+function item_id_get_random(_by_rarity, _table = global.item_tables.any_obtainable)
 {
 	if(_by_rarity)
 	{
@@ -938,13 +929,13 @@ function getdef(_defid, _deftype = 0)
 {
 	switch(_deftype)
 	{
-		case deftype.item:
+		case DefType.item:
 			return __struct_get(global.itemdefs, _defid, "global.itemdefs")
 			break;
-		case deftype.buff:
+		case DefType.buff:
 			return __struct_get(global.buffdefs, _defid, "global.buffdefs")
 			break;
-		case deftype.modifier:
+		case DefType.modifier:
 			return __struct_get(global.modifierdefs, _defid, "global.modifierdefs")
 			break;
 	}
@@ -1110,7 +1101,7 @@ function time_convert(value, units, newUnits)
 
 function getraritycol(_invitem)
 {
-	return global.itemdata.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
+	return global.enumColors.rarity_colors[global.itemdefs[$ _invitem.item_id].rarity]
 }
 
 function random_weighted(list) // example values: [{v:3,w:1}, {v:4,w:3}, {v:2,w:5}]; v:value, w:weight.
@@ -1397,7 +1388,7 @@ function _itemdef(name) constructor {
 	pickup = string_loc($"item.{name}.pickup")
 	description = string_loc($"item.{name}.description")
 	lore = string_loc($"item.{name}.lore")
-	rarity = item_rarity.none
+	rarity = ItemRarity.none
 
 	draw = function(target, stacks) {}
 	step = function(target, stacks) {}
@@ -1407,21 +1398,36 @@ function _itemdef(name) constructor {
 
 function itemdef(_name, _struct = {})
 {
+	if(!is_struct(_struct)) return;
+
 	static total_items = 0
 	total_items++
 
 	var __newstruct = new _itemdef(_name)
 
-	// hhhhhh i hate scope issues so much
-	var names = variable_struct_get_names(_struct)
-	var size = variable_struct_names_count(_struct);
+	if(struct_exists(_struct, "__type__"))
+	{
+		var names = luaRef_keys(_struct)
+		var size = array_length(names)
 
-	for (var i = 0; i < size; i++) {
-		var name = names[i];
-		var element = variable_struct_get(_struct, name);
-		variable_struct_set(__newstruct, name, element)
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = _struct.get(name)
+			struct_set(__newstruct, name, element)
+		}
 	}
-	delete _struct
+	else
+	{
+		var names = struct_get_names(_struct)
+		var size = struct_names_count(_struct)
+
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = struct_get(_struct, name)
+			struct_set(__newstruct, name, element)
+		}
+	}
+
 	return __newstruct
 }
 
@@ -1518,15 +1524,29 @@ function modifierdef(_name, _struct = {})
 
 	var __newstruct = new _modifierdef(_name)
 
-	var names = variable_struct_get_names(_struct)
-	var size = variable_struct_names_count(_struct);
+	if(struct_exists(_struct, "__type__"))
+	{
+		var names = luaRef_keys(_struct)
+		var size = array_length(names)
 
-	for (var i = 0; i < size; i++) {
-		var name = names[i];
-		var element = variable_struct_get(_struct, name);
-		variable_struct_set(__newstruct, name, element)
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = _struct.get(name)
+			struct_set(__newstruct, name, element)
+		}
 	}
-	delete _struct
+	else
+	{
+		var names = struct_get_names(_struct)
+		var size = struct_names_count(_struct)
+
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = struct_get(_struct, name)
+			struct_set(__newstruct, name, element)
+		}
+	}
+
 	return __newstruct
 }
 
@@ -1535,12 +1555,12 @@ global.modifierdefs = {
 	cut_hp: modifierdef("cut_hp"),
 	evolution: modifierdef("evolution", {
 		on_pickup: function() {
-			var item = item_id_get_random(1, global.itemdata.item_tables.chest_small)
+			var item = item_id_get_random(1, global.item_tables.chest_small)
 			var stacks = 1
-			var r = getdef(item, deftype.item).rarity
-			if(r == item_rarity.common)
+			var r = getdef(item, DefType.item).rarity
+			if(r == ItemRarity.common)
 				stacks = 5
-			if(r == item_rarity.rare)
+			if(r == ItemRarity.rare)
 				stacks = 3
 			for(var i = 0; i < array_length(global.players); i++)
 				item_add_stacks(item, global.players[i], stacks)
@@ -1657,15 +1677,29 @@ function buffdef(_name, _struct = {})
 
 	var __newstruct = new _buffdef(_name)
 
-	var names = variable_struct_get_names(_struct)
-	var size = variable_struct_names_count(_struct);
+	if(struct_exists(_struct, "__type__"))
+	{
+		var names = luaRef_keys(_struct)
+		var size = array_length(names)
 
-	for (var i = 0; i < size; i++) {
-		var name = names[i];
-		var element = variable_struct_get(_struct, name);
-		variable_struct_set(__newstruct, name, element)
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = _struct.get(name)
+			struct_set(__newstruct, name, element)
+		}
 	}
-	delete _struct
+	else
+	{
+		var names = struct_get_names(_struct)
+		var size = struct_names_count(_struct)
+
+		for (var i = 0; i < size; i++) {
+			var name = names[i]
+			var element = struct_get(_struct, name)
+			struct_set(__newstruct, name, element)
+		}
+	}
+
 	return __newstruct
 }
 
@@ -1706,7 +1740,7 @@ function buff_instance(buff_id, context, duration, stacks) constructor
 	self.stacks = stacks
 	self.timer = duration
 
-	var def = getdef(buff_id, deftype.buff)
+	var def = getdef(buff_id, DefType.buff)
 	def.apply(self)
 }
 
@@ -1718,7 +1752,7 @@ function buff_instance_create(buff_id, context, duration = -1, stacks = 1)
 	var b = buff_get_instance(buff_id, context.target)
 	if(b != -1)
 	{
-		var def = getdef(buff_id, deftype.buff)
+		var def = getdef(buff_id, DefType.buff)
 
 		b.context = buff.context // overrides attacker, target, etc. (essentially a refresh)
 		switch(buff_id) // timer stuff
@@ -1753,7 +1787,7 @@ function buff_instance_create_headless(buff_id, target, duration = -1, stacks = 
 
 function buff_instance_remove(instance)
 {
-	getdef(instance.buff_id, deftype.buff).on_remove(instance)
+	getdef(instance.buff_id, DefType.buff).on_remove(instance)
 	for(var i = 0; i < array_length(instance.context.target.buffs); i++)
 	{
 		if(instance.context.target.buffs[i].buff_id == instance.buff_id)
@@ -1790,18 +1824,18 @@ function buff_instance_add_stacks(instance, stacks)
 	var oldstacks = instance.stacks
 	instance.stacks += stacks
 	if(instance.stacks <= 0)
-		getdef(instance.buff_id, deftype.buff).on_expire(instance)
+		getdef(instance.buff_id, DefType.buff).on_expire(instance)
 	else if(instance.stacks > oldstacks)
-		getdef(instance.buff_id, deftype.buff).on_stack(instance)
+		getdef(instance.buff_id, DefType.buff).on_stack(instance)
 }
 function buff_instance_set_stacks(instance, stacks)
 {
 	var oldstacks = instance.stacks
 	instance.stacks = stacks
 	if(instance.stacks <= 0)
-		getdef(instance.buff_id, deftype.buff).on_expire(instance)
+		getdef(instance.buff_id, DefType.buff).on_expire(instance)
 	else if(instance.stacks > oldstacks)
-		getdef(instance.buff_id, deftype.buff).on_stack(instance)
+		getdef(instance.buff_id, DefType.buff).on_stack(instance)
 }
 
 function buff_get_stacks(buff_id, target)
@@ -1833,7 +1867,7 @@ function buff_add_timer(buff_id, target, timer)
 		{
 			target.buffs[i].timer += timer
 			if(target.buffs[i].timer <= 0)
-				getdef(buff_id, deftype.buff).on_expire(target.buffs[i])
+				getdef(buff_id, DefType.buff).on_expire(target.buffs[i])
 			return;
 		}
 	}
@@ -1851,7 +1885,7 @@ function buff_set_timer(buff_id, target, timer)
 		{
 			target.buffs[i].timer = timer
 			if(target.buffs[i].timer <= 0)
-				getdef(buff_id, deftype.buff).on_expire(target.buffs[i])
+				getdef(buff_id, DefType.buff).on_expire(target.buffs[i])
 			return;
 		}
 	}
