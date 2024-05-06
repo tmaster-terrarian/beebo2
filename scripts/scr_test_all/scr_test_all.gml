@@ -11,7 +11,7 @@ function scr_test_all() {
 		trace(sfmt("%...", script_get_name(test)))
 		test();
 	}
-	show_debug_message("Tests OK!")
+	Log("Apollo/INFO", "Tests OK!")
 }
 
 function assert(a, b) {

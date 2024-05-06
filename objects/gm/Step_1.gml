@@ -123,7 +123,7 @@ with(par_unit)
 
     for(var i = 0; i < array_length(items); i++)
     {
-        getdef(items[i].item_id, DefType.item).step(id, items[i].stacks)
+        getdef(items[i].item_id, DefType.item).step.call(id, items[i].stacks)
         items[i].triggered = 0
     }
 

@@ -209,7 +209,17 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 
 	self.toString = function()
 	{
-		var str = $"\{ uniqueId: {self.uniqueId}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")}, damage: {self.damage}, procCoefficient: {self.proc}, useAttackerItems: {self.use_attacker_items}, criticalHit: {self.force_crit}, damageReduceable: {self.isReduceable}, itemBlacklist: {self.excludedItems} \}"
+		var str =
+		$"\{ uniqueId: {self.uniqueId
+		}, attacker: {(instance_exists(self.attacker) ? (string(self.attacker.id) + " (" + object_get_name(self.attacker.object_index) + ")") : "noone")
+		}, target: {(instance_exists(self.target) ? (string(self.target.id) + " (" + object_get_name(self.target.object_index) + ")") : "noone")
+		}, damage: {self.damage
+		}, procCoefficient: {self.proc
+		}, useAttackerItems: {self.use_attacker_items
+		}, criticalHit: {self.force_crit
+		}, damageReduceable: {self.isReduceable
+		}, itemBlacklist: {self.excludedItems
+		} \}"
 		return str
 	}
 
@@ -217,6 +227,30 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	self.nonlethal = 0
 
 	// LogInfo("Main", "DamageEventContext created: " + string(self))
+
+	static fromLua = function(luaRef)
+	{
+		var ctx = new DamageEventContext(
+			lualib_fixInstanceId(luaRef.get("attacker")),
+			lualib_fixInstanceId(luaRef.get("target")),
+			luaRef.get("damage"),
+			luaRef.get("proc"),
+			luaRef.get("use_attacker_items"),
+			luaRef.get("force_crit"),
+			luaRef.get("isReduceable")
+		)
+		global.__eventContextId--
+
+        ctx.damage_color = luaRef.get("damage_color")
+        ctx.crit = luaRef.get("crit")
+        ctx.blocked = luaRef.get("blocked")
+        ctx.excludedItems = lualib_toArray(luaRef.get("excludedItems"))
+        ctx.uniqueId = luaRef.get("uniqueId")
+        ctx.chain = lualib_toArray(luaRef.get("chain"))
+        ctx.nonlethal = luaRef.get("nonlethal")
+
+		return ctx
+	}
 }
 
 function DamageEvent(ctx)
@@ -357,7 +391,7 @@ function DamageEvent(ctx)
 				var _def = getdef(_item.item_id, DefType.item)
 				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
 				{
-					_def.onHit(ctx, _item.stacks)
+					_def.onHit.call(ctx, _item.stacks)
 				}
 			}
 		}
@@ -382,7 +416,7 @@ function DamageEvent(ctx)
 					var _def = getdef(_item.item_id, DefType.item)
 					if(!array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
-						_def.onKill(ctx, _item.stacks)
+						_def.onKill.call(ctx, _item.stacks)
 						_item.triggered = 1
 					}
 				}
@@ -446,7 +480,7 @@ function __dbg_clearScope()
 
 function ThrowException(err, isEngineCrash = false)
 {
-	var _string = "gml.RuntimeException: " + err.message //string_replace(err.message, "<unknown_object>", global.__dbg_scopeName);
+	var _string = "Uncaught gml.RuntimeException: " + err.message //string_replace(err.message, "<unknown_object>", global.__dbg_scopeName);
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
@@ -456,7 +490,7 @@ function ThrowException(err, isEngineCrash = false)
 		// _string += "\n\tat " + global.__dbg_scope[i][0] + string_replace(line[1], "line", (!is_undefined(global.__dbg_scope[i][1]) ? global.__dbg_scope[i][1] : "unknown")) + ":" + line[2];
 		_string += "\n\tat " + string_replace_all(string_replace_all(string_replace_all(stack[i], "\t", ""), "    ", ""), "\n", "")
 	}
-	LogException(_string)
+	LogException(string_copy(_string, 1, string_length(_string) - 1))
 
 	if(!isEngineCrash)
 	{
@@ -466,7 +500,7 @@ function ThrowException(err, isEngineCrash = false)
 
 function ThrowError(err, blame = false, isEngineError = false) // harmless version of ThrowException, doesnt close the game
 {
-	var _string = (blame ? "Caused by: " : "") + "gml.RuntimeError: " + err.message
+	var _string = (blame ? "Caused by: " : "") + "gml.RuntimeException: " + err.message
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
@@ -486,7 +520,7 @@ function ThrowError(err, blame = false, isEngineError = false) // harmless versi
 			_string += "\n\tat " + string_replace_all(string_replace_all(string_replace_all(stack[i], "\t", ""), "    ", ""), "\n", "")
 		}
 	}
-	LogException(_string)
+	LogException(isEngineError ? string_copy(_string, 1, string_length(_string) - 1) : _string)
 }
 
 exception_unhandled_handler(function(err) {
@@ -1179,6 +1213,8 @@ function array_toString(array, separator, useBrackets = true)
 	return str
 }
 
+#macro __CLOSE_CALL "Caught FATAL ERROR (an impending crash was averted)\n\tREASON: failed to gather exception info"
+
 function Log(src, str)
 {
 	var t = timer_to_string(get_timer())
@@ -1390,31 +1426,35 @@ function _itemdef(name) constructor {
 	lore = string_loc($"item.{name}.lore")
 	rarity = ItemRarity.none
 
-	draw = function(target, stacks) {}
-	step = function(target, stacks) {}
-	onHit = function(context, stacks) {}
-	onKill = function(context, stacks) {}
+	draw = {call: function(target, stacks) {}}
+	step = {call: function(target, stacks) {}}
+	onHit = {call: function(context, stacks) {}}
+	onKill = {call: function(context, stacks) {}}
 }
 
 function itemdef(_name, _struct = {})
 {
-	if(!is_struct(_struct)) return;
-
 	static total_items = 0
 	total_items++
 
 	var __newstruct = new _itemdef(_name)
 
-	if(struct_exists(_struct, "__type__"))
+	if(is_lua_ref(_struct))
 	{
-		var names = luaRef_keys(_struct)
-		var size = array_length(names)
+		if(_struct.get("rarity") != undefined)
+			__newstruct.rarity = _struct.get("rarity")
 
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = _struct.get(name)
-			struct_set(__newstruct, name, element)
-		}
+		if(_struct.get("draw") != undefined)
+			__newstruct.draw = _struct.get("draw")
+
+		if(_struct.get("step") != undefined)
+			__newstruct.step = _struct.get("step")
+
+		if(_struct.get("onHit") != undefined)
+			__newstruct.onHit = _struct.get("onHit")
+
+		if(_struct.get("onKill") != undefined)
+			__newstruct.onKill = _struct.get("onKill")
 	}
 	else
 	{
@@ -1427,6 +1467,8 @@ function itemdef(_name, _struct = {})
 			struct_set(__newstruct, name, element)
 		}
 	}
+
+	Log(_name == "unknown" ? "Startup/INFO" : "ModLoader/INFO", $"registered item '{_name}'")
 
 	return __newstruct
 }
@@ -1524,7 +1566,7 @@ function modifierdef(_name, _struct = {})
 
 	var __newstruct = new _modifierdef(_name)
 
-	if(struct_exists(_struct, "__type__"))
+	if(is_lua_ref(_struct))
 	{
 		var names = luaRef_keys(_struct)
 		var size = array_length(names)
@@ -1677,7 +1719,7 @@ function buffdef(_name, _struct = {})
 
 	var __newstruct = new _buffdef(_name)
 
-	if(struct_exists(_struct, "__type__"))
+	if(is_lua_ref(_struct))
 	{
 		var names = luaRef_keys(_struct)
 		var size = array_length(names)

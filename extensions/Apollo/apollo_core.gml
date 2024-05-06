@@ -3,7 +3,7 @@
 //#global lua_init_error
 //#global lua_error_handler
 lua_error_handler = function(_state, _error_text) {
-	show_debug_message("Lua error in " + string(_state) + ": " + _error_text);
+	Log("Apollo/ERROR", "Lua error in " + string(_state) + ": " + _error_text);
 }
 global.g_apollo_trouble = true;
 global.g_apollo_destroy_soon = ds_stack_create();

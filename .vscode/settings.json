@@ -45,5 +45,12 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/scripts/__scribble_*/**": true
-    }
+    },
+    "gml-ls.workspaceCompletions": true,
+    "gml-ls.workspaceColors": true,
+    "gml-ls.workspaceGotoDefinition": true,
+    "gml-ls.workspaceHovers": true,
+    "gml-ls.workspaceReferences": true,
+    "gml-ls.semanticTokens.enabled": false,
+    "gml-ls.simpleMode": false
 }

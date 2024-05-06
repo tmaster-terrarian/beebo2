@@ -1,4 +1,8 @@
-#macro __lua_catch catch (_e) { lua_show_error("[" + _e.script + "]:" + string(_e.line) + ": " + _e.message); exit; }
+function __lua_err(_e)
+{
+	Log("Apollo/ERROR", _e.script + ": line " + string(_e.line) + ": " + _e.message);
+}
+
 function LuaEmptyContext() constructor {
 	__self__ = self;
 }

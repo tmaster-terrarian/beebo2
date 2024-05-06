@@ -1,5 +1,14 @@
 #macro __apollo_debug_gml_ref 0
 
+#macro __god_help_me catch (_e) {\
+	try {\
+		ThrowError(_e, false, true)\
+	} catch(e) {\
+		ThrowError(e, false, true)\
+	}\
+	exit\
+}
+
 function lua_gml_ref_to_uid(_state/*:LuaState*/, _ref) {
 	var _uid = _state.__ref_to_uid[?_ref];
 	if (_uid == undefined) {
@@ -28,13 +37,13 @@ function lua_gml_ref_get_length(_state, _uid) {
 function lua_gml_ref_get_index(_state, _uid, _ind) {
 	try {
 		return _state.__uid_to_ref[?_uid][_ind - 1];
-	} __lua_catch;
+	} __god_help_me
 }
 
 function lua_gml_ref_set_index(_state, _uid, _ind, _value) {
 	try {
 		_state.__uid_to_ref[?_uid][_ind - 1] = _value;
-	} __lua_catch;
+	} __god_help_me
 }
 
 // GmlStruct-specific:
@@ -48,13 +57,13 @@ function lua_gml_ref_get_key(_state, _uid, _key) {
 			_value = method(_self, _value);
 		}
 		return _value;
-	} __lua_catch;
+	} __god_help_me
 }
 
 function lua_gml_ref_set_key(_state, _uid, _key, _value) {
 	try {
 		_state.__uid_to_ref[?_uid][$ _key] = _value;
-	} __lua_catch;
+	} __god_help_me
 }
 
 function lua_gml_ref_invoke(_state, _uid, _argArray, _numArgs) {
@@ -72,7 +81,7 @@ function lua_gml_ref_invoke(_state, _uid, _argArray, _numArgs) {
 			return script_execute_ext(method_get_index(_func), _argArray, 0, _numArgs);
 		}
 		return script_execute_ext(_func, _argArray, 0, _numArgs);
-	} __lua_catch;
+	} __god_help_me
 }
 
 // CrossRef-specific:
@@ -86,18 +95,18 @@ function lua_gml_cross_ref_get_key(_state, _uid, _key) {
 			_value = method(_self, _value);
 		}
 		return _value;
-	} __lua_catch;
+	} __god_help_me
 }
 
 function lua_gml_cross_ref_set_key(_state, _uid, _key, _value) {
 	try {
 		_state.__uid_to_ref[?_uid].set(_key, _value);
-	} __lua_catch;
+	} __god_help_me
 }
 
 function lua_gml_cross_ref_invoke(_state, _uid, _argArray, _numArgs) {
 	try {
 		var _func = _state.__uid_to_ref[?_uid];
 		return _func.callExt(_argArray, 0, _numArgs);
-	} __lua_catch;
+	} __god_help_me
 }

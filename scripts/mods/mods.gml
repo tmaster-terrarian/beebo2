@@ -1,7 +1,22 @@
 #macro PROGRAM_DIR string_replace_all(program_directory, "\\", "/")
 
+function addCodeFromFile(state, dir)
+{
+    var f = file_text_open_read(string(dir))
+    if(!f)
+    {
+        Log("Apollo/ERROR", $"failed to read file from path '{string(dir)}'")
+        return;
+    }
+    var _code = file_text_read_whole(f)
+    file_text_close(f)
+    return state.addCode(_code)
+}
+
 function initializeMods()
 {
+    lua_init()
+
     global.modsList = variable_clone(global.optionsStruct.enabledMods)
     array_insert(global.modsList, 0, "base")
 
@@ -12,7 +27,7 @@ function initializeMods()
     array_push(global.loadedMods, file_json_read(modFile))
     file_text_close(modFile)
     global.loadedMods[0].data = {}
-    global.loadedMods[0].data.luaState = lua_state_create()
+    global.loadedMods[0].data.luaState = new LuaState()
 
     for(var i = 1; i < array_length(global.modsList); i++) // load mods and apply their localization data
     {
@@ -25,18 +40,6 @@ function initializeMods()
             Log("Modloader/INFO", "Found mod: '" + _mod.displayName + "' (" + PROGRAM_DIR + "mods/" + _mod.id + ")")
 
             var state = new LuaState()
-            state.addCodeFromFile = function(dir)
-            {
-                var f = file_text_open_read(string(dir))
-                if(!f)
-                {
-                    Log("Apollo/ERROR", $"failed to read file from path '{string(dir)}'")
-                    return;
-                }
-                var _code = file_text_read_whole(f)
-                file_text_close(f)
-                return lua_add_code(__ptr__, _code)
-            }
 
             _mod.data = {}
             _mod.data.luaState = state
@@ -76,9 +79,9 @@ function initializeMods()
 
         lualib_addModLibrary(state, lib)
 
-        state.addCodeFromFile(i == 0 ? "data/init.lua" : path + "init.lua")
+        addCodeFromFile(state, i == 0 ? "data/init.lua" : path + "init.lua")
 
-        Log("Modloader/INFO", "initialized " + _mod.id + " with state " + string(state))
+        Log("Modloader/INFO", "Finished initializing mod '" + _mod.id + "' with " + string(state))
     }
 }
 
@@ -86,22 +89,43 @@ function modLibrary(state) constructor
 {
     self._state = state
     self.modId = ""
+    lualib_set(self._state, "_items", {})
+    lualib_set(self._state, "_buffs", {})
+
+    self.set_raw_from = function(to, from)
+    {
+        self.set_struct(string(to), self.get_struct(string(from)))
+    }
+
+    self.set_raw = function(key, value)
+    {
+        // set values without lua conversion
+    }
+
+    self.get_raw = function(key)
+    {
+        
+    }
 
     self.registerItemDef = function(id, struct = {})
     {
         global.itemdefs[$ id] = itemdef(id, struct)
         global.itemdefs_by_rarity[global.itemdefs[$ id].rarity][$ id] = global.itemdefs[$ id]
+        lualib_set(self._state, "_items." + id, global.itemdefs[$ id])
+
         return global.itemdefs[$ id]
     }
     self.registerBuffDef = function(id, struct)
     {
         global.buffdefs[$ id] = buffdef(id, struct)
+        lualib_set(self._state, "_buffs." + id, global.itemdefs[$ id])
+
         return global.buffdefs[$ id]
     }
 
     self.createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
     {
-        return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
+        return new DamageEventContext(lualib_fixInstanceId(attacker), lualib_fixInstanceId(target), damage, proc, use_attacker_items, force_crit, isReduceable)
     }
 
     self.gmlMethod = function(luaFunctionName)
@@ -109,26 +133,20 @@ function modLibrary(state) constructor
         return lualib_f_gmlMethod(luaFunctionName, self._state)
     }
 
-    self.events = {
-        doDamageEvent: function(ctx)
-        {
-            ctx.attacker = lualib_fixInstanceId(ctx.attacker)
-            ctx.target = lualib_fixInstanceId(ctx.target)
-            DamageEvent(ctx)
-        }
+    self.events = {}
+    self.events.doDamageEvent = function(ctx)
+    {
+        DamageEvent(DamageEventContext.fromLua(ctx))
     }
 
-    self.unit = {
-        inflictBuff: function(buff_id, context, duration = -1, stacks = 1)
-        {
-            context.attacker = lualib_fixInstanceId(context.attacker)
-            context.target = lualib_fixInstanceId(context.target)
-            return buff_instance_create(buff_id, context, duration, stacks)
-        },
-        inflictBuffNoContext: function(buff_id, target, duration = -1, stacks = 1)
-        {
-            return buff_instance_create_headless(buff_id, lualib_fixInstanceId(target), duration, stacks)
-        }
+    self.unit = {}
+    self.unit.inflictBuff = function(buff_id, context, duration = -1, stacks = 1)
+    {
+        return buff_instance_create(buff_id, DamageEventContext.fromLua(context), duration, stacks)
+    }
+    self.unit.inflictBuffNoContext = function(buff_id, target, duration = -1, stacks = 1)
+    {
+        return buff_instance_create_headless(buff_id, lualib_fixInstanceId(target), duration, stacks)
     }
 
     self.instance = {
@@ -188,9 +206,9 @@ function modLibrary(state) constructor
         }
     }
 
-    self.log = function(text)
+    self.log = function(value)
     {
-        Log(self.modId + "/INFO", string(text))
+        Log(self.modId + "/INFO", string(value))
     }
 
     self.rng = {

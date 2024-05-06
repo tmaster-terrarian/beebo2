@@ -141,7 +141,7 @@ lib = {
     ---
     ---state.get("funcB")(); // => "hello world"
     ---```
-    ---@param luaFunction function
+    ---@param luaFunction string
     ---@return GmlMethod
     gmlMethod = function(luaFunction) end,
 
@@ -198,7 +198,7 @@ lib = {
 
         ---@param x integer value greater than 0
         ---@return integer
-        intRandom = function(x) end,
+        RandomInt = function(x) end,
 
         ---@param min number
         ---@param max number
@@ -208,10 +208,10 @@ lib = {
         ---@param min integer
         ---@param max integer
         ---@return integer
-        intRandomRange = function(min, max) end,
+        RandomRangeInt = function(min, max) end,
 
         ---@param val number value between 0.0 and 1.0<br>the comparison is `random(1) <= val`<br>if the value is equal to either end of the range; then it directly returns the value as a boolean
         ---@return boolean
-        RollChance = function(val) end,
+        Roll = function(val) end,
     }
 }

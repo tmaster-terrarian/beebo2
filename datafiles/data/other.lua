@@ -7,6 +7,10 @@ function instance_create_depth(x, y, depth, obj) end
 ---@generic T
 ---@alias Readonly T
 
----@class GmlStruct: table
+---@class GmlRef: table
 
----@class GmlMethod: GmlStruct
+---@class GmlArray: GmlRef
+
+---@class GmlStruct: GmlRef
+
+---@class GmlMethod: GmlRef

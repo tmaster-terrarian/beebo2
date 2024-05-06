@@ -1,17 +1,14 @@
 --#region item registry
 
-lib.registerItemDef("unknown")
-
 lib.registerItemDef("beeswax", {
     rarity = lib.enums.ItemRarity.common
 })
 
-lib.registerItemDef("eviction_notice", {
-    rarity = lib.enums.ItemRarity.legendary,
-
+---@type ItemDef
+Item_EvictionNotice = {
     ---@param context DamageEventContext
     ---@param stacks number
-    onHit = lib.gmlMethod(function(context, stacks)
+    onHit = function(context, stacks)
         if(context.attacker.hp/context.attacker.hp_max >= 0.8)
         then
             local offx = 0
@@ -30,26 +27,33 @@ lib.registerItemDef("eviction_notice", {
                 .reduceable(1)
                 .exclude("eviction_notice")
         end
-    end)
+    end
+}
+lib.registerItemDef("eviction_notice", {
+    rarity = lib.enums.ItemRarity.legendary,
+    onHit = lib.gmlMethod("Item_EvictionNotice.onHit")
 })
 
-lib.registerItemDef("serrated_stinger", {
-    rarity = lib.enums.ItemRarity.common,
-
+---@type ItemDef
+Item_SerratedStinger = {
     ---@param context DamageEventContext
     ---@param stacks number
-    onHit = lib.gmlMethod(function(context, stacks)
-        if(lib.rng.RollChance(0.1 * stacks * context.proc))
+    onHit = function(context, stacks)
+        if(lib.rng.Roll(0.1 * stacks * context.proc))
         then
-            local ctx = lib.createDamageEventContext(context.attacker, context.target, lib.instance.get(context.attacker, "base_damage") * 0.2, 0)
-                .useAttackerItems(1)
-                .reduceable(1)
-                .exclude("serrated_stinger")
-                .damageColor(lib.enums.DamageColor.bleed)
+            local ctx = lib.createDamageEventContext(context.attacker, context.target, context.attacker.base_damage * 0.2, 0)
+            lib.log(ctx)
+            lib.log(tostring(ctx))
+            table.insert(ctx.excludedItems, "serrated_stinger")
+            ctx.damage_color = lib.enums.DamageColor.bleed
 
-            lib.unit.inflictBuff("bleed", ctx, 3 * context.proc, 1)
+            lib.unit.inflictBuff("bleed", ctx, 3.0 * context.proc, 1)
         end
-    end)
+    end
+}
+lib.registerItemDef("serrated_stinger", {
+    rarity = lib.enums.ItemRarity.common,
+    onHit = lib.gmlMethod("Item_SerratedStinger.onHit")
 })
 
 lib.registerItemDef("emergency_field_kit", {
