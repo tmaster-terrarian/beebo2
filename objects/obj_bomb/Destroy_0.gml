@@ -17,7 +17,7 @@ else
 audio_play_sound(sn_bomb_explosion, 0, 0)
 audio_stop_sound(throwsound)
 
-with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, parent, team, killtimer: 16 / _fps}))
+with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, team, killtimer: 16 / _fps}))
 {
     sprite_index = spr_fx_explosion
     image_index = other.bulleted
@@ -26,6 +26,7 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
     image_yscale = _size
 
     crit = other.bulleted
+	parent = other.parent
 
     with(par_unit)
     {

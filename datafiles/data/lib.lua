@@ -9,55 +9,7 @@
 -- Treat this as you would treat a `.d.ts` file - it's all just type information.
 local NOTICE = nil
 
----@class Item
----@field item_id Readonly<string>
----@field stacks integer
-local Item = {}
-
----@class ItemDef
----@field rarity lib.enums.ItemRarity?
-local ItemDef = {}
-
----@param context DamageEventContext
----@param stacks integer
-function ItemDef:onHit(context, stacks) end
-
----@param context DamageEventContext
----@param stacks integer
-function ItemDef:onKill(context, stacks) end
-
----@class Buff
----@field buff_id Readonly<string>
----@field context DamageEventContext
----@field stacks integer
----@field timer Readonly<number>
-local Buff = {}
-
----@class BuffDef
----@field timed boolean?
----@field duration number?
----@field ticksPerSecond number?
----@field stackable boolean?
-local BuffDef = {}
-
----@param instance Buff
--- runs at the same speed as the framerate
-function BuffDef:step(instance) end
-
----@param instance Buff
--- runs at a fixed rate (every `1 / ticksPerSecond` seconds)
-function BuffDef:tick(instance) end
-
----@param instance Buff
-function BuffDef:on_stack(instance) end
-
----@param instance Buff
-function BuffDef:on_expire(instance) end
-
----@class ref:integer
-local ref = {}
-
----@class Instance:ref
+---@class Instance: GmlStruct
 
 ---@class DamageEventContext
 ---@field attacker Instance                             the initiator of the event
@@ -95,19 +47,12 @@ function DamageEventContext.exclude(value) end
 ---@return DamageEventContext
 function DamageEventContext.damageColor(value) end
 
+-- creates a copy of the event context
+---@return DamageEventContext
+function DamageEventContext.copy() end
+
 ---@class lib
 lib = {
-    ---@param id string
-    ---@param def ItemDef?
-    ---@return ItemDef
-    -- note: leaving the `def` argument blank will register an itemdef with no rarity (gray color)
-    registerItemDef = function(id, def) end,
-
-    ---@param id string
-    ---@param def BuffDef
-    ---@return BuffDef
-    registerBuffDef = function(id, def) end,
-
     ---@param attacker Instance
     ---@param target Instance
     ---@param damage number
@@ -119,31 +64,11 @@ lib = {
     -- An object carrying lots of information for use in damage events
     createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items, force_crit, reduceable) end,
 
-    ---Creates a function that can be called in the standard way on Gamemaker's end.<br>
-    ---Items, Buffs, and Modifiers require you to declare class methods via `gmlMethod`
-    ---
-    ---In the example below, `funcA` is assigned to a regular Lua function, while `funcB` is assigned to a Gamemaker method.<br>
-    ---Much information is lost when using `gmlMethod`, and thus it should only be used if Gamemaker is expecting a non-Lua method.
-    ---
-    ---GML Example:
-    ---```gml
-    ---var state = new LuaState();
-    ---state.addCode(@'
-    ---    funcA = function() {
-    ---        return "hello world"
-    ---    }
-    ---    funcB = lib.gmlMethod(function() {
-    ---        return "hello world"
-    ---    })
-    ---');
-    ---
-    ---state.get("funcA").call(); // => "hello world"
-    ---
-    ---state.get("funcB")(); // => "hello world"
-    ---```
-    ---@param luaFunction string
-    ---@return GmlMethod
-    gmlMethod = function(luaFunction) end,
+    -- ---Creates a function that gets error-checked on Gamemaker's end whenever it's called.
+    -- ---@deprecated
+    -- ---@param luaFunction string
+    -- ---@return GmlMethod
+    -- gmlMethod = function(luaFunction) end,
 
     ---Access units (players/enemies) and do various things with them
     unit = {
@@ -159,7 +84,7 @@ lib = {
         ---@param duration number?
         ---@param stacks integer?
         ---@return table
-        inflictBuffNoContext = function(buff_id, target, duration, stacks) end
+        inflictBuffSimple = function(buff_id, target, duration, stacks) end
     },
 
     ---Trigger various game events
@@ -170,6 +95,21 @@ lib = {
 
     ---Basic instance manipulation
     instance = {
+        ---@param ins Instance
+        ---@return boolean
+        exists = function(ins) end,
+
+        ---@param x number
+        ---@param y number
+        ---@param obj any
+        create = function(x, y, obj) end,
+
+        ---@param x number
+        ---@param y number
+        ---@param depth number
+        ---@param obj any
+        createDepth = function(x, y, depth, obj) end,
+
         ---@param ins Instance
         destroy = function(ins) end,
     },
@@ -214,4 +154,78 @@ lib = {
         ---@return boolean
         Roll = function(val) end,
     }
+}
+
+---@class Item
+---@field item_id Readonly<string>
+---@field stacks integer
+local Item = {}
+
+---@class ItemDef
+---@field rarity lib.enums.ItemRarity?
+local ItemDef = {}
+
+---@param context DamageEventContext
+---@param stacks integer
+function ItemDef:onHit(context, stacks) end
+
+---@param context DamageEventContext
+---@param stacks integer
+function ItemDef:onKill(context, stacks) end
+
+---@class Modifier
+---@field modifier_id Readonly<string>
+---@field stacks integer
+local Modifier = {}
+
+---@class ModifierDef
+local ModifierDef = {}
+
+function ModifierDef:onPickup() end
+
+---@class Buff
+---@field buff_id Readonly<string>
+---@field context DamageEventContext
+---@field stacks integer
+---@field timer Readonly<number>
+local Buff = {}
+
+---@class BuffDef
+---@field timed boolean?
+---@field duration number?
+---@field ticksPerSecond number?
+---@field stackable boolean?
+local BuffDef = {}
+
+---@param instance Buff
+-- runs at the same speed as the framerate
+function BuffDef:step(instance) end
+
+---@param instance Buff
+-- runs at a fixed rate (every `1 / ticksPerSecond` seconds)
+function BuffDef:tick(instance) end
+
+---@param instance Buff
+function BuffDef:onStack(instance) end
+
+---@param instance Buff
+function BuffDef:onExpire(instance) end
+
+---@class registry
+registry = {
+    ---@param id string
+    ---@param def ItemDef?
+    ---@return GmlStruct
+    -- note: leaving the `def` argument blank will register an itemdef with no rarity (gray color) and no special functions
+    addItem = function(id, def) end,
+
+    ---@param id string
+    ---@param def ModifierDef
+    ---@return GmlStruct
+    addModifier = function(id, def) end,
+
+    ---@param id string
+    ---@param def BuffDef
+    ---@return GmlStruct
+    addBuff = function(id, def) end,
 }

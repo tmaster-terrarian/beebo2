@@ -99,7 +99,7 @@ addFixedStep(function() {
         for(var i = 0; i < array_length(buffs); i++)
         {
             getdef(buffs[i].buff_id, DefType.buff).step(buffs[i])
-            getdef(buffs[i].buff_id, DefType.buff).timer_step(buffs[i])
+            getdef(buffs[i].buff_id, DefType.buff).timerStep(buffs[i])
         }
     }
 })

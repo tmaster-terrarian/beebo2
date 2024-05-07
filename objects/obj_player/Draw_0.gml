@@ -30,7 +30,16 @@ var drawgun = function(_v)
                 draw_sprite_ext(spr_player_gun_reticle2, 0, x + gun_pos.x * sign(facing) + (nx * 4), y + gun_pos.y + (ny * 4) - 2, gun_flip, 1, 0, c_white, 1)
         }
 
-        draw_sprite_ext(gun_spr, gun_spr_ind, x + gun_pos.x * sign(facing) * stretch + lengthdir_x(-recoil, round(fire_angle / 10) * 10), y + gun_pos.y * squash + lengthdir_y(-recoil, round(fire_angle / 10) * 10), 1 * stretch, 1 * gun_flip * squash, round(fire_angle / 10) * 10, merge_color(c_white, c_red, (heat/heat_max)*0.5), 1)
+        draw_sprite_ext(
+            gun_spr,
+            gun_spr_ind,
+            x + gun_pos.x * sign(facing) * stretch + lengthdir_x(-recoil, round(fire_angle / 10) * 10),
+            y + gun_pos.y * squash + lengthdir_y(-recoil, round(fire_angle / 10) * 10),
+            1 * stretch,
+            1 * gun_flip * squash,
+            round(fire_angle / 10) * 10,
+            merge_color(c_white, c_red, (heat/heat_max)*0.5), 1
+        )
 
         shader_reset()
     }

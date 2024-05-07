@@ -7,13 +7,12 @@
         "undefined-field",
         "inject-field"
     ],
-    "Lua.completion.showWord": "Disable",
     "Lua.workspace.library": [
         "datafiles/data/?.lua"
     ],
     "Lua.completion.keywordSnippet": "Both",
     "Lua.hint.enable": false,
-    "Lua.hint.paramName": "Literal",
+    "Lua.hint.paramName": "All",
     "Lua.hint.paramType": false,
     "Lua.hint.semicolon": "SameLine",
     "gml-ls.userGlobals": {

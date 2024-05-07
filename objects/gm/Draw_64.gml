@@ -35,8 +35,8 @@ else
     // _debugtext.draw(2, 1)
 
     var _MONEY = scribble($"[fa_left][fa_top][spr_hudnumbers][c_yellow]$[/c]:{floor(_money)}")
-    // _draw_rect(1, 1, _MONEY.get_width(), _MONEY.get_height(), c_black, 0.5)
-    // _MONEY.draw(1, 1)
+    _draw_rect(1, 1, _MONEY.get_width(), _MONEY.get_height(), c_black, 0.5)
+    _MONEY.draw(1, 1)
 
     if(mainDirector.waveType == 1 && global.enemyCount > 0)
     {
@@ -62,36 +62,38 @@ else
         global.combinedBossMaxHealth = 0
     }
 
-    // var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.stocks)} {ceil(global.players[0].skills.secondary.stocks)} {ceil(global.players[0].skills.utility.stocks)} {ceil(global.players[0].skills.special.stocks)}")
+    var _stockcounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{ceil(global.players[0].skills.primary.stocks)} {ceil(global.players[0].skills.secondary.stocks)} {ceil(global.players[0].skills.utility.stocks)} {ceil(global.players[0].skills.special.stocks)}")
 
-    // _draw_rect(_timer.get_width() + 25, SC_H - 16, _timer.get_width() + _stockcounter.get_width() + 24, SC_H - 10, c_black, 0.5)
+    _draw_rect(_timer.get_width() + 25, SC_H - 16, _timer.get_width() + _stockcounter.get_width() + 24, SC_H - 10, c_black, 0.5)
 
-    // var p = ceil(global.players[0].skills.primary.cooldown)
-    // var s = ceil(global.players[0].skills.secondary.cooldown)
-    // var u = ceil(global.players[0].skills.utility.cooldown)
-    // var r = ceil(global.players[0].skills.special.cooldown)
-    // var _cldncounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]{p ? p : "_"} {s ? s : "_"} {u ? u : "_"} {r ? r : "_"} state:{global.players[0].attack_state}")
+    var p = ceil(global.players[0].skills.primary.cooldown)
+    var s = ceil(global.players[0].skills.secondary.cooldown)
+    var u = ceil(global.players[0].skills.utility.cooldown)
+    var r = ceil(global.players[0].skills.special.cooldown)
+    var _cldncounter = scribble($"[fa_left][fa_bottom][fnt_itemdesc][c_white]         state:{global.players[0].attack_state}")
 
-    // _draw_rect(_timer.get_width() + 25, SC_H - 8, _timer.get_width() + _cldncounter.get_width() + 24, SC_H - 2, c_black, 0.5)
+    _draw_rect(_timer.get_width() + 25, SC_H - 8, _timer.get_width() + _cldncounter.get_width() + 24, SC_H - 2, c_black, 0.5)
 
-    // draw_set_font(fnt_itemdesc) draw_set_halign(fa_left) draw_set_valign(fa_bottom)
-    // var names = struct_get_names(global.players[0].skills)
-    // for(var i = 0; i < array_length(names); i++)
-    // {
-    //     var skill = global.players[0].skills[$ names[i]]
-    //     var def = skill.def
-    //     var xx = _timer.get_width() + 23 + i * 7
+    _cldncounter.draw(_timer.get_width() + 26, SC_H - 1)
 
-    //     if(skill.cooldown > 0)
-    //     {
-    //         var mult = round(6 * skill.cooldown / def.baseStockCooldown)
+    draw_set_font(fnt_itemdesc) draw_set_halign(fa_left) draw_set_valign(fa_bottom)
+    var names = struct_get_names(global.players[0].skills)
+    for(var i = 0; i < array_length(names); i++)
+    {
+        var skill = global.players[0].skills[$ names[i]]
+        var def = skill.def
+        var xx = _timer.get_width() + 23 + i * 7
 
-    //         draw_text(xx + 3, SC_H - 1, ceil(skill.cooldown))
-    //         _draw_line(xx + 1, SC_H - 8.5 + mult, xx + 6, SC_H - 8.5 + mult, 1, c_white, 0.5)
-    //     }
-    //     if(def.baseMaxStocks + global.players[0].bonus_stocks[$ names[i]] > 1)
-    //         draw_text(xx + 3, SC_H - 8, ceil(skill.stocks))
-    // }
+        if(skill.cooldown > 0)
+        {
+            var mult = round(6 * skill.cooldown / def.baseStockCooldown)
+
+            draw_text(xx + 3, SC_H - 1, ceil(skill.cooldown))
+            _draw_line(xx + 1, SC_H - 8.5 + mult, xx + 6, SC_H - 8.5 + mult, 1, c_white, 0.5)
+        }
+        if(def.baseMaxStocks + global.players[0].bonus_stocks[$ names[i]] > 1)
+            draw_text(xx + 3, SC_H - 8, ceil(skill.stocks))
+    }
 }
 
 UILayers[UILayer].draw()

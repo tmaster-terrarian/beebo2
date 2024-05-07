@@ -223,6 +223,24 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 		return str
 	}
 
+	self.copyWith = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
+	{
+		var obj = struct_clone(self)
+		obj.attacker = attacker
+		obj.target = target
+		obj.damage = damage
+		obj.proc = proc
+		obj.use_attacker_items = use_attacker_items
+		obj.force_crit = force_crit
+		obj.isReduceable = isReduceable
+		return obj
+	}
+
+	self.copy = function()
+	{
+		return self.copyWith(self.attacker, self.target, self.damage, self.proc, self.use_attacker_items, self.force_crit, self.isReduceable)
+	}
+
 	self.chain = []
 	self.nonlethal = 0
 
@@ -391,7 +409,7 @@ function DamageEvent(ctx)
 				var _def = getdef(_item.item_id, DefType.item)
 				if(!array_contains(ctx.excludedItems, _item.item_id) && !array_contains(ctx.chain, _item.item_id))
 				{
-					_def.onHit.call(ctx, _item.stacks)
+					_def.onHit(ctx, _item.stacks)
 				}
 			}
 		}
@@ -416,7 +434,7 @@ function DamageEvent(ctx)
 					var _def = getdef(_item.item_id, DefType.item)
 					if(!array_contains(ctx.excludedItems, _item.item_id) && !_item.triggered)
 					{
-						_def.onKill.call(ctx, _item.stacks)
+						_def.onKill(ctx, _item.stacks)
 						_item.triggered = 1
 					}
 				}
@@ -1426,52 +1444,13 @@ function _itemdef(name) constructor {
 	lore = string_loc($"item.{name}.lore")
 	rarity = ItemRarity.none
 
-	draw = {call: function(target, stacks) {}}
-	step = {call: function(target, stacks) {}}
-	onHit = {call: function(context, stacks) {}}
-	onKill = {call: function(context, stacks) {}}
+	draw = function(target, stacks) {}
+	step = function(target, stacks) {}
+	onHit = function(context, stacks) {}
+	onKill = function(context, stacks) {}
 }
 
-function itemdef(_name, _struct = {})
-{
-	static total_items = 0
-	total_items++
-
-	var __newstruct = new _itemdef(_name)
-
-	if(is_lua_ref(_struct))
-	{
-		if(_struct.get("rarity") != undefined)
-			__newstruct.rarity = _struct.get("rarity")
-
-		if(_struct.get("draw") != undefined)
-			__newstruct.draw = _struct.get("draw")
-
-		if(_struct.get("step") != undefined)
-			__newstruct.step = _struct.get("step")
-
-		if(_struct.get("onHit") != undefined)
-			__newstruct.onHit = _struct.get("onHit")
-
-		if(_struct.get("onKill") != undefined)
-			__newstruct.onKill = _struct.get("onKill")
-	}
-	else
-	{
-		var names = struct_get_names(_struct)
-		var size = struct_names_count(_struct)
-
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = struct_get(_struct, name)
-			struct_set(__newstruct, name, element)
-		}
-	}
-
-	Log(_name == "unknown" ? "Startup/INFO" : "ModLoader/INFO", $"registered item '{_name}'")
-
-	return __newstruct
-}
+// refer to registry
 
 global.itemdefs =
 {
@@ -1556,47 +1535,16 @@ function _modifierdef(_name) constructor
 	summary = string_loc($"modifier.{name}.summary")
 	description = string_loc($"modifier.{name}.description")
 
-	on_pickup = function() {}
+	onPickup = function() {}
 }
 
-function modifierdef(_name, _struct = {})
-{
-	static total_modifiers = 0
-	total_modifiers++
-
-	var __newstruct = new _modifierdef(_name)
-
-	if(is_lua_ref(_struct))
-	{
-		var names = luaRef_keys(_struct)
-		var size = array_length(names)
-
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = _struct.get(name)
-			struct_set(__newstruct, name, element)
-		}
-	}
-	else
-	{
-		var names = struct_get_names(_struct)
-		var size = struct_names_count(_struct)
-
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = struct_get(_struct, name)
-			struct_set(__newstruct, name, element)
-		}
-	}
-
-	return __newstruct
-}
+// refer to registry
 
 global.modifierdefs = {
 	unknown: modifierdef("unknown"),
 	cut_hp: modifierdef("cut_hp"),
 	evolution: modifierdef("evolution", {
-		on_pickup: function() {
+		onPickup: function() {
 			var item = item_id_get_random(1, global.item_tables.chest_small)
 			var stacks = 1
 			var r = getdef(item, DefType.item).rarity
@@ -1681,12 +1629,12 @@ function _buffdef(name) constructor
 		instance.timer = ceil(instance.timer * 60) / 60
 	}
 
-	self.timer_step = function(instance) {
+	self.timerStep = function(instance) {
 		if(self.timed)
 		{
 			if(instance.timer <= 0)
 			{
-				self.on_expire(instance)
+				self.onExpire(instance)
 				return
 			}
 			else if(self.ticksPerSecond > 0)
@@ -1703,76 +1651,21 @@ function _buffdef(name) constructor
 	self.step = function(instance) {}
 	self.tick = function(instance) {}
 
-	self.on_stack = function(instance) {}
-	self.on_expire = function(instance) {
+	self.onStack = function(instance) {}
+
+	self.onExpire = function(instance) {
 		buff_instance_remove(instance)
 	}
-	self.on_remove = function(instance) {
+	self.onRemove = function(instance) {
 		Log("Main/INFO", $"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
 	}
 }
 
-function buffdef(_name, _struct = {})
-{
-	static total_buffs = 0
-	total_buffs++
-
-	var __newstruct = new _buffdef(_name)
-
-	if(is_lua_ref(_struct))
-	{
-		var names = luaRef_keys(_struct)
-		var size = array_length(names)
-
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = _struct.get(name)
-			struct_set(__newstruct, name, element)
-		}
-	}
-	else
-	{
-		var names = struct_get_names(_struct)
-		var size = struct_names_count(_struct)
-
-		for (var i = 0; i < size; i++) {
-			var name = names[i]
-			var element = struct_get(_struct, name)
-			struct_set(__newstruct, name, element)
-		}
-	}
-
-	return __newstruct
-}
+// refer to registry
 
 global.buffdefs =
 {
-	unknown: buffdef("unknown"),
-	bleed: buffdef("bleed", {
-		timed: 1,
-		duration: 3,
-		ticksPerSecond: 4,
-		stackable: 1,
-		tick: function(instance)
-		{
-			DamageEvent(instance.context)
-		}
-	}),
-	collapse: buffdef("collapse", {
-		timed: 1,
-		duration: 3,
-		ticksPerSecond: 0,
-		stackable: 1,
-		// apply: function(instance)
-		// {
-		// 	instance.context.damage = instance.context.attacker.base_damage * (4 * instance.stacks)
-		// },
-		on_expire: function(instance)
-		{
-			DamageEvent(instance.context)
-			buff_instance_remove(instance)
-		}
-	})
+	unknown: buffdef("unknown")
 }
 
 function buff_instance(buff_id, context, duration, stacks) constructor
@@ -1829,7 +1722,7 @@ function buff_instance_create_headless(buff_id, target, duration = -1, stacks = 
 
 function buff_instance_remove(instance)
 {
-	getdef(instance.buff_id, DefType.buff).on_remove(instance)
+	getdef(instance.buff_id, DefType.buff).onRemove(instance)
 	for(var i = 0; i < array_length(instance.context.target.buffs); i++)
 	{
 		if(instance.context.target.buffs[i].buff_id == instance.buff_id)
@@ -1866,18 +1759,18 @@ function buff_instance_add_stacks(instance, stacks)
 	var oldstacks = instance.stacks
 	instance.stacks += stacks
 	if(instance.stacks <= 0)
-		getdef(instance.buff_id, DefType.buff).on_expire(instance)
+		getdef(instance.buff_id, DefType.buff).onExpire(instance)
 	else if(instance.stacks > oldstacks)
-		getdef(instance.buff_id, DefType.buff).on_stack(instance)
+		getdef(instance.buff_id, DefType.buff).onStack(instance)
 }
 function buff_instance_set_stacks(instance, stacks)
 {
 	var oldstacks = instance.stacks
 	instance.stacks = stacks
 	if(instance.stacks <= 0)
-		getdef(instance.buff_id, DefType.buff).on_expire(instance)
+		getdef(instance.buff_id, DefType.buff).onExpire(instance)
 	else if(instance.stacks > oldstacks)
-		getdef(instance.buff_id, DefType.buff).on_stack(instance)
+		getdef(instance.buff_id, DefType.buff).onStack(instance)
 }
 
 function buff_get_stacks(buff_id, target)
@@ -1909,7 +1802,7 @@ function buff_add_timer(buff_id, target, timer)
 		{
 			target.buffs[i].timer += timer
 			if(target.buffs[i].timer <= 0)
-				getdef(buff_id, DefType.buff).on_expire(target.buffs[i])
+				getdef(buff_id, DefType.buff).onExpire(target.buffs[i])
 			return;
 		}
 	}
@@ -1927,7 +1820,7 @@ function buff_set_timer(buff_id, target, timer)
 		{
 			target.buffs[i].timer = timer
 			if(target.buffs[i].timer <= 0)
-				getdef(buff_id, DefType.buff).on_expire(target.buffs[i])
+				getdef(buff_id, DefType.buff).onExpire(target.buffs[i])
 			return;
 		}
 	}

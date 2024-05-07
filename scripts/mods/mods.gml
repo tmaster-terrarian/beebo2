@@ -79,9 +79,14 @@ function initializeMods()
 
         lualib_addModLibrary(state, lib)
 
-        addCodeFromFile(state, i == 0 ? "data/init.lua" : path + "init.lua")
-
-        Log("Modloader/INFO", "Finished initializing mod '" + _mod.id + "' with " + string(state))
+        var initPath = path + "init.lua"
+        if(i == 0) initPath = "data/init.lua"
+        if(file_exists(initPath))
+        {
+            addCodeFromFile(state, initPath)
+            Log("Modloader/INFO", "Finished initializing mod '" + _mod.id + "' with " + string(state))
+        }
+        else if(i == 0) Log("Main/ERROR", "base mod contents could not be initialized! All vanilla mod features will be either missing or very broken!")
     }
 }
 
@@ -89,49 +94,59 @@ function modLibrary(state) constructor
 {
     self._state = state
     self.modId = ""
-    lualib_set(self._state, "_items", {})
-    lualib_set(self._state, "_buffs", {})
 
-    self.set_raw_from = function(to, from)
+    self.vars = {}
+
+    self.setVarFrom = function(to, from)
     {
-        self.set_struct(string(to), self.get_struct(string(from)))
+        self.setVar(string(to), self.getVar(string(from)))
     }
 
-    self.set_raw = function(key, value)
+    self.setVar = function(key, value)
     {
-        // set values without lua conversion
+        var split = string_split(key, ".")
+        var g = self.vars
+        for(var i = 0; i < array_length(split) - 1; i++)
+        {
+            if(!struct_exists(g, split[i]))
+            {
+                g[$ split[i]] = {}
+            }
+            if(!is_struct(g[$ split[i]]) && !is_method(g[$ split[i]]))
+                throw "Invalid path: '" + key + "' (at '" + split[i] + "')"
+
+            g = g[$ split[i]]
+        }
+        g[$ split[array_length(split) - 1]] = value
     }
 
-    self.get_raw = function(key)
+    self.getVar = function(key)
     {
-        
-    }
+        var split = string_split(key, ".")
+        var g = self.vars
+        for(var i = 0; i < array_length(split); i++)
+        {
+            if(!struct_exists(g, split[i]))
+            {
+                g[$ split[i]] = {}
+            }
+            if(!is_struct(g[$ split[i]]) && !is_method(g[$ split[i]]) && i < (array_length(split) - 1))
+                throw "Invalid path: '" + key + "' (at '" + split[i] + "')"
 
-    self.registerItemDef = function(id, struct = {})
-    {
-        global.itemdefs[$ id] = itemdef(id, struct)
-        global.itemdefs_by_rarity[global.itemdefs[$ id].rarity][$ id] = global.itemdefs[$ id]
-        lualib_set(self._state, "_items." + id, global.itemdefs[$ id])
-
-        return global.itemdefs[$ id]
-    }
-    self.registerBuffDef = function(id, struct)
-    {
-        global.buffdefs[$ id] = buffdef(id, struct)
-        lualib_set(self._state, "_buffs." + id, global.itemdefs[$ id])
-
-        return global.buffdefs[$ id]
+            g = g[$ split[i]]
+        }
+        return g
     }
 
     self.createDamageEventContext = function(attacker, target, damage, proc, use_attacker_items = 1, force_crit = -1, isReduceable = 1)
     {
-        return new DamageEventContext(lualib_fixInstanceId(attacker), lualib_fixInstanceId(target), damage, proc, use_attacker_items, force_crit, isReduceable)
+        return new DamageEventContext(attacker, target, damage, proc, use_attacker_items, force_crit, isReduceable)
     }
 
-    self.gmlMethod = function(luaFunctionName)
-    {
-        return lualib_f_gmlMethod(luaFunctionName, self._state)
-    }
+    // self.gmlMethod = function(luaFunctionName)
+    // {
+    //     return lualib_f_gmlMethod(luaFunctionName, self._state)
+    // }
 
     self.events = {}
     self.events.doDamageEvent = function(ctx)
@@ -144,33 +159,44 @@ function modLibrary(state) constructor
     {
         return buff_instance_create(buff_id, DamageEventContext.fromLua(context), duration, stacks)
     }
-    self.unit.inflictBuffNoContext = function(buff_id, target, duration = -1, stacks = 1)
+    self.unit.inflictBuffSimple = function(buff_id, target, duration = -1, stacks = 1)
     {
         return buff_instance_create_headless(buff_id, lualib_fixInstanceId(target), duration, stacks)
     }
 
     self.instance = {
-        // obsoleted with Apollo v3 (probably)
-        // get: function(ins, prop)
-        // {
-        //     var ref = lualib_fixInstanceId(ins)
-        //     if(!instance_exists(ref))
-        //     {
-        //         lua_show_error("Couldn't find instance " + string(ins));
-        //     }
-        //     else return variable_instance_get(ref, string(prop));
-        //
-        //     return undefined;
-        // },
-        // set: function(ins, prop, val)
-        // {
-        //     var ref = lualib_fixInstanceId(ins)
-        //     if(!instance_exists(ref))
-        //     {
-        //         lua_show_error("Couldn't find instance " + string(ins));
-        //     }
-        //     else variable_instance_set(ref, string(prop), val);
-        // },
+        get: function(ins, prop)
+        {
+            var ref = lualib_fixInstanceId(ins)
+            if(!instance_exists(ref))
+            {
+                lua_show_error("Couldn't find instance " + string(ins));
+            }
+            else return variable_instance_get(ref, string(prop));
+
+            return undefined;
+        },
+        set: function(ins, prop, val)
+        {
+            var ref = lualib_fixInstanceId(ins)
+            if(!instance_exists(ref))
+            {
+                lua_show_error("Couldn't find instance " + string(ins));
+            }
+            else variable_instance_set(ref, string(prop), val);
+        },
+        exists: function(ins)
+        {
+            return instance_exists(lualib_fixInstanceId(ins))
+        },
+        create: function(x, y, obj)
+        {
+            return instance_create_depth(x, y, 0, lualib_fixRefId("object", ins))
+        },
+        createDepth: function(x, y, depth, obj)
+        {
+            return instance_create_depth(x, y, depth, lualib_fixRefId("object", ins))
+        },
         destroy: function(ins)
         {
             instance_destroy(lualib_fixInstanceId(ins))
