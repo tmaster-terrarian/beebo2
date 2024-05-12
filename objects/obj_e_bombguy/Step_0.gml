@@ -1,6 +1,3 @@
-event_inherited();
-
-
 if(instance_exists(target))
 {
     if(state == "normal")
@@ -32,7 +29,7 @@ else
     fric = air_fric
 }
 
-states[$ state]()
+event_inherited();
 
 if(place_meeting(x + input_dir * 12, y, par_solid) && state != "attack")
     INPUT.JUMP = 1

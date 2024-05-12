@@ -90,6 +90,148 @@ function initializeMods()
     }
 }
 
+enum ModAssetType
+{
+    Item,
+    Buff,
+    ModifierArt
+}
+
+global.spriteCache = {}
+global.builtinSpriteList = []
+
+// first feature to introduce significant mod load order, which allows for mods that resprite other mods (including base)
+function loadSprite(name, assetType)
+{
+    if(struct_exists(global.spriteCache, name)) return global.spriteCache[$ name]
+
+    var subPath = ""
+    switch(assetType)
+    {
+        case ModAssetType.Item: subPath = "item/"; break;
+        case ModAssetType.Buff: subPath = "buff/"; break;
+        case ModAssetType.ModifierArt: subPath = "modifier/"; break;
+    }
+
+    var assetPath = undefined
+    var jsonPath = undefined
+    for(var i = 0; i < array_length(global.loadedMods); i++)
+    {
+        var _mod = global.loadedMods[i]
+        var modId = _mod.id
+        var path = _mod.id != "base" ? "mods/" + _mod.id + "/" : "data/"
+
+        if(!directory_exists(path + "assets/sprites")) continue;
+
+        path = path + "assets/sprites/" + subPath
+
+        if(file_exists(path + name + ".png")) assetPath = path + name + ".png"
+        if(file_exists(path + name + ".json")) jsonPath = path + name + ".json"
+    }
+
+    if(is_undefined(assetPath))
+    {
+        var builtinSpr = asset_get_index(name)
+        if(sprite_exists(builtinSpr))
+        {
+            global.spriteCache[$ name] = builtinSpr
+            array_push(global.builtinSpriteList, name)
+            return builtinSpr
+        }
+
+        // this way we can get the call stack for completely free!
+        try
+        {
+            a = a + 1
+        }
+        catch(err)
+        {
+            err.message = "No sprite exists with the name \"" + name + "\""
+            array_delete(err.stacktrace, 0, 1)
+            ThrowError(err, false, true)
+        }
+
+        return -1
+    }
+
+    var spr
+
+    if(!is_undefined(jsonPath))
+    {
+        var json = undefined
+
+        var file = file_text_open_read(jsonPath)
+        json = file_json_read(file)
+        file_text_close(file)
+
+        var pivot = [0, 0]
+        if(struct_exists(json, "pivot") && is_array(json.pivot) && array_length(json.pivot) >= 2)
+        {
+            pivot[0] = json.pivot[0]
+            pivot[1] = json.pivot[1]
+        }
+
+        spr = sprite_add(
+            assetPath,
+            struct_exists(json, "frameCount") && is_numeric(json.frameCount) ? max(1, floor(real(json.frameCount))) : 1,
+            false,
+            false,
+            pivot[0],
+            pivot[1]
+        )
+
+        var w = sprite_get_width(spr)
+        var h = sprite_get_height(spr)
+
+        if(struct_exists(json, "bbox") && is_struct(json.bbox))
+        {
+            var shape = struct_exists(json.bbox, "type") && is_string(json.bbox.type) ? json.bbox.type : "box"
+            var mode  = struct_exists(json.bbox, "mode") && is_string(json.bbox.mode) ? json.bbox.mode : "auto"
+
+            switch(mode)
+            {
+                case "manual": mode = 2; break;
+                case "full": mode = 1; break;
+                case "auto": default: mode = 0; break;
+            }
+
+            switch(shape)
+            {
+                case "ellipse": shape = bboxkind_ellipse; break;
+                case "precise": shape = bboxkind_precise; break;
+                case "box": default: shape = bboxkind_rectangular; break;
+            }
+
+            sprite_collision_mask(
+                spr,
+                false,
+                mode,
+                struct_exists(json.bbox, "left") && is_numeric(json.bbox.left) ? real(json.bbox.left) : 0,
+                struct_exists(json.bbox, "right") && is_numeric(json.bbox.right) ? real(json.bbox.right) : w - 1,
+                struct_exists(json.bbox, "top") && is_numeric(json.bbox.top) ? real(json.bbox.top) : 0,
+                struct_exists(json.bbox, "bottom") && is_numeric(json.bbox.bottom) ? real(json.bbox.bottom) : h - 1,
+                shape,
+                128
+            )
+        }
+    }
+    else
+    {
+        spr = sprite_add(assetPath, 1, false, false, 0, 0)
+
+        var w = sprite_get_width(spr)
+        var h = sprite_get_height(spr)
+
+        sprite_collision_mask(spr, false, 0, 0, w - 1, 0, h - 1, bboxkind_rectangular, 128)
+    }
+
+    sprite_set_speed(spr, 1, spritespeed_framespergameframe)
+
+    global.spriteCache[$ name] = spr
+
+    return spr
+}
+
 function modLibrary(state) constructor
 {
     self._state = state

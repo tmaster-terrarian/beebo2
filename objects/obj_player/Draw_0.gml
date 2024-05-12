@@ -1,10 +1,12 @@
+if(!surface_exists(drawSurface)) drawSurface = surface_create(room_width, room_height)
+
+surface_set_target(drawSurface)
+draw_clear_alpha(c_black, 0)
+
 var drawgun = function(_v)
 {
     if(_v && draw_gun && has_gun)
     {
-        if(flash > 0)
-            shader_set(sh_flash)
-
         if(gamepad)
         {
             var d = fire_angle
@@ -38,17 +40,13 @@ var drawgun = function(_v)
             1 * stretch,
             1 * gun_flip * squash,
             round(fire_angle / 10) * 10,
-            merge_color(c_white, c_red, (heat/heat_max)*0.5), 1
+            merge_color(c_white, c_red, (heat/heat_max)*0.5),
+            1
         )
-
-        shader_reset()
     }
 }
 
 drawgun(gun_behind)
-
-if(flash > 0)
-    shader_set(sh_flash)
 
 // ponytail
 var px = x - 5 * facing
@@ -149,20 +147,19 @@ if(ponytail_visible)
     }
 }
 
-var sx = image_xscale
-var sy = image_yscale
-image_xscale *= stretch
-image_yscale *= squash
-
-draw_self()
-
-image_xscale = sx
-image_yscale = sy
-
-if(flash > 0)
-    shader_reset()
+draw_sprite_ext(sprite_index, image_index, x, y, image_xscale * stretch, image_yscale * squash, image_angle, c_white, 1)
 
 drawgun(!gun_behind)
+
+surface_reset_target()
+
+
+if(flash > 0) shader_set(sh_flash)
+
+draw_surface_ext(drawSurface, 0, 0, 1, 1, 0, image_blend, image_alpha)
+
+if(flash > 0) shader_reset()
+
 
 if(global.draw_debug)
 {

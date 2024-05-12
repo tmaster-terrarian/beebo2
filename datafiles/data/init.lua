@@ -105,4 +105,24 @@ registry.addBuff("collapse", {
     end
 })
 
+-- registry.addBuff("fire", {
+--     timed = true,
+--     duration = 4,
+--     ticksPerSecond = 5,
+--     stackable = true,
+--     tick = function(instance)
+--         lib.events.doDamageEvent(instance.context)
+--     end,
+--     -- onExpire = function(instance)
+--     --     if(lib.instance.exists(instance.context.target)) then
+--     --         if(lib.instance.exists(instance.context.target.bigFlamo1)) then
+--     --             instance.context.target.bigFlamo1.interval = 0 --sentenced to death
+--     --         end
+--     --         if(lib.instance.exists(instance.context.target.bigFlamo2)) then
+--     --             instance.context.target.bigFlamo2.interval = 0
+--     --         end
+--     --     end
+--     -- end,
+-- })
+
 --#endregion

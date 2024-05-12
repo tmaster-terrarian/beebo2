@@ -5,7 +5,8 @@ skills = variable_clone(global.chardefs.base.skills)
 attack_states = variable_clone(global.chardefs.base.attack_states)
 
 t = 0
-regen = 1
+canRegen = 1
+regen = canRegen
 accel = 0
 fric = 0
 hp = 1
@@ -66,6 +67,78 @@ invokeOnCombatEnter = function()
 
 onCombatEnter = function() {}
 onCombatExit = function() {}
+onHurt = function(context) {}
+
+onReceiveBuff = function(buff_id, context, duration, stacks)
+{
+    switch(buff_id)
+    {
+        case "fire":
+        {
+            if(buff_get_stacks(buff_id, id)) break;
+
+            if(instance_exists(bigFlamo1)) bigFlamo1.stop()
+            if(instance_exists(bigFlamo2)) bigFlamo2.stop()
+
+            bigFlamo1 = instance_create_depth((bbox_left + bbox_right) / 2, (bbox_top + bbox_bottom) / 2, depth + 3, fx_particle_emitter, {
+                posGlobal: 1,
+                interval: 1,
+                max_particles: 40,
+                spr: spr_fx_steam,
+                img: 0,
+                imgE: 0,
+                color: #EDCA07,
+                colorE: #38282E,
+                life: 3.5/6,
+                lifeR: 0.5/6,
+                scale: 0.75,
+                scaleR: 0.05,
+                scaleE: 0.1,
+                scaleER: 0.05,
+                spd: 0.75,
+                spdR: 0.25,
+                spdE: 0.4,
+                spdER: 0.05,
+                grvY: -0.13,
+                dir: 90,
+                dirR: 5,
+                xR: (bbox_right - bbox_left) / 2,
+                yR: (bbox_bottom - bbox_top) / 2,
+            })
+
+            bigFlamo2 = instance_create_depth((bbox_left + bbox_right) / 2, bbox_top, depth + 4, fx_particle_emitter, {
+                posGlobal: 1,
+                interval: 6,
+                max_particles: 40,
+                spr: spr_fx_steam,
+                img: 0,
+                imgE: 2,
+                color: #3A1F27,
+                colorE: #160A0D,
+                alphaE: 0.1,
+                life: 3.5/6,
+                lifeR: 0.5/6,
+                scale: 1,
+                scaleR: 0.05,
+                scaleE: 0.95,
+                scaleER: 0.05,
+                spd: 0.55,
+                spdR: 0.05,
+                spdE: 0.4,
+                spdER: 0.05,
+                grvY: -0.13,
+                dir: 90,
+                dirR: 5,
+                xR: (bbox_right - bbox_left) / 2,
+                yR: 8,
+            })
+
+            audio_play_sound(sn_burning_start, 0, false, 2)
+
+            break;
+        }
+    }
+}
 
 _onCombatExit = function()
 {
@@ -137,7 +210,7 @@ attack_states = {}
 
 state = states.normal
 attack_state = noone
-timer0 = 0 // most powerful fucker ive ever seen
+timer0 = 0
 
 _setstate = function(_state, _resettimer = 0, _resetframe = 0)
 {
@@ -149,7 +222,6 @@ _setstate = function(_state, _resettimer = 0, _resetframe = 0)
 }
 
 fire_angle = 0
-gun_pos = {x:0,y:0}
 
 items = []
 if(team == Team.enemy)
@@ -160,3 +232,20 @@ if(team == Team.enemy)
 buffs = []
 
 skill_queue = []
+
+INPUT =
+{
+    LEFT: 0,
+    RIGHT: 0,
+    UP: 0,
+    DOWN: 0,
+    JUMP: 0,
+    FIRE: 0,
+    PRIMARY: 0,
+    SECONDARY: 0,
+    UTILITY: 0,
+    SPECIAL: 0
+}
+
+bigFlamo1 = noone
+bigFlamo2 = noone

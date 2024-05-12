@@ -4,7 +4,7 @@
 	try {\
 		ThrowError(_e, false, true)\
 	} catch(e) {\
-		ThrowError(e, false, true)\
+		\// ThrowError(e, false, true)\
 	}\
 	exit\
 }

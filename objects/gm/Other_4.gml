@@ -12,3 +12,12 @@ if(!instance_exists(obj_camera))
     else
         instance_create_depth(0, 0, 0, obj_camera, {cam_id: 0, target: obj_player})
 }
+
+if(room != Room1)
+struct_foreach(global.spriteCache as (name, value) {
+    if(!array_contains(global.builtinSpriteList, name))
+    {
+        sprite_delete(value)
+        struct_remove(global.spriteCache, name)
+    }
+})

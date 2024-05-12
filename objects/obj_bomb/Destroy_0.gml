@@ -17,7 +17,7 @@ else
 audio_play_sound(sn_bomb_explosion, 0, 0)
 audio_stop_sound(throwsound)
 
-with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, team, killtimer: 16 / _fps}))
+with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, team, parent, killtimer: 16 / _fps}))
 {
     sprite_index = spr_fx_explosion
     image_index = other.bulleted
@@ -26,13 +26,12 @@ with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc,
     image_yscale = _size
 
     crit = other.bulleted
-	parent = other.parent
 
     with(par_unit)
     {
         if(place_meeting(x, y, other) && canHurt(self, other))
         {
-            DamageEvent(new DamageEventContext(other.parent, id, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
+            DamageEvent(new DamageEventContext(other.parent, self, other._dmg * (1 + other.crit * 0.5), other.proc, 1, 1))
         }
         if(place_meeting(x, y, other) && other.parent.id == id && other.crit)
         {

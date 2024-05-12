@@ -65,6 +65,24 @@ function buffdef(_name, _struct = {})
 	else
 	{
 		__newstruct = struct_assign(__newstruct, _struct)
+
+		// dumb workaround for fire vfx, sorry modders! but i think this may have to stay this way for now until I figure out why its so finicky
+		if(_name == "fire")
+		{
+			__newstruct.tick = method(__newstruct, function(instance)
+			{
+				DamageEvent(instance.context)
+			})
+
+			__newstruct.onExpire = method(__newstruct, function(instance) {
+				if(instance_exists(instance.context.target))
+				{
+					if(instance_exists(instance.context.target.bigFlamo1)) instance.context.target.bigFlamo1.stop()
+					if(instance_exists(instance.context.target.bigFlamo2)) instance.context.target.bigFlamo2.stop()
+				}
+				buff_instance_remove(instance)
+			})
+		}
 	}
 
 	if(_name != "unknown")

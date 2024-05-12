@@ -47,6 +47,7 @@ lastSafeY = y
 
 jump_buffer = 0
 jump_buffer2 = 0
+jump_cancelled = 0
 dashtimer = 0
 
 firing = 0
@@ -185,11 +186,13 @@ _oncollide_v = function()
     vsp = 0
 }
 
+drawSurface = -1
+
 drawMyShit = function()
 {
     var w = 24
 
-    if(hp >= 0)
+    if(drawhp)
     {
         var c = c_black
         var avgx = (bbox_left + bbox_right) / 2
@@ -487,7 +490,7 @@ states =
             wallslideTimer = 0
             lasthsp = 0
             lastvsp = 0
-            jump_buffer = 10
+            jump_buffer = 5
             jumps = jumps_max
 
             if(!place_meeting(x + 1, y + 1, par_solid) || !place_meeting(x - 1, y + 1, par_solid))

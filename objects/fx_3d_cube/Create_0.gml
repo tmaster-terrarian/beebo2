@@ -2,8 +2,8 @@ event_inherited()
 
 depth = -100
 
-image_zscale = 2
-_image_xscale = 2
+_image_xscale = image_xscale
+image_zscale = image_xscale
 
 vertex_format_begin()
 vertex_format_add_position_3d()
@@ -91,3 +91,51 @@ vertex_freeze(v_buff)
 
 u_width = shader_get_uniform(shd_palette_swap, "width")
 u_height = shader_get_uniform(shd_palette_swap, "height")
+
+particle = instance_create_depth(x, y, depth + 2, fx_particle_emitter, {
+    spr: spr_8x8centered,
+    posGlobal: 1,
+    life: 0.75,
+    max_particles: 15,
+    interval: 4,
+    scale: 0.75,
+    scaleE: 0.25,
+    scaleER: 0.125,
+    dirR: 45,
+    spd: 0.5,
+    spdR: 0.1,
+    spdE: 0,
+    xR: 4 * image_xscale - 2,
+    yR: 4 * image_yscale - 2,
+    color: c_red,
+    colorER: 30,
+    alphaE: 0.5,
+    alphaER: 0.25,
+    grvY: 0.1,
+})
+
+onHurt = function(context)
+{
+    var s = choose(sn_cube_hit1, sn_cube_hit2, sn_cube_hit3)
+    audio_play_sound(s, 0, false, 3)
+}
+
+surf = -1
+
+state = "normal"
+
+states = {
+    normal: function() {with(other) {
+        if(instance_exists(target))
+        {
+            hsp = approach(hsp, lengthdir_x(spd, point_direction(x, y, target.x, (target.bbox_top + target.bbox_bottom) / 2)), air_accel)
+            vsp = approach(vsp, lengthdir_y(spd, point_direction(x, y, target.x, (target.bbox_top + target.bbox_bottom) / 2)), air_accel)
+        }
+
+        if(!instance_exists(target) || sqrt(sqr(hsp) + sqr(vsp)) > spd)
+        {
+            hsp = approach(hsp, 0, air_fric)
+            vsp = approach(vsp, 0, air_fric)
+        }
+    }}
+}

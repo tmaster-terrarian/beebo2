@@ -376,6 +376,7 @@ function DamageEvent(ctx)
 
 			if(ctx.target._shield_recharge_handler != -1 || time_source_exists(ctx.target._shield_recharge_handler))
 				call_cancel(ctx.target._shield_recharge_handler)
+
 			with(ctx.target)
 			{
 				_shield_recharge_handler = call_later(7, time_source_units_seconds, function() {
@@ -396,6 +397,8 @@ function DamageEvent(ctx)
 			{
 				audio_play_sound(sn_player_hit, 5, false)
 			}
+
+			ctx.target.onHurt(ctx)
 
 			// damage number
 			instance_create_depth((ctx.target.bbox_left + ctx.target.bbox_right) / 2, (ctx.target.bbox_top + ctx.target.bbox_bottom) / 2, 10, fx_damage_number, {notif_type: _damage_type, value: ceil(damage), dir: _dir})
@@ -518,7 +521,7 @@ function ThrowException(err, isEngineCrash = false)
 
 function ThrowError(err, blame = false, isEngineError = false) // harmless version of ThrowException, doesnt close the game
 {
-	var _string = (blame ? "Caused by: " : "") + "gml.RuntimeException: " + err.message
+	var _string = (blame ? "Caused by: " : "") + "gml.RuntimeException: " + string(err.message)
 
 	var stack = err.stacktrace
 	for(var i = 0; i < array_length(stack); i++)
@@ -1619,11 +1622,13 @@ function _buffdef(name) constructor
 	self.name = name
 	self.displayname = string_loc($"buff.{name}.name")
 
-	self.timed = 0
+	self.timed = false
 	self.duration = 1
-	self.stackable = 0
+	self.stackable = false
 
 	self.ticksPerSecond = 0
+
+	self.blocksRegeneration = false
 
 	self.apply = function(instance) {
 		instance.timer = ceil(instance.timer * 60) / 60
@@ -1665,7 +1670,14 @@ function _buffdef(name) constructor
 
 global.buffdefs =
 {
-	unknown: buffdef("unknown")
+	unknown: buffdef("unknown"),
+
+	fire: buffdef("fire", {
+		timed: true,
+		duration: 4,
+		ticksPerSecond: 5,
+		stackable: true
+	})
 }
 
 function buff_instance(buff_id, context, duration, stacks) constructor
@@ -1685,6 +1697,9 @@ function buff_instance_create(buff_id, context, duration = -1, stacks = 1)
 {
 	var buff = new buff_instance(buff_id, context, duration, stacks)
 	var b = buff_get_instance(buff_id, context.target)
+
+	context.target.onReceiveBuff(buff_id, context, duration, stacks)
+
 	if(b != -1)
 	{
 		var def = getdef(buff_id, DefType.buff)

@@ -1,5 +1,5 @@
 draw_sprite_flat_ext(
-    sprite_index, 0,
+    _sprite_index, 0,
     x + lengthdir_x(2, t*2),
     y + lengthdir_y(2, t*2) + round(sin(t / 40) * 2 - 2),
     1, 1,
@@ -8,7 +8,7 @@ draw_sprite_flat_ext(
     sin(t / 30) * 0.25 + 0.5
 )
 draw_sprite_flat_ext(
-    sprite_index, 0,
+    _sprite_index, 0,
     x + lengthdir_x(-2, t*2),
     y + lengthdir_y(-2, t*2) + round(sin(t / 40) * 2 - 2),
     1, 1,
@@ -20,7 +20,7 @@ draw_sprite_flat_ext(
 if(flash)
 	shader_set(sh_flash)
 
-draw_sprite(sprite_index, 0, x, y + round(sin(t / 40) * 2 - 2))
+draw_sprite(_sprite_index, 0, x, y + round(sin(t / 40) * 2 - 2))
 
 if(flash)
 	shader_reset()

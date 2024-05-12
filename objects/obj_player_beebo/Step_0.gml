@@ -255,7 +255,7 @@ if(ded)
 
 if(has_gun)
 {
-    if(duck)
+    if(duck && !(place_meeting(x, y + 1, par_jumpthru) && hsp == 0))
     {
         if(fire_angle > 180 && fire_angle <= 270)
             fire_angle = 180

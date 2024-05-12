@@ -41,7 +41,7 @@ function initSkills()
                     damage = other.damage * 0.5
                     proc = 0.8
                 }
-                with(instance_create_depth(x + lengthdir_x(4, fire_angle) + gun_pos.x * sign(facing), y + lengthdir_y(4, fire_angle) - 1 + gun_pos.y, depth - 5, fx_casing))
+                with(instance_create_depth(x + lengthdir_x(4, fire_angle), y + lengthdir_y(4, fire_angle), depth - 5, fx_casing))
                 {
                     image_yscale = other.facing
                     angle = other.fire_angle
@@ -76,7 +76,7 @@ function initSkills()
 
     var beeboSecondarySkill = new Skill("beebo.bomb_throw", function(def) {
         def.baseMaxStocks = 1
-        def.baseStockCooldown = 3.5
+        def.baseStockCooldown = 2
         def.beginCooldownOnEnd = 0
         def.fullRestockOnAssign = 1
         def.isCombatSkill = 1
@@ -215,7 +215,9 @@ function initSkills()
 
                     damage = other.damage * (2 + 3 * (other.heat/other.heat_max))
 
-                    bulleted_delay = 20
+                    // bulleted_delay = 20
+
+                    bulleted_delay = 0
                 }
                 if(heat > 1)
                 repeat(6)
@@ -1195,7 +1197,7 @@ function initChars()
 
     global.chardefs.fx_3d_cube = new CharacterDef("fx_3d_cube", function(def) {
         def.stats = {
-            hp_max: 100,
+            hp_max: 140,
             regen_rate: 0,
             curse: 1,
             spd: 0.5,
@@ -1216,6 +1218,33 @@ function initChars()
         def.level_stats = {
             hp_max: 30,
             damage: 2.4,
+            regen_rate: 0
+        }
+    })
+
+    global.chardefs.e_dummy = new CharacterDef("e_dummy", function(def) {
+        def.stats = {
+            hp_max: 100,
+            regen_rate: 0,
+            curse: 1,
+            spd: 1,
+            jumpspd: -1,
+            firerate: 5,
+            bombrate: 0,
+            spread: 4,
+            damage: 1,
+            ground_accel: 0.12,
+            ground_fric: 0.08,
+            air_accel: 0.07,
+            air_fric: 0.02,
+            jumps_max: 1,
+            grv: 0.2,
+            attack_speed: 1,
+            shield: 0,
+        }
+        def.level_stats = {
+            hp_max: 20,
+            damage: 0,
             regen_rate: 0
         }
     })

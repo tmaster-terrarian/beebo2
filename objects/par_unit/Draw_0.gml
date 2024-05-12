@@ -59,7 +59,7 @@ if(drawhp) && (hp > 0) && team == Team.enemy
 }
 
 var buffoffsi = 0
-if(hp > 0) && team == Team.enemy
+if(drawhp)
 for(var i = 0; i < array_length(buffs); i++)
 {
 	var buff = buffs[i]
@@ -67,7 +67,7 @@ for(var i = 0; i < array_length(buffs); i++)
     var buffsy = bbox_top - 18
     if(buff.stacks > 0)
     {
-        var spr = asset_get_index("spr_buff_" + buff.buff_id)
+        var spr = loadSprite("spr_buff_" + buff.buff_id, ModAssetType.Buff)
         draw_sprite((spr != -1) ? spr : spr_buff_missing, 0, buffsx + (10 * (i + buffoffsi)), buffsy)
         if(buff.stacks > 1)
         {

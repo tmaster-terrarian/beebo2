@@ -9,7 +9,7 @@
   "managed":true,
   "name":"obj_e_player_chaser",
   "overriddenProperties":[
-    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"par_unit","path":"objects/par_unit/par_unit.yy",},"propertyId":{"name":"team","path":"objects/par_unit/par_unit.yy",},"resource":null,"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Team.enemy",},
+    {"$GMOverriddenProperty":"v1","%Name":"","name":"","objectId":{"name":"par_unit","path":"objects/par_unit/par_unit.yy",},"propertyId":{"name":"team","path":"objects/par_unit/par_unit.yy",},"resourceType":"GMOverriddenProperty","resourceVersion":"2.0","value":"Team.enemy",},
   ],
   "parent":{
     "name":"Objects",
@@ -33,7 +33,7 @@
   "physicsShapePoints":[],
   "physicsStartAwake":true,
   "properties":[
-    {"$GMObjectProperty":"v1","%Name":"delay","filters":[],"listItems":[],"multiselect":false,"name":"delay","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resource":null,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"2 * 60","varType":0,},
+    {"$GMObjectProperty":"v1","%Name":"delay","filters":[],"listItems":[],"multiselect":false,"name":"delay","rangeEnabled":false,"rangeMax":10.0,"rangeMin":0.0,"resourceType":"GMObjectProperty","resourceVersion":"2.0","value":"2 * 60","varType":0,},
   ],
   "resourceType":"GMObject",
   "resourceVersion":"2.0",

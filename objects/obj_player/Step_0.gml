@@ -26,7 +26,7 @@ else if(jump_buffer < 10 && state != "ledgegrab")
 
 if(place_meeting(x, y, par_solid) && !place_meeting(x, y - 1, par_jumpthru) && !ghost) y -= 1 * global.dt;
 
-if(place_meeting(x, y, par_jumpthru))
+if(place_meeting(x, y, par_jumpthru) && state != "ghost")
 {
     if(vsp <= 0)
     {
@@ -48,6 +48,8 @@ if(duck)
 
 if(on_ground)
 {
+    jump_cancelled = 0
+
     accel = ground_accel;
     fric = ground_fric;
 }
@@ -55,15 +57,13 @@ else
 {
     accel = air_accel;
     fric = air_fric;
-    // if(abs(hsp) > spd * 1.3)
-    //     fric *= 0.1
+    if(abs(hsp) > spd * 1.3)
+        fric *= 0.5
 }
-
-// PAUSECHECK //prevent any further code from running if the game is paused (hopefully)
 
 states[$ state]() //MAGIC
 
-if (input.jump() && can_jump)
+if(input.jump() && can_jump)
 {
     if(on_ground) || ((jump_buffer && vsp > 0) || (jumps - 1 && state != "ledgegrab"))
     {
@@ -237,8 +237,9 @@ if (input.jump() && can_jump)
     }
 }
 
-if(input.unjump() && vsp < 0)
+if(input.unjump() && vsp < 0 && !jump_cancelled)
 {
+    jump_cancelled = 1
     vsp /= 2
 }
 

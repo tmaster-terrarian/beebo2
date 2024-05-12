@@ -34,4 +34,6 @@ heat_rate = stats.heat_rate
 cool_rate = stats.cool_rate
 cool_delay = 0
 
+gun_pos = {x:0,y:0}
+
 bomb = noone

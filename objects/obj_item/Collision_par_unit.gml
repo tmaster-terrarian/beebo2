@@ -1,5 +1,9 @@
 if(object_get_parent(other.object_index) == obj_player)
 {
-	item_add_stacks(item_id, other, stacks, true)
+	if(item_id != "")
+	{
+		item_add_stacks(item_id, other, stacks, true)
+		other.flash = 3
+	}
 	instance_destroy()
 }

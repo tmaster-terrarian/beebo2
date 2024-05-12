@@ -1,7 +1,6 @@
 t = 0
+_t = 0
 particles = []
-
-depth = 0
 
 sprite_index = spr
 
@@ -48,6 +47,14 @@ lerpAngle = function(a, b, t)
     return (a + angle_difference(b, a) * t)
 }
 
+stopped = false
+
+stop = function()
+{
+    stopped = true
+    interval = 0
+}
+
 step = addFixedStep(function() {
     for(var i = 0; i < array_length(particles); i++)
     {
@@ -55,7 +62,7 @@ step = addFixedStep(function() {
             break
         var p = particles[i]
         p.life += 1/60
-        if(p.life > p.lifeM)
+        if(p.life >= p.lifeM)
         {
             array_delete(particles, i, 1)
             i--
@@ -100,8 +107,10 @@ step = addFixedStep(function() {
                 }
             }
         }
-        else if(array_length(particles) == 0)
-            instance_destroy()
+        if(array_length(particles) == 0)
+            stop()
     }
+
     t++
+    if(!stopped) _t = t
 })
