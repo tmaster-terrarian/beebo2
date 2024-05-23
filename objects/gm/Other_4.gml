@@ -13,7 +13,7 @@ if(!instance_exists(obj_camera))
         instance_create_depth(0, 0, 0, obj_camera, {cam_id: 0, target: obj_player})
 }
 
-if(room != Room1)
+if(room != startRoom)
 struct_foreach(global.spriteCache as (name, value) {
     if(!array_contains(global.builtinSpriteList, name))
     {
@@ -21,3 +21,7 @@ struct_foreach(global.spriteCache as (name, value) {
         struct_remove(global.spriteCache, name)
     }
 })
+else
+{
+    set_music(bgm_placeholder, 1, 0)
+}

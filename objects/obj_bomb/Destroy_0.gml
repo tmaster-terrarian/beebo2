@@ -14,7 +14,7 @@ else
     screen_shake_set(4, 40)
 }
 
-audio_play_sound(sn_bomb_explosion, 0, 0)
+_audio_play_sound(sn_bomb_explosion, 0, 0)
 audio_stop_sound(throwsound)
 
 with(instance_create_depth(x, y, depth - 1, obj_empty, {_size, _dmg, _fps, proc, team, parent, killtimer: 16 / _fps}))

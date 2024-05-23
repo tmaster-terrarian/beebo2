@@ -5,9 +5,9 @@ wh = camera_get_view_width(cam) * 0.5
 hh = camera_get_view_height(cam) * 0.5
 
 // constrain to room edges
-if(bounded && place_meeting(tx, ty, obj_trigger_camera_bounds))
+if(bounded && place_meeting(target.x, target.y, obj_trigger_camera_bounds))
 {
-    var t = instance_place(tx, ty, obj_trigger_camera_bounds)
+    var t = instance_place(target.x, target.y, obj_trigger_camera_bounds)
     tx = clamp(tx, t.x + wh, (t.x + t.image_xscale) - wh)
     ty = clamp(ty, t.y + hh, (t.y + t.image_yscale) - hh - (t.image_yscale % 8))
 }

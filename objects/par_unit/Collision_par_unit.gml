@@ -7,7 +7,7 @@ if(fucked && other.team != Team.player)
         other.fucker = fucker
         other.hsp = hsp
         other.hp -= (bbox_right - bbox_left) * 0.75 // ouch
-        audio_play_sound(sn_heavyHit, 0, false)
+        _audio_play_sound(sn_heavyHit, 0, false)
         screen_shake_set(8, 20)
         hsp *= -1
         vsp = -1.5
@@ -23,8 +23,8 @@ if(fucked && other.team != Team.player)
     }
     else
     {
-        audio_play_sound(sn_heavyHit, 1, false)
-        audio_play_sound(sn_bomb_explosion, 0, false)
+        _audio_play_sound(sn_heavyHit, 1, false)
+        _audio_play_sound(sn_bomb_explosion, 0, false)
         screen_shake_set(10, 30)
         with(instance_create_depth(x, y, depth - 1, obj_empty, {_size: 1.5, _dmg: (bbox_right - bbox_left) / 2, _fps: 0.5, proc: 1, parent: fucker, team: Team.player, killtimer: 16 / 0.5}))
         {

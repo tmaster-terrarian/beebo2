@@ -1,6 +1,6 @@
 event_inherited()
 
-particle.interval = 0
+particle.stop()
 
 instance_create_depth(x, y, depth - 1, fx_particle_emitter, {
     spr: spr_8x8centered,
@@ -27,6 +27,6 @@ instance_create_depth(x, y, depth - 1, fx_particle_emitter, {
 
 screen_shake_set(3, 60)
 
-audio_play_sound(sn_cube_death, 0, false, 3)
+_audio_play_sound(sn_cube_death, 0, false, 3)
 
 surface_free(surf)

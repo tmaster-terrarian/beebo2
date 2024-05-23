@@ -21,3 +21,4 @@ shake_length = 0
 shake_strength = 1
 
 bounded = 1
+currentTrigger = noone

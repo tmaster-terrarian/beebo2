@@ -77,7 +77,7 @@ else
     _cldncounter.draw(_timer.get_width() + 26, SC_H - 1)
 
     draw_set_font(fnt_itemdesc) draw_set_halign(fa_left) draw_set_valign(fa_bottom)
-    var names = struct_get_names(global.players[0].skills)
+    var names = ["primary", "secondary", "utility", "special"]
     for(var i = 0; i < array_length(names); i++)
     {
         var skill = global.players[0].skills[$ names[i]]

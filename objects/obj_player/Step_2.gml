@@ -49,36 +49,36 @@ if(bbox_top < 0)
 }
 
 //bound position to screen
-if((bbox_left < cam_x || bbox_right > cam_x + cam_w) && state != "dead")
-{
-    if(bbox_left < cam_x)
-        x = cam_x + x - bbox_left
-    if(bbox_right > cam_x + cam_w)
-        x = cam_x + cam_w + x - bbox_right
+// if((bbox_left < cam_x || bbox_right > cam_x + cam_w) && state != "dead")
+// {
+//     if(bbox_left < cam_x)
+//         x = cam_x + x - bbox_left
+//     if(bbox_right > cam_x + cam_w)
+//         x = cam_x + cam_w + x - bbox_right
 
-    if(!keyboard_check(_dbkey) && state != "ghost")
-        _oncollide_h()
-    hsp = 0
+//     if(!keyboard_check(_dbkey) && state != "ghost")
+//         _oncollide_h()
+//     hsp = 0
 
-    if(running)
-    {
-        image_index = 0
-    }
-}
-if(bbox_top < cam_y && state != "dead")
-{
-    y = cam_y + y - bbox_top
+//     if(running)
+//     {
+//         image_index = 0
+//     }
+// }
+// if(bbox_top < cam_y && state != "dead")
+// {
+//     y = cam_y + y - bbox_top
 
-    if(!keyboard_check(_dbkey) && state != "ghost")
-        _oncollide_v()
-    vsp = 0
-}
-if(bbox_bottom > cam_y + cam_h && state == "ghost")
-{
-    y = cam_y + cam_h + y - bbox_bottom
+//     if(!keyboard_check(_dbkey) && state != "ghost")
+//         _oncollide_v()
+//     vsp = 0
+// }
+// if(bbox_bottom > cam_y + cam_h && state == "ghost")
+// {
+//     y = cam_y + cam_h + y - bbox_bottom
 
-    vsp = 0
-}
+//     vsp = 0
+// }
 
 if(position_meeting(bbox_left, bbox_bottom + 1, par_solid) && position_meeting(bbox_right, bbox_bottom + 1, par_solid))
 {

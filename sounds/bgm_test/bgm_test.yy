@@ -12,8 +12,8 @@
   "duration":178.992,
   "name":"bgm_test",
   "parent":{
-    "name":"music",
-    "path":"folders/Sounds/music.yy",
+    "name":"bgm",
+    "path":"folders/Sounds/bgm.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

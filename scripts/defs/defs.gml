@@ -32,7 +32,7 @@ function initSkills()
                 {
                     parent = other
                     team = other.team
-                    audio_play_sound(sn_player_shoot, 1, false);
+                    _audio_play_sound(sn_player_shoot, 1, false);
 
                     _speed = 12;
                     direction = other.fire_angle;
@@ -138,7 +138,7 @@ function initSkills()
                 {
                     parent = other
                     team = other.team
-                    audio_play_sound(sn_player_shoot, 1, false);
+                    _audio_play_sound(sn_player_shoot, 1, false);
 
                     _speed = 12;
                     direction = other.fire_angle + random_range(-v, v);
@@ -208,7 +208,7 @@ function initSkills()
                 {
                     parent = other
                     team = other.team
-                    audio_play_sound(sn_throw, 0, 0, 1, 0, 1)
+                    _audio_play_sound(sn_throw, 0, 0, 1, 0, 1)
 
                     hsp = lengthdir_x(2, other.fire_angle) + (other.hsp * 0.5)
                     vsp = lengthdir_y(2, other.fire_angle) + (other.vsp * 0.25) - 1
@@ -230,7 +230,7 @@ function initSkills()
                         vx *= 1.5
                         fric *= 0.2
                     }
-                    audio_play_sound(sn_steam, 0, false, heat/heat_max)
+                    _audio_play_sound(sn_steam, 0, false, heat/heat_max)
                 }
                 heat = 0
             }
@@ -357,7 +357,7 @@ function initSkills()
 
                         instance_create_depth(x + 12 * other.facing, y - 12, depth - 1, fx_anim, {sprite_index: spr_fx_hotswap, animspeed: 0.4, image_xscale})
 
-                        audio_play_sound(sn_shotgun_blast, 1, 0)
+                        _audio_play_sound(sn_shotgun_blast, 1, 0)
 
                         with(par_unit)
                         {
@@ -454,7 +454,7 @@ function initSkills()
                                     if(timer0 == 4)
                                     {
                                         _sword_angle = sword_angle
-                                        audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
+                                        _audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
                                     }
                                     sword_angle = 180 * facing
                                     sword_xscale = approach(sword_xscale, -1.5 * facing, 0.05 * global.dt)
@@ -515,7 +515,7 @@ function initSkills()
                                 {
                                     if(timer0 == 4)
                                     {
-                                        audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
+                                        _audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
                                     }
                                     sword_angle = 220 * facing
                                     sword_xscale = -1.25 * facing
@@ -577,7 +577,7 @@ function initSkills()
                                 {
                                     if(timer0 == 4)
                                     {
-                                        audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
+                                        _audio_play_sound(sn_rivalSwing, 1, 0, 1, 0, random_range(1.1, 1.2))
                                     }
                                     sword_angle = 120 * facing
                                     sword_xscale = -1.25 * facing
@@ -830,7 +830,7 @@ function initSkills()
                             __alreadyHit = []
                             fxtrail = 0
                             image_index = 0
-                            audio_play_sound(sn_groundhit, 1, 0, 1.5)
+                            _audio_play_sound(sn_groundhit, 1, 0, 1.5)
                             screen_shake_set(3, 40)
 
                             var obj = instance_create_depth(x, y - 4, depth, obj_empty, {damage: base_damage * 2, parent: id, proc: 1, team})

@@ -25,6 +25,40 @@
                         "type": "DamageEventContext"
                     }
                 ]
+            },
+            "_audio_play_sound": {
+                "description": "Plays a sound with global time scale applied",
+                "parameters": [
+                    {
+                        "label": "index",
+                        "type": "SoundAsset"
+                    },
+                    {
+                        "label": "priority",
+                        "type": "number",
+                    },
+                    {
+                        "label": "loop",
+                        "type": "boolean",
+                    },
+                    {
+                        "label": "gain",
+                        "type": "number",
+                    },
+                    {
+                        "label": "offset",
+                        "type": "number",
+                    },
+                    {
+                        "label": "pitch",
+                        "type": "number",
+                    },
+                    {
+                        "label": "listener_mask",
+                        "type": "integer",
+                    }
+                ],
+                "returns": "SoundInstance"
             }
         },
         "macros": {

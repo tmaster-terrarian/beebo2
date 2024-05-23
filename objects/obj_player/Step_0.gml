@@ -84,7 +84,7 @@ if(input.jump() && can_jump)
                     vsp = c.vsp
             }
             vsp = jumpspd
-            s = audio_play_sound(sn_jump, 0, false)
+            s = _audio_play_sound(sn_jump, 0, false)
         }
         else if(!place_meeting(x, y - 2, par_solid))
         {
@@ -99,11 +99,11 @@ if(input.jump() && can_jump)
                     vsp = c.vsp
             }
             vsp += jumpspd / 2
-            s = audio_play_sound(sn_jump, 0, false)
+            s = _audio_play_sound(sn_jump, 0, false)
         }
         else
         {
-            s = audio_play_sound(sn_jump, 0, false)
+            s = _audio_play_sound(sn_jump, 0, false)
         }
 
         if(!on_ground)
@@ -117,7 +117,7 @@ if(input.jump() && can_jump)
                 var w = instance_place(x + spd, y, par_solid)
                 hsp += w.hsp / 2
                 audio_stop_sound(s)
-                audio_play_sound(sn_walljump, 0, false)
+                _audio_play_sound(sn_walljump, 0, false)
             }
             else if _place_meeting(x - spd, y, par_solid) && !place_meeting(x - spd, y, par_jumpthru) && can_walljump
             {
@@ -128,7 +128,7 @@ if(input.jump() && can_jump)
                 var w = instance_place(x - spd, y, par_solid)
                 hsp += w.hsp / 2
                 audio_stop_sound(s)
-                audio_play_sound(sn_walljump, 0, false)
+                _audio_play_sound(sn_walljump, 0, false)
             }
             else if(jump_buffer && vsp > 0)
             {
@@ -160,7 +160,7 @@ if(input.jump() && can_jump)
                 sprite_index = _sp.jump
                 vsp = jumpspd
                 audio_stop_sound(s)
-                audio_play_sound(sn_walljump, 0, false)
+                _audio_play_sound(sn_walljump, 0, false)
             }
         }
     }
@@ -196,7 +196,7 @@ if(input.jump() && can_jump)
                 sprite_index = _sp.jump
                 image_index = 0
             }
-		    audio_play_sound(sn_walljump, 0, false)
+		    _audio_play_sound(sn_walljump, 0, false)
         }
         else // otherwise just hop off
         {
@@ -206,7 +206,7 @@ if(input.jump() && can_jump)
             vsp -= 2.7 * !input.down()
             sprite_index = _sp.jump
             image_index = 0
-		    audio_play_sound(sn_walljump, 0, false)
+		    _audio_play_sound(sn_walljump, 0, false)
         }
         state = "normal"
     }
@@ -221,7 +221,7 @@ if(input.jump() && can_jump)
             facing = -1
             var w = instance_place(x + spd, y, par_solid)
             hsp += w.hsp / 2
-            audio_play_sound(sn_walljump, 0, false)
+            _audio_play_sound(sn_walljump, 0, false)
         }
         else if _place_meeting(x - spd, y, par_solid) && !place_meeting(x - spd, y, par_jumpthru)
         {
@@ -232,7 +232,7 @@ if(input.jump() && can_jump)
             facing = 1
             var w = instance_place(x - spd, y, par_solid)
             hsp += w.hsp / 2
-            audio_play_sound(sn_walljump, 0, false)
+            _audio_play_sound(sn_walljump, 0, false)
         }
     }
 }
@@ -252,7 +252,7 @@ if(vsp > 4)
 if(skidding && on_ground)
 {
     sprite_index = _sp.run
-    image_index = 0
+    image_index = 6
 
     with(instance_create_depth(x, bbox_bottom, (depth - 10), fx_dust))
     {

@@ -334,9 +334,9 @@ function DamageEvent(ctx)
 				if(ctx.attacker.team == Team.player)
 				{
 					if(ctx.crit)
-						audio_play_sound(sn_hit_crit, 5, false)
+						_audio_play_sound(sn_hit_crit, 5, false)
 					else
-						audio_play_sound(sn_hit, 5, false)
+						_audio_play_sound(sn_hit, 5, false)
 				}
 			}
 		}
@@ -395,7 +395,7 @@ function DamageEvent(ctx)
 
 			if(array_contains(global.players, ctx.target))
 			{
-				audio_play_sound(sn_player_hit, 5, false)
+				_audio_play_sound(sn_player_hit, 5, false)
 			}
 
 			ctx.target.onHurt(ctx)
@@ -425,7 +425,7 @@ function DamageEvent(ctx)
 				if(ctx.attacker.object_index == obj_player_benb)
 				{
 					var s = choose(sn_aaaaugh, sn_aaaaugh, sn_aaaaugh, sn_aaaugh_2, sn_aaaugh_2)
-					audio_play_sound(s, 1, 0, 1.5, 0, random_range(0.9, 1.1))
+					_audio_play_sound(s, 1, 0, 1.5, 0, random_range(0.9, 1.1))
 				}
 			}
 			if(instance_exists(ctx.attacker) && ctx.use_attacker_items && attacker_has_items)
@@ -564,6 +564,8 @@ function __struct_get(struct, name, structname = -1)
 	})
 }
 
+global.__fixedStepUID = 0
+
 // could this be the ultimate form of framerate independence?
 global.fixedStep = {
 	_functions: [],
@@ -571,7 +573,7 @@ global.fixedStep = {
 	t: 0,
 
 	addFunction: function(func, thisObject = self) {
-		var _id = floor(get_timer() / 1000)
+		var _id = global.__fixedStepUID++
 		var f = {
 			_thisObject: thisObject,
 			__func: func,
@@ -584,7 +586,7 @@ global.fixedStep = {
 	},
 
 	addQueueFunction: function(func, delaySeconds, thisObject = self) {
-		var _id = floor(get_timer() / 1000)
+		var _id = global.__fixedStepUID++
 		var f = {
 			_thisObject: thisObject,
 			__func: func,
@@ -661,6 +663,16 @@ function stopTimeout(func)
 	{
 		array_delete(global.fixedStep._queueFunctions, ind, 1)
 	}
+}
+
+function fixedStepExists(func)
+{
+	global.______grahhhhhh = func.uniqueId
+	var ind = array_find_index(global.fixedStep._functions, function(e, i) {
+		return (e.uniqueId == global.______grahhhhhh)
+	})
+
+	return ind != -1
 }
 
 global.fixedStepTimeSource = time_source_create(time_source_game, 1/60, time_source_units_seconds, global.fixedStep.step, [], -1)
@@ -1662,7 +1674,7 @@ function _buffdef(name) constructor
 		buff_instance_remove(instance)
 	}
 	self.onRemove = function(instance) {
-		Log("Main/INFO", $"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
+		LogInfo($"buff {instance.buff_id} removed from {instance.context.target.id}:{object_get_name(instance.context.target.object_index)}")
 	}
 }
 
@@ -2366,7 +2378,7 @@ function UI() constructor
 			{
 				if(self.selected.enabled)
 				{
-					audio_play_sound(sn_click2, 0, 0)
+					_audio_play_sound(sn_click2, 0, 0)
 				}
 				self.selected.pressed = 1
 			}
@@ -2389,10 +2401,10 @@ function UI() constructor
 				{
 					self.selected.pressed = 1
 					self.selected.on_confirm()
-					audio_play_sound(sn_click3, 0, 0)
+					_audio_play_sound(sn_click3, 0, 0)
 				}
 				else
-					audio_play_sound(sn_nuh_uh, 0, 0, 1, 0, random_range(0.9, 1.1))
+					_audio_play_sound(sn_nuh_uh, 0, 0, 1, 0, random_range(0.9, 1.1))
 			}
 			for(var i = 0; i < array_length(self.elements); i++)
 			{

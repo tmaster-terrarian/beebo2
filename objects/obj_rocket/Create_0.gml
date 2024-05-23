@@ -36,4 +36,4 @@ _squish = function()
 }
 
 var snd = choose(sn_item_proc_missile_fire_01, sn_item_proc_missile_fire_02, sn_item_proc_missile_fire_03, sn_item_proc_missile_fire_04)
-audio_play_sound(snd, 0, 0)
+_audio_play_sound(snd, 0, 0)

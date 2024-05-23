@@ -4,6 +4,8 @@ particles = []
 
 sprite_index = spr
 
+hasOwner = owner != noone
+
 createParticle = function ()
 {
     var p = {}
@@ -112,5 +114,4 @@ step = addFixedStep(function() {
     }
 
     t++
-    if(!stopped) _t = t
 })

@@ -1,4 +1,3 @@
-// good ole platformer days
 if(!global.usesplitscreen && follow && array_length(global.players) > 1)
 {
     // target the AVERAGE of the target positions

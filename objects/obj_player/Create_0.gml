@@ -140,7 +140,7 @@ _oncollide_h = function()
         {
             if (abs(hsp) >= 1)
             {
-                audio_play_sound(sn_player_land, 0, false)
+                _audio_play_sound(sn_player_land, 0, false)
                 for (var i = 0; i < 3; i++)
                 {
                     with(instance_create_depth((x + (4 * sign(facing))), random_range((bbox_bottom - 12), (bbox_bottom - 2)), (depth - 1), fx_dust))
@@ -167,7 +167,7 @@ _oncollide_v = function()
     }
     if (vsp > 0.4)
     {
-        audio_play_sound(sn_player_land, 0, false)
+        _audio_play_sound(sn_player_land, 0, false)
         squash = 0.9
         stretch = 1.4
     }
@@ -233,7 +233,7 @@ onFrameChange = function()
             var footsound = choose(sn_stepgrass1, sn_stepgrass2, sn_stepgrass3)
             if(running && (f == 5 || f == 1) && !skidding)
             {
-                audio_play_sound(footsound, 8, false)
+                _audio_play_sound(footsound, 8, false)
             }
             if(running && run && abs(hsp) >= spd && c % 3 == 0)
             {
@@ -297,9 +297,9 @@ states =
                 vsp = -2 - random(1)
                 can_use_skills = 1
             }
-            audio_play_sound(sn_walljump, 2, 0)
-            audio_play_sound(sn_walljump, 2, 0)
-            audio_play_sound(sn_walljump, 2, 0)
+            _audio_play_sound(sn_walljump, 2, 0)
+            _audio_play_sound(sn_walljump, 2, 0)
+            _audio_play_sound(sn_walljump, 2, 0)
         }
     }},
 

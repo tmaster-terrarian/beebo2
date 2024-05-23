@@ -37,7 +37,7 @@ if(has_gun)
                 vy = random_range(-1.5, -1) + other.vsp
                 vx += other.hsp
             }
-            audio_play_sound(sn_steam, 1, 0, heat/heat_max)
+            _audio_play_sound(sn_steam, 1, 0, heat/heat_max)
         }
     }
     cool_delay = approach(cool_delay, 0, global.dt)
@@ -51,14 +51,14 @@ if(has_gun)
             {
                 gun_spr_ind = approach(gun_spr_ind, 1, 0.2 * global.dt)
                 if(gun_spr_ind == 1)
-                    audio_play_sound(sn_gun_open, 1, 0)
+                    _audio_play_sound(sn_gun_open, 1, 0)
             }
             else if(gun_spr_ind < 2)
             {
                 gun_spr_ind = approach(gun_spr_ind, 2, 0.2 * global.dt)
                 if(gun_spr_ind == 2)
                 {
-                    audio_play_sound(sn_steam, 1, 0)
+                    _audio_play_sound(sn_steam, 1, 0)
                     for (i = 0; i < 3; i++)
                     { 
                         with(instance_create_depth(x + gun_pos.x + random_range(-1, 1), y + gun_pos.y + random_range(-1, 1), depth - 1, fx_dust))
@@ -80,7 +80,7 @@ if(has_gun)
                         gun_spr = spr_player_gun
                         gun_spr_ind = 0
                     }
-                    else audio_play_sound(snReload, 0, 0)
+                    else _audio_play_sound(snReload, 0, 0)
                 }
             }
             else

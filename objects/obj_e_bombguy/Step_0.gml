@@ -49,7 +49,7 @@ if(INPUT.JUMP && can_jump)
             vsp = c.vsp
     }
     vsp = jumpspd
-    // s = audio_play_sound(sn_jump, 0, false)
+    // s = _audio_play_sound(sn_jump, 0, false)
 }
 
 if(input_dir != 0)

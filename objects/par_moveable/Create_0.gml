@@ -25,7 +25,7 @@ _squish = function()
 {
     hsp = 0
     vsp = 0
-    Log("Main/INFO", $"actor {id} got squished!")
+    LogInfo($"actor {id} got squished!")
 }
 
 _oncollide_h = function()

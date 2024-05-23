@@ -1,7 +1,7 @@
 _size = 0.75
 _fps = 0.33
 
-audio_play_sound(sn_bomb_explosion, 0, 0)
+_audio_play_sound(sn_bomb_explosion, 0, 0)
 
 screen_shake_set(3, 30)
 

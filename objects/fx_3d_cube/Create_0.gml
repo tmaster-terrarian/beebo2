@@ -2,8 +2,9 @@ event_inherited()
 
 depth = -100
 
-_image_xscale = image_xscale
-image_zscale = image_xscale
+_image_xscale = 2 * image_xscale
+image_zscale = _image_xscale
+image_yscale = _image_xscale
 
 vertex_format_begin()
 vertex_format_add_position_3d()
@@ -93,6 +94,7 @@ u_width = shader_get_uniform(shd_palette_swap, "width")
 u_height = shader_get_uniform(shd_palette_swap, "height")
 
 particle = instance_create_depth(x, y, depth + 2, fx_particle_emitter, {
+    owner: self,
     spr: spr_8x8centered,
     posGlobal: 1,
     life: 0.75,
@@ -117,7 +119,7 @@ particle = instance_create_depth(x, y, depth + 2, fx_particle_emitter, {
 onHurt = function(context)
 {
     var s = choose(sn_cube_hit1, sn_cube_hit2, sn_cube_hit3)
-    audio_play_sound(s, 0, false, 3)
+    _audio_play_sound(s, 0, false, 3)
 }
 
 surf = -1

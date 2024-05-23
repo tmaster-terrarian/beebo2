@@ -81,6 +81,7 @@ onReceiveBuff = function(buff_id, context, duration, stacks)
             if(instance_exists(bigFlamo2)) bigFlamo2.stop()
 
             bigFlamo1 = instance_create_depth((bbox_left + bbox_right) / 2, (bbox_top + bbox_bottom) / 2, depth + 3, fx_particle_emitter, {
+                owner: self,
                 posGlobal: 1,
                 interval: 1,
                 max_particles: 40,
@@ -107,6 +108,7 @@ onReceiveBuff = function(buff_id, context, duration, stacks)
             })
 
             bigFlamo2 = instance_create_depth((bbox_left + bbox_right) / 2, bbox_top, depth + 4, fx_particle_emitter, {
+                owner: self,
                 posGlobal: 1,
                 interval: 6,
                 max_particles: 40,
@@ -133,7 +135,7 @@ onReceiveBuff = function(buff_id, context, duration, stacks)
                 yR: 8,
             })
 
-            audio_play_sound(sn_burning_start, 0, false, 2)
+            _audio_play_sound(sn_burning_start, 0, false, 2)
 
             break;
         }

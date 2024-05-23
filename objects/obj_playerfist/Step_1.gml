@@ -18,7 +18,7 @@ if(!swung)
 		{
 			parent.movex(-0.5 * sign(facing))
 			var s = choose(sn_punch_1, sn_punch_2)
-			audio_play_sound(s, 1, 0)
+			_audio_play_sound(s, 1, 0)
 		}
 	}
 }
