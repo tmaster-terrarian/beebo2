@@ -249,5 +249,73 @@ INPUT =
     SPECIAL: 0
 }
 
+_processSkills = function()
+{
+    var names = ["primary", "secondary", "utility", "special"]
+    for(var i = 0; i < array_length(names); i++)
+    {
+        var skill = skills[$ names[i]]
+        var def = skill.def
+
+        if(skill.cooldown > 0)
+            skill.cooldown = approach(skill.cooldown, 0, global.dt / 60)
+        else if(skill.stocks < def.baseMaxStocks + bonus_stocks[$ names[i]])
+        {
+            skill.cooldown = def.baseStockCooldown
+            skill.stocks = min(skill.stocks + def.rechargeStock, def.baseMaxStocks + bonus_stocks[$ names[i]])
+        }
+
+        var inputPressed = INPUT[$ string_upper(names[i])]
+
+        if(can_use_skills && inputPressed && (attack_state == names[i] && attack_states[$ attack_state].age >= (attack_states[$ attack_state].duration * def.spamCoeff)))
+        {
+            if(!def.beginCooldownOnEnd)
+                skill.cooldown = def.baseStockCooldown
+            skill.stocks -= def.stockToConsume
+
+            if(attack_state != noone)
+            {
+                attack_states[$ attack_state].onExit(attack_states[$ attack_state], self)
+                attack_state = noone
+            }
+
+            attack_state = names[i]
+            attack_states[$ attack_state].onEnter(attack_states[$ attack_state], self)
+        }
+    }
+
+    for(var i = 0; i < array_length(names); i++)
+    {
+        var skill = skills[$ names[i]]
+        var def = skill.def
+
+        var inputHeld = INPUT[$ string_upper(names[i])]
+        var preventSkillSelfInterrupt = attack_state != names[i]
+        var higherPriority = (attack_state == noone || skills[$ attack_state].def.priority < skill.def.priority || skills[$ attack_state].def.priority < 0)
+        var enoughStocksToFire = (skill.stocks >= def.requiredStock && skill.stocks - def.stockToConsume >= 0)
+
+        if(can_use_skills && skill.cooldown <= 0 && inputHeld && preventSkillSelfInterrupt && higherPriority && enoughStocksToFire)
+        {
+            if(!def.beginCooldownOnEnd)
+                skill.cooldown = def.baseStockCooldown
+            skill.stocks -= def.stockToConsume
+
+            if(attack_state != noone)
+            {
+                attack_states[$ attack_state].onExit(attack_states[$ attack_state], self)
+                attack_state = noone
+            }
+
+            attack_state = names[i]
+            attack_states[$ attack_state].onEnter(attack_states[$ attack_state], self)
+        }
+    }
+
+    if(attack_state != noone)
+    {
+        attack_states[$ attack_state].update(attack_states[$ attack_state], self)
+    }
+}
+
 bigFlamo1 = noone
 bigFlamo2 = noone

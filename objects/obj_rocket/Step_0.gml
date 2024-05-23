@@ -1,7 +1,6 @@
-
-
 if(timer < 60 * 0.2)
 {
+    ghost = 1
     spd = approach(spd, 2, 1/(60 * 0.2) * global.dt)
 }
 else
@@ -18,6 +17,8 @@ else
         angle = angleRotate(angle, angle + 20, turnspd * global.dt);
     }
 }
+
+if(timer > 60 * 0.75) ghost = 0
 
 hsp = lengthdir_x(spd, angle)
 vsp = lengthdir_y(spd, angle)
@@ -49,7 +50,7 @@ if(timer % (8 / spd + 4) <= 1)
         angleR: 0,
         angleE: 0,
         angleER: 0,
-        colorE: $FF999999,
+        colorE: #999999,
         alpha: 1,
         alphaE: 1,
         grvX: 0,

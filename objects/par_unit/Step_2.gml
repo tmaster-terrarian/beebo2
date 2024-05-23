@@ -49,3 +49,8 @@ if(instance_exists(bigFlamo2))
     bigFlamo2.y = bbox_top
     bigFlamo2.xR = (bbox_right - bbox_left) / 2
 }
+
+INPUT.PRIMARY = 0
+INPUT.SECONDARY = 0
+INPUT.UTILITY = 0
+INPUT.SPECIAL = 0

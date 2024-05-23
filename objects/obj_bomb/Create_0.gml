@@ -1,6 +1,9 @@
 event_inherited();
 destroy_on_hit = 1
 
+x = round(xstart)
+y = round(ystart)
+
 grv = 0.1
 
 image_speed = 0.15

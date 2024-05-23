@@ -1,4 +1,5 @@
 event_inherited();
+
 t += 1 // useful framerate-dependent timer
 
 __lastframe = floor(image_index)

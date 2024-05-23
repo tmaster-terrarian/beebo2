@@ -244,7 +244,7 @@ function DamageEventContext(attacker, target, damage, proc, use_attacker_items =
 	self.chain = []
 	self.nonlethal = 0
 
-	// LogInfo("Main", "DamageEventContext created: " + string(self))
+	// LogInfo("DamageEventContext created: " + string(self))
 
 	static fromLua = function(luaRef)
 	{
@@ -1261,17 +1261,17 @@ function Log(src, str)
 	return {time: t, name: src, message: str}
 }
 
-function LogInfo(src, str)
+function LogInfo(str)
 {
 	var t = timer_to_string(get_timer())
-	show_debug_message($"[{t}] [{src}/INFO]: {str}")
+	show_debug_message($"[{t}] [Main/INFO]: {str}")
 
 	var file = file_text_open_append("latest.log")
-	file_text_write_string(file, $"[{t}] [{src}/INFO]: {str}")
+	file_text_write_string(file, $"[{t}] [Main/INFO]: {str}")
 	file_text_writeln(file)
 	file_text_close(file)
 
-	return {time: t, name: src, message: str}
+	return {time: t, name: "Main", message: str}
 }
 
 function LogException(str)

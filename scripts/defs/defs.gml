@@ -920,7 +920,55 @@ function initSkills()
     benbSecondarySkill.activationState = benbSecondarySkillState
     #endregion
 
-    LogInfo("Startup", "Initialized character skills and skill states")
+    #region fx_3d_cube
+    var fx_3d_cubePrimarySkill = new Skill("fx_3d_cube.primary", function(def) {
+        def.baseMaxStocks = 3
+        def.baseStockCooldown = 3
+        def.beginCooldownOnEnd = 1
+        def.fullRestockOnAssign = 1
+        def.isCombatSkill = 1
+        def.mustKeyPress = 0
+        def.rechargeStock = 3
+        def.requiredStock = 1
+        def.stockToConsume = 1
+        def.slot = "primary"
+        def.priority = 0
+        def.buffer = 0
+    })
+
+    var fx_3d_cubePrimarySkillState = new State(function(def) {
+        def.baseDuration = 20/60
+        def.onEnter = function(ins, obj) {
+            ins.duration = ins.baseDuration / obj.attack_speed
+
+            with(obj)
+            {
+                screen_shake_set(1, 5)
+
+                var f = function() {
+                    var _obj = instance_create_depth(x, y, depth - 3, obj_rocket)
+
+                    with (_obj)
+                    {
+                        parent = other
+                        team = other.team
+
+                        damage = other.damage
+                        proc = 1
+                    }
+                }
+
+                f()
+
+                setTimeout(f, 0.25)
+                setTimeout(f, 0.5)
+            }
+        }
+    }, fx_3d_cubePrimarySkill)
+    fx_3d_cubePrimarySkill.activationState = fx_3d_cubePrimarySkillState
+    #endregion
+
+    Log("Startup/INFO", "Initialized character skills and skill states")
 }
 
 function initChars()
@@ -1220,6 +1268,9 @@ function initChars()
             damage: 2.4,
             regen_rate: 0
         }
+
+        def.skills.primary = new SkillInstance(global.skilldefs[$ "fx_3d_cube.primary"])
+        def.attack_states.primary = variable_clone(def.skills.primary.def.activationState)
     })
 
     global.chardefs.e_dummy = new CharacterDef("e_dummy", function(def) {
@@ -1249,5 +1300,5 @@ function initChars()
         }
     })
 
-    LogInfo("Startup", "Initialized character definitions")
+    Log("Startup/INFO", "Initialized character definitions")
 }

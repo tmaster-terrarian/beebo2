@@ -126,6 +126,9 @@ surf = -1
 
 state = "normal"
 
+attack_timer_max = 180
+attack_timer = attack_timer_max - irandom(30)
+
 states = {
     normal: function() {with(other) {
         if(instance_exists(target))
@@ -139,5 +142,14 @@ states = {
             hsp = approach(hsp, 0, air_fric)
             vsp = approach(vsp, 0, air_fric)
         }
+
+        attack_timer = approach(attack_timer, 0, global.dt)
+
+        if(attack_timer == 0)
+        {
+            INPUT.PRIMARY = 1
+        }
     }}
 }
+
+skills.primary.stocks = 3
