@@ -820,8 +820,7 @@ function interpSine(x) // funky curve from 0-1
 
 function canHurt(obj1, obj2)
 {
-	var out = (obj1.team != obj2.team || global.friendlyfire)
-	return out
+	return (obj1.team != obj2.team || global.friendlyfire)
 }
 
 function struct_clone(_struct = {})

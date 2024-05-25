@@ -721,7 +721,7 @@ function initSkills()
                 }
                 with (instance_create_depth(x, y, depth + 2, obj_playerfist))
                 {
-                    parent = other.id
+                    parent = other
                     team = other.team
                     knockdown = -1
                     knockback = 1
